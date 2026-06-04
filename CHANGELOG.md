@@ -9,6 +9,17 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [2.10.6] - 2026-06-04
+
+Patch: Elixir 1.20 type-system awareness across the verify/review path, plus
+contributor tooling — a `/release` skill and single-sourced markdownlint ignores.
+
+### Added
+
 - **Elixir 1.20 type-system awareness.** Elixir v1.20 (2026-06-03) completed
   its first type-system milestone: the compiler now infers types and gradually
   type-checks every program **without annotations**, reporting dead code and
@@ -43,6 +54,20 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   only checks section presence + min count) — so the old soft gate would have
   silently accepted dropping a security Iron Law. New tests:
   `lab/autoresearch/tests/test_protected_sections.py` (10 cases).
+- **`/release` contributor skill** for cutting plugin releases — bumps
+  `plugin.json`, finalizes the CHANGELOG, gates on `make ci`, tags `vX.Y.Z`,
+  and runs `gh release create`. Encodes the Release/Versioning checklist and
+  local gotchas as Iron Laws (`claude plugin tag` doesn't work for this
+  marketplace layout; `plugin.json` == CHANGELOG heading == tag; confirm before
+  the outward-facing publish; never force-push). `.claude/skills/release/` —
+  contributor tooling, not distributed.
+
+### Changed
+
+- **markdownlint ignores single-sourced** via `.markdownlintignore` (gitignore
+  syntax), de-duplicating the list across `package.json` and the Makefile and
+  excluding untracked non-source dirs (`social/`, `.rtk/`) so `make ci` stays
+  green on promo/cache content. Contributor tooling, not distributed.
 
 ## [2.10.5] - 2026-05-25
 
