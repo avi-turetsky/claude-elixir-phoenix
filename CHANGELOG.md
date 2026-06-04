@@ -9,6 +9,26 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Elixir 1.20 type-system awareness.** Elixir v1.20 (2026-06-03) completed
+  its first type-system milestone: the compiler now infers types and gradually
+  type-checks every program **without annotations**, reporting dead code and
+  *verified bugs* (guaranteed runtime failures) as `mix compile` warnings —
+  built-in, no Dialyzer/PLT. The practical impact for the plugin: on 1.20+
+  (OTP 27+), `mix compile --warnings-as-errors` — which `/phx:verify`,
+  `/phx:work` checkpoints, and the "fix CI" pattern run everywhere — now
+  **fails the build on type violations**. Changes:
+  - New reference `skills/elixir-idioms/references/elixir-120-type-system.md`:
+    the `dynamic()` mental model (refinable range, disjoint-only flagging),
+    guard/clause/map inference, how to read & fix a violation, and a
+    compiler-checker-vs-Dialyzer comparison table.
+  - `skills/elixir-idioms/SKILL.md`: reference pointer added.
+  - `skills/verify/SKILL.md` + `agents/verification-runner.md`: note that
+    `--warnings-as-errors` now surfaces type violations at the compile step,
+    and to suspect a newly-detected verified bug (not a regression) when a
+    previously-green build fails after a 1.20 bump.
+  - `agents/elixir-reviewer.md`: new "Type Checking (Compiler vs Dialyzer)"
+    note — the built-in checker is the first line of type safety,
+    complementary to (not redundant with) Dialyzer.
 - **Protected-section invariant** in the autoresearch loop (contributor
   tooling, not distributed). The `## Iron Laws` section of every SKILL.md is
   now **append-only slow state**: the loop may add a law but a delete/reword
