@@ -9,6 +9,19 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [2.11.0] - 2026-06-08
+
+First-class Ash Framework support — an inline `ash-framework` skill (7 Iron
+Laws, 100% trigger accuracy), three specialist agents, `mix.exs` auto-detection,
+and Ash-aware output compression — plus the `/phx:freeze` scoped edit-lock and
+per-skill eval + trigger coverage across all 47 skills.
+
+### Added
+
 - **`ash-framework` skill** — Iron Laws, generator workflow, and tiered research protocol
   (Tidewave → `usage_rules` → WebFetch hexdocs.pm) for Ash Framework projects. Iron Laws:
   domain code interfaces, actor-on-query placement, generators first, codegen after resource
