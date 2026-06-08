@@ -9,7 +9,37 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **`ash-framework` skill** — Iron Laws, generator workflow, and tiered research protocol
+  (Tidewave → `usage_rules` → WebFetch hexdocs.pm) for Ash Framework projects. Iron Laws:
+  domain code interfaces, actor-on-query placement, generators first, codegen after resource
+  changes, actions over functions, never edit resource snapshots, no direct `Repo.*`.
+- **`ash-resource-designer` agent** (sonnet) — designs Ash resources with actions, policies,
+  relationships, and domain code interfaces. Outputs a design doc with generator commands and
+  code interface stubs.
+- **`ash-policy-reviewer` agent** (sonnet) — audits Ash policy coverage, `authorize?: false`
+  bypass patterns, actor placement at call sites, and check module correctness.
+- **`ash-query-optimizer` agent** (sonnet) — detects N+1 load patterns and surfaces the
+  "Ash way" across 8 Iron Laws and 9 anti-patterns: load+`length`/`count` → aggregates,
+  `count > 0` → `exists` aggregate, post-load `Enum.filter` → query-customized loads,
+  derived `Map.put` → calculations, multi-read + `Enum.uniq_by` → `Ash.Query.combination_of`,
+  direct `Repo.*` → Ash actions/aggregates, wide-resource reads → `Ash.Query.select`.
+- **Ash auto-detection** — `detect-ash.sh` SessionStart hook announces the `ash-framework`
+  skill (and `usage_rules` setup) when `:ash` appears in `mix.exs` or `use Ash.Resource`/
+  `use Ash.Domain` appears in `lib/`. `priv/resource_snapshots/**` added to the CLAUDE.md
+  auto-load table with a reminder that snapshots are owned by `mix ash.codegen`.
+- **`mix-compression` Ash filters** — added `[filters.mix-ash-codegen]` and
+  `[filters.mix-ash-migrate]` to `references/rtk-filters.toml`. Matches the same
+  compression model as `mix-ecto-migrate`: happy-path short-circuits to one-liner,
+  snapshot/migration file lists preserved verbatim, errors never stripped. Extends
+  the documented 5-15% per-session token reduction to Ash workflows.
+
 ### Changed
+
+- **Ash callouts in existing skills** — `ecto-constraint-debug`, `liveview-patterns`,
+  `phoenix-contexts`, `security`, and `testing` now route Ash projects to the
+  `ash-framework` skill. CLAUDE.md "Ash Framework Detection" rewritten to load the skill
+  and research via `usage_rules` rather than deferring to external docs.
+- **`mix-compression` install docs** — `rtk test` → `rtk verify` CLI syntax.
 
 ### Fixed
 
@@ -762,7 +792,7 @@ none of the interim 2.10.0–2.12.0 bumps were ever tagged or shipped
   (`elixir-reviewer`, `testing-reviewer`, `iron-law-judge`, `security-analyzer`,
   `oban-specialist`, `deployment-validator`, `verification-runner`,
   `parallel-reviewer`) previously declared `disallowedTools: Write, Edit,
-  NotebookEdit` and could not write to disk. The skill told them to write
+NotebookEdit` and could not write to disk. The skill told them to write
   findings to `.claude/plans/{slug}/reviews/{agent}.md`; the main context fell
   back to extracting from each agent's return message, producing the visible
   log line *"Agent didn't write the file. Let me read its output to extract
@@ -838,7 +868,7 @@ none of the interim 2.10.0–2.12.0 bumps were ever tagged or shipped
 - **`disableSkillShellExecution` resilience** — Converted executable bash fenced blocks
   to inline prose instructions across 18 skills (14 BROKEN, 4 DEGRADED). Skills now
   instruct Claude via prose ("Run `mix compile`", "Use Grep to search...") instead of
-  `` ```bash `` blocks that CC may block when `disableSkillShellExecution` is enabled
+  ` ```bash ` blocks that CC may block when `disableSkillShellExecution` is enabled
   (CC v2.1.91). Tool-replaceable commands (`grep`, `cat`, `find`, `ls`) converted to
   Claude tool references (Grep, Read, Glob). Documentation/example blocks unchanged.
 - **Removed `disableModelInvocation` from plan, review, investigate** — The flag
