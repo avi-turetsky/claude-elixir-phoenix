@@ -1,6 +1,6 @@
 ---
 name: ash-framework
-description: "Ash Framework patterns — resources, actions, domains, policies, AshPhoenix forms, LiveView, AshPostgres migrations. Use when editing Ash resources, changes, checks, types, validations, or domain code interfaces."
+description: "Ash Framework — resources, actions, policies, aggregates, calculations, AshPhoenix.Form, LiveView, migrations. Use when generating resources via mix ash.codegen, editing changes, checks, types, validations, or domain code interfaces."
 effort: medium
 user-invocable: false
 ---
