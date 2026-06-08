@@ -122,6 +122,16 @@
             "statusMessage": "Tiered deps audit..."
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/freeze-gate.sh",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "PostToolUseFailure": [

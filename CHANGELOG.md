@@ -32,6 +32,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   compression model as `mix-ecto-migrate`: happy-path short-circuits to one-liner,
   snapshot/migration file lists preserved verbatim, errors never stripped. Extends
   the documented 5-15% per-session token reduction to Ash workflows.
+- **`freeze` skill + `freeze-gate.sh` hook** — scoped edit lock (`/phx:freeze`). Writes a
+  `.claude/.freeze` sentinel (allow-list of path prefixes, or empty = freeze everything);
+  a `PreToolUse` hook then denies `Edit`/`Write`/`NotebookEdit` outside the allow-list.
+  Use for read-only investigation or to keep a refactor inside specific dirs.
 
 ### Changed
 
