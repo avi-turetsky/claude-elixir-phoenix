@@ -7,6 +7,12 @@
 # Elixir-specific branches self-gate on mix.exs presence (see PR #55,
 # "gate hooks on mix.exs to fix cross-project bleed"). The git force-push
 # block is intentionally global and stays ungated.
+#
+# FAIL-OPEN CONTRACT: every intentional deny goes through emit_block (JSON
+# permissionDecision + exit 0). A non-zero exit from this script is always
+# an error (e.g. the script file corrupted by merge-conflict markers once
+# blocked ALL Bash calls), so hooks.json appends `|| exit 0` to fail open.
+# Never add a deny path that relies on a non-zero exit code.
 
 INPUT=$(cat)
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)

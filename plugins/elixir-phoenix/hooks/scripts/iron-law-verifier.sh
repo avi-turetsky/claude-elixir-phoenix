@@ -8,7 +8,8 @@
 proj="${CLAUDE_PROJECT_DIR:-$PWD}"
 [ -f "$proj/mix.exs" ] || exit 0
 
-FILE_PATH=$(cat | jq -r '.tool_input.file_path // empty')
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
 if [[ -z "$FILE_PATH" ]]; then
   exit 0
 fi
@@ -17,14 +18,25 @@ fi
 [[ "$FILE_PATH" == *.ex ]] || [[ "$FILE_PATH" == *.exs ]] || exit 0
 [[ -f "$FILE_PATH" ]] || exit 0
 
+# Blame-aware: scan ONLY the content this edit introduced (new_string for
+# Edit, content for Write) — never the whole file. Pre-existing violations
+# in untouched regions are not this edit's fault and forcing refactors on
+# them wastes turns (session-analysis 2026-06-11, blame-unaware fires).
+SCAN_CONTENT=$(echo "$INPUT" | jq -r '.tool_input.new_string // .tool_input.content // empty')
+[[ -n "$SCAN_CONTENT" ]] || exit 0
+SCAN_FILE=$(mktemp)
+trap 'rm -f "$SCAN_FILE"' EXIT
+printf '%s\n' "$SCAN_CONTENT" > "$SCAN_FILE"
+
 VIOLATIONS=""
 
 # Helper: grep lines that are NOT comments (skip lines starting with #)
 # Uses grep -En (ERE) for macOS compatibility — no PCRE (-P) needed
+# Line numbers are relative to the edited content, not the file.
 check_violation() {
   local pattern="$1"
   # grep -n output is "NUM:content" — strip line number, check if content is a comment
-  grep -En "$pattern" "$FILE_PATH" 2>/dev/null | while IFS= read -r line; do
+  grep -En "$pattern" "$SCAN_FILE" 2>/dev/null | while IFS= read -r line; do
     content="${line#*:}"
     # Skip if the trimmed content starts with #
     trimmed="${content#"${content%%[! ]*}"}"
@@ -95,7 +107,8 @@ fi
 
 if [ -n "$VIOLATIONS" ]; then
   cat >&2 <<MSG
-IRON LAW VIOLATION(S) in $(basename "$FILE_PATH"):
+IRON LAW VIOLATION(S) in the change you just made to $(basename "$FILE_PATH")
+(line numbers are relative to your edit, not the file):
 $(echo -e "$VIOLATIONS")
 
 Fix these before proceeding. These are non-negotiable constraints.

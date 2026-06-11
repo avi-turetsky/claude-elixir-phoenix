@@ -30,6 +30,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **Iron Law verifier is now blame-aware** — `iron-law-verifier.sh` scans only the content
+  the current Edit/Write introduced (`new_string`/`content`), not the whole file.
+  Pre-existing violations in untouched regions no longer force unrelated refactors.
+- **`block-dangerous-ops.sh` fails open on script errors** — a corrupted hook file (e.g.
+  merge-conflict markers) once blocked ALL Bash calls with no recovery; hooks.json now
+  appends `|| exit 0` and the script documents the JSON-deny/exit-0 contract.
+- **Stop hook warns about uncommitted feature-branch changes** — prevents the
+  lost-work-after-rebase incident class observed in session analysis.
 - **`liveview-architect` + `ecto-schema-designer` missing Write** — both agents still had
   the pre-v2.8.1 `disallowedTools: Write, ...` frontmatter and fell back to inline output
   when spawned as reviewers ("I only have Read, Grep, and Glob"). Write now allowed for

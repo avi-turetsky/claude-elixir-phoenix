@@ -11,6 +11,16 @@ if [[ "$PENDING" -gt 0 ]]; then
   echo "⚠ $PENDING plan(s) have uncompleted tasks"
 fi
 
+# Lost-work guard: uncommitted changes on a feature branch are one rebase
+# away from being gone (session-analysis 2026-06-11).
+BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+if [[ -n "$BRANCH" && "$BRANCH" != "main" && "$BRANCH" != "master" && "$BRANCH" != "HEAD" ]]; then
+  DIRTY=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
+  if [[ "$DIRTY" =~ ^[0-9]+$ ]] && (( DIRTY > 0 )); then
+    echo "⚠ $DIRTY uncommitted change(s) on branch '$BRANCH' — commit or stash before switching/rebasing"
+  fi
+fi
+
 # CC 2.1.145+: Stop hook input includes background_tasks[] and session_crons[].
 # Surface running background work (mix phx.server, iex, mix watch, scheduled jobs).
 BG_COUNT=$(echo "$INPUT" | jq -r '(.background_tasks // []) | length' 2>/dev/null)
