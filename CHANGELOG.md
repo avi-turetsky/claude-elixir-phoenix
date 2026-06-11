@@ -9,6 +9,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **UserPromptSubmit routing hook (`route-intent.sh`)** — injects one-line `/phx:`
+  suggestions directly into Claude's context for three high-signal intents: GitHub
+  PR URLs / review-feedback phrasing → `/phx:pr-review`, Tidewave
+  `<context name="current-page">` blocks → `/phx:investigate`, Elixir stack-trace
+  pastes → `/phx:investigate`. Replaces CLAUDE.md prose routing rules measured at
+  ~0% firing rate across 400 sessions. One suggestion per category per session,
+  silent on explicit slash commands, gated on `mix.exs`, always exits 0
+  (UserPromptSubmit exit 2 would erase the user's prompt).
 - **Three new Iron Laws (#23–#25)** from the 400-session analysis, wired into
   `elixir-idioms`, `liveview-patterns`, the `/phx:init` template, the SubagentStart
   injection hook, and `iron-law-judge` detection patterns:

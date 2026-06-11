@@ -484,16 +484,19 @@ When working on Elixir/Phoenix code, ALWAYS load relevant skills based on file c
 3. If code violates Iron Law, **stop and explain** before proceeding
 4. Reference detailed docs from `references/` when making implementation decisions
 
-## Workflow Routing (Proactive)
+## Workflow Routing (Hook-Driven)
 
-When the user's FIRST message describes work without specifying a `/phx:` command:
+High-signal intents are detected by the `route-intent.sh` UserPromptSubmit
+hook, which injects a one-line `/phx:` suggestion directly into context:
+PR URLs / review-feedback phrasing → `/phx:pr-review`; Tidewave
+`<context name="current-page">` blocks → `/phx:investigate`; Elixir stack
+traces → `/phx:investigate`. One suggestion per category per session,
+silent on explicit slash commands. (CLAUDE.md prose routing measured ~0%
+firing across 400 sessions — detection lives in the hook now.)
 
-1. Detect intent from their description (see `intent-detection` skill for routing table)
-2. If multi-step workflow detected, suggest the appropriate command
-3. Format: "This looks like [intent]. Want me to run `/phx:[command]`, or should I handle it directly?"
-4. For trivial tasks (typos, single-line fixes, config changes): skip suggestion, just do it
-5. If user already specified a command: follow it, don't re-suggest
-6. NEVER block the user — suggestion only, one attempt max
+For ambiguous multi-step requests not covered by the hook, the
+`intent-detection` skill's routing table still applies: suggest once,
+never block, skip for trivial tasks.
 
 ### Debugging Loop Detection
 
@@ -507,12 +510,6 @@ debugging loops more effectively than unstructured retry.
 If the hook hasn't triggered (e.g., non-mix failures), manually detect:
 when 3+ consecutive Bash commands are `mix compile` or `mix test` with failures,
 suggest: "Looks like a debugging loop. Want me to run `/phx:investigate` for structured analysis?"
-
-### LiveView Bug Detection via Tidewave Context
-
-When the user's message contains a `<context name="current-page">` block (injected by Tidewave)
-describing a broken form, missing element, or UI issue — proactively suggest:
-"This looks like a LiveView bug. Want me to run `/phx:investigate` for structured root-cause analysis?"
 
 ### Custom MIX_ENV Awareness
 
