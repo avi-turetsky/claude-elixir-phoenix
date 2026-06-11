@@ -17,6 +17,16 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   ~0% firing rate across 400 sessions. One suggestion per category per session,
   silent on explicit slash commands, gated on `mix.exs`, always exits 0
   (UserPromptSubmit exit 2 would erase the user's prompt).
+- **`/phx:watch-pr` — token-conscious PR/CI watching** (replaces hand-rolled
+  60-min foreground `sleep` loops observed in session analysis). A quiet
+  background watcher (`scripts/watch-pr.sh`, Monitor-tool-first with
+  `run_in_background` fallback) polls `gh pr view --json` in its own process and
+  emits ONE line per genuinely-new event (review, comment, CI conclusion, merged/
+  closed, watchdog, gh-failure) — raw JSON never enters Claude's context, and
+  Claude takes zero turns while idle (no cache-TTL straddling). `--checks-only`
+  delegates to `gh pr checks --watch --fail-fast` (exit code is the signal).
+  Routes actionable reviews to `/phx:pr-review` and CI failures to
+  `/phx:investigate`. 100% trigger accuracy on the new fixture.
 - **`/phx:pr-review` v2 — closes the review loop** (fetch → fix → reply → resolve).
   The old skill drafted replies but used REST endpoints that expose neither thread
   IDs nor resolved status, so it could never resolve a thread or skip handled ones.

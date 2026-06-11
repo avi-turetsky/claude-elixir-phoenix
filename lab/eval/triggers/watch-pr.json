@@ -1,0 +1,16 @@
+{
+  "skill": "watch-pr",
+  "should_trigger": [
+    "I just pushed to my PR — watch CI and tell me when it's green",
+    "Can you keep an eye on PR 42 for new review comments while I work on something else?",
+    "Wait for Copilot's review pass on this PR and triage whatever it finds",
+    "Monitor the checks on https://github.com/acme/web/pull/87 and ping me if anything fails",
+    "Watch my open PR until the reviewer responds",
+    "CI is running on my branch — let me know the result without me asking again"
+  ],
+  "should_not_trigger": [
+    "Address the review comments on PR 42 and resolve the threads",
+    "Why is my mix test failing in CI?",
+    "Review my changes before I open a PR"
+  ]
+}
