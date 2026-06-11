@@ -12,6 +12,7 @@ from lab.eval.matchers import (
     frontmatter_field,
     description_length, description_keywords, description_no_vague,
     has_iron_laws, has_gotchas, no_dangerous_patterns,
+    askuserquestion_option_limit,
     action_density, has_examples,
     workflow_step_coverage, description_structure,
 )
@@ -267,6 +268,81 @@ class TestNoDangerousPatterns:
     def test_safe_in_iron_laws(self):
         safe = "---\nname: x\n---\n## Iron Laws\n1. NEVER use String.to_atom(input)\n"
         passed, _ = no_dangerous_patterns(safe)
+        assert passed
+
+
+class TestAskUserQuestionOptionLimit:
+    def test_no_mentions(self):
+        passed, _ = askuserquestion_option_limit(VALID_SKILL)
+        assert passed
+
+    def test_four_bullets_ok(self):
+        content = (
+            "---\nname: x\n---\n## Step\n"
+            "Use AskUserQuestion with these options:\n\n"
+            "- **A** — first\n- **B** — second\n- **C** — third\n- **D** — fourth\n"
+        )
+        passed, _ = askuserquestion_option_limit(content)
+        assert passed
+
+    def test_five_bullets_fail(self):
+        content = (
+            "---\nname: x\n---\n## Step\n"
+            "Use AskUserQuestion with EXACTLY these options:\n\n"
+            "- **A** — first\n- **B** — second\n- **C** — third\n"
+            "- **D** — fourth\n- **E** — fifth\n"
+        )
+        passed, evidence = askuserquestion_option_limit(content)
+        assert not passed
+        assert "5 options" in evidence
+
+    def test_yaml_label_block(self):
+        content = (
+            "---\nname: x\n---\n## Step\n"
+            "```\nAskUserQuestion:\n  options:\n"
+            "    - label: \"a\"\n    - label: \"b\"\n    - label: \"c\"\n"
+            "    - label: \"d\"\n    - label: \"e\"\n```\n"
+        )
+        passed, evidence = askuserquestion_option_limit(content)
+        assert not passed
+        assert "5 options" in evidence
+
+    def test_parent_numbered_step_not_counted(self):
+        # Bullets followed by the parent list resuming ("4. Wait...") must not
+        # inflate the count — marker-type change ends the option list.
+        content = (
+            "---\nname: x\n---\n## Step\n"
+            "3. Use AskUserQuestion with these options:\n\n"
+            "   - **A** — first\n   - **B** — second\n"
+            "   - **C** — third\n   - **D** — fourth\n\n"
+            "4. Wait for user response\n"
+        )
+        passed, _ = askuserquestion_option_limit(content)
+        assert passed
+
+    def test_list_in_next_section_not_counted(self):
+        # FP class (brainstorm): a back-reference to AskUserQuestion followed
+        # by an unrelated numbered list in the NEXT section (e.g. Iron Laws).
+        content = (
+            "---\nname: x\n---\n## Converge\n"
+            "Do NOT recommend one. Return to Decision Point (AskUserQuestion).\n\n"
+            "## Iron Laws\n\n"
+            "1. Law one\n2. Law two\n3. Law three\n4. Law four\n"
+            "5. Law five\n6. Law six\n7. Law seven\n"
+        )
+        passed, _ = askuserquestion_option_limit(content)
+        assert passed
+
+    def test_sibling_list_items_not_counted(self):
+        # FP class (deps-vet): mention inside a numbered list item — the
+        # following same-level items are sibling laws, not options.
+        content = (
+            "---\nname: x\n---\n## Iron Laws\n"
+            "1. **NEVER auto-approve.** Every entry MUST come from an `AskUserQuestion`\n"
+            "   confirmation. Drive-by trust ruins the ledger's value.\n"
+            "2. Law two\n3. Law three\n4. Law four\n5. Law five\n6. Law six\n"
+        )
+        passed, _ = askuserquestion_option_limit(content)
         assert passed
 
 

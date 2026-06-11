@@ -76,6 +76,21 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   verification (multi-worktree setups debug the wrong server), schema introspection
   before SQL, output-size caps, `browser_eval` server-side fallbacks, and a
   QA-walkthrough pattern for feature smoke tests.
+- **Eval: AskUserQuestion 4-option-limit check** (`askuserquestion_option_limit`
+  matcher) — the tool silently drops a 5th option; brainstorm shipped that way for
+  months. Scans option lists after every AskUserQuestion mention (YAML `- label:`
+  blocks and bullet/numbered runs), stops at headings, and skips sibling list items
+  when the mention is itself inside a list. Backfilled into all 50 skill evals and
+  the generator template; caught a real second instance in `/phx:plan`.
+- **Eval: cross-file consistency tests** (`lab/eval/tests/test_consistency.py`) —
+  two bug classes per-skill scoring can't see: references teaching anti-patterns
+  their own Iron Laws ban (mix-tasks.md shipped the `app.start` pattern Iron Law
+  #23 bans), and skill scripts using cwd-relative `.claude/` paths (the
+  nested-state-dir bug class). The path lint caught a 4th live instance in
+  `scripts/fetch-claude-docs.sh`.
+- **`make eval` now sees untracked files** — brand-new skills/agents were invisible
+  to the `git diff`-based changed-file detection until first commit;
+  `git ls-files --others` is now merged into both detection paths.
 
 ### Changed
 
@@ -131,6 +146,12 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **`web-researcher` could never write its output file** — research workers were asked to
   save findings but had Write disallowed; agents burned all turns on fetches then lost the
   output. Write allowed + reserve-last-turns-for-output guard.
+- **`/phx:plan` post-plan AskUserQuestion exceeded the 4-option limit** — 5 options
+  ("Review the plan" / "Adjust the plan" merged into one) meant one was always
+  silently dropped. Fixed in the skill, `planning-orchestrator`, and both hook
+  scripts that echo the list (`precompact-rules.sh`, `plan-stop-reminder.sh`).
+- **`scripts/fetch-claude-docs.sh` wrote its cache relative to cwd** — anchored to
+  `${CLAUDE_PROJECT_DIR:-$PWD}` like the other skill scripts.
 
 ## [2.11.0] - 2026-06-08
 

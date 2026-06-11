@@ -9,7 +9,10 @@ PR="${1:?usage: watch-pr.sh <pr-number> [reviews,comments,checks]}"
 WATCH="${2:-reviews,comments,checks}"
 INTERVAL="${WATCH_INTERVAL:-30}"
 MAX_DURATION="${WATCH_MAX_DURATION:-3600}"
-DELTA_FILE="${WATCH_DELTA_FILE:-.claude/watch/pr-${PR}.jsonl}"
+# Anchor to the project root, not cwd — relative .claude/ paths create stray
+# state dirs when the script runs from elsewhere (same bug class as the
+# cc-changelog nested-state-dir incident).
+DELTA_FILE="${WATCH_DELTA_FILE:-${CLAUDE_PROJECT_DIR:-$PWD}/.claude/watch/pr-${PR}.jsonl}"
 mkdir -p "$(dirname "$DELTA_FILE")"
 
 START_EPOCH=$(date -u +%s)

@@ -254,8 +254,7 @@ For single plan:
 - **Start in fresh session** (recommended for 5+ tasks)
 - **Get a briefing** -- interactive walkthrough via `/phx:brief`
 - **Start here** -- in current session (fine for small plans)
-- **Review the plan** -- walk through phases in detail
-- **Adjust the plan** -- tell me what to change
+- **Review or adjust the plan** -- walk through phases, tell me what to change
 
 Do NOT say "Start Phase 1" — `/phx:work` runs the whole plan.
 

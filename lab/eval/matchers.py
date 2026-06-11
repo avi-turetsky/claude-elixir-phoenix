@@ -437,6 +437,78 @@ def no_dangerous_patterns(content: str, patterns: list[str] | None = None, **_) 
     return False, f"Dangerous patterns found: {found}"
 
 
+def askuserquestion_option_limit(content: str, max_options: int = 4, **_) -> tuple[bool, str]:
+    """AskUserQuestion supports at most 4 options — a 5th is SILENTLY dropped.
+
+    The brainstorm skill shipped with 5 options for months and nothing errored;
+    the UI just dropped one. Scans the first option list following each
+    AskUserQuestion mention: either a YAML-ish `- label:` block or the first
+    contiguous bullet/numbered list run (same marker type — a marker change
+    means a different list, e.g. a parent numbered step resuming). The scan
+    stops at headings (a list in the next section isn't this question's
+    options) and, when the mention is itself a list item, only counts
+    deeper-indented items (same-level items are siblings, not options).
+    """
+    body = get_body(content)
+    lines = body.split("\n")
+    violations = []
+
+    for i, line in enumerate(lines):
+        if "askuserquestion" not in line.lower():
+            continue
+        # Window ends at the next heading — a list in another section is not
+        # this AskUserQuestion's option list.
+        window = []
+        for ln in lines[i + 1 : i + 16]:
+            if ln.startswith("#"):
+                break
+            window.append(ln)
+
+        # If the mention line is itself a list item, only deeper-indented
+        # items can be its options — same-level items are siblings (e.g. an
+        # AskUserQuestion mention inside an Iron Laws numbered list).
+        mention_indent = None
+        mention_item = re.match(r'^(\s*)(?:[-*]|\d+[\.\)])\s+\S', line)
+        if mention_item:
+            mention_indent = len(mention_item.group(1))
+
+        # Shape 1: YAML-ish options block (`- label:` entries)
+        label_count = sum(1 for ln in window if re.match(r'^\s*-\s+label:', ln))
+        if label_count:
+            count = label_count
+        else:
+            # Shape 2: first contiguous list run of one marker type
+            count = 0
+            marker = None
+            for ln in window:
+                is_bullet = bool(re.match(r'^\s*[-*]\s+\S', ln))
+                is_number = bool(re.match(r'^\s*\d+[\.\)]\s+\S', ln))
+                if is_bullet or is_number:
+                    indent = len(ln) - len(ln.lstrip())
+                    if mention_indent is not None and indent <= mention_indent:
+                        break
+                    this = "b" if is_bullet else "n"
+                    if marker is None:
+                        marker = this
+                        count = 1
+                    elif this == marker:
+                        count += 1
+                    else:
+                        break
+                elif marker is not None and ln.strip() and not ln.startswith((" ", "\t")):
+                    break
+
+        if count > max_options:
+            violations.append(f"near line {i + 1}: {count} options")
+
+    if violations:
+        return False, (
+            f"AskUserQuestion list exceeds {max_options} options ({'; '.join(violations)}) "
+            f"— the tool's hard limit; extra options are silently dropped"
+        )
+    return True, f"All AskUserQuestion option lists within {max_options}-option limit"
+
+
 # --- Clarity & Specificity matchers (from SkillsBench, MePO papers) ---
 
 def action_density(content: str, min_ratio: float = 0.4, **_) -> tuple[bool, str]:
@@ -685,6 +757,7 @@ MATCHERS = {
     "has_iron_laws": has_iron_laws,
     "has_gotchas": has_gotchas,
     "no_dangerous_patterns": no_dangerous_patterns,
+    "askuserquestion_option_limit": askuserquestion_option_limit,
     # New: Clarity & Specificity (from SkillsBench, MePO, Anthropic docs)
     "action_density": action_density,
     "specificity_ratio": specificity_ratio,

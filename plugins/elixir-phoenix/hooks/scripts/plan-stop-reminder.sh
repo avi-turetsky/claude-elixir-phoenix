@@ -40,9 +40,9 @@ Do NOT proceed to implementation.
 Present a brief summary of the plan to the user,
 then use AskUserQuestion with options:
   - Start in fresh session (recommended)
+  - Get a briefing (/phx:brief)
   - Start here
-  - Review the plan
-  - Adjust the plan
+  - Review or adjust the plan
 ==========================================
 MSG
 exit 2

@@ -149,6 +149,8 @@ def generate_eval(skill_name: str, skill_path: str) -> dict:
     # --- Build safety checks ---
     safety_checks = [
         {"type": "no_dangerous_patterns", "desc": "No unsafe code patterns"},
+        {"type": "askuserquestion_option_limit",
+         "desc": "AskUserQuestion lists within 4-option tool limit"},
     ]
     if iron_law_count > 0 or has_section(sections, "Iron Laws"):
         min_laws = max(1, min(iron_law_count, 3))

@@ -14,7 +14,8 @@ set -euo pipefail
 
 DOCS_BASE_URL="https://code.claude.com/docs/en"
 INDEX_URL="https://code.claude.com/docs/llms.txt"
-CACHE_DIR=".claude/docs-check/docs-cache"
+# Anchor to the project root, not cwd (nested-state-dir bug class)
+CACHE_DIR="${CLAUDE_PROJECT_DIR:-$PWD}/.claude/docs-check/docs-cache"
 MAX_AGE_HOURS=24
 FORCE=false
 INDEX_ONLY=false

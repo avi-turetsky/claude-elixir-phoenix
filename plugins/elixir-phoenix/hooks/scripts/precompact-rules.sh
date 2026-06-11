@@ -65,8 +65,7 @@ if [ "$ACTIVE_PLAN" = true ] && [ "$FULL_MODE" = false ]; then
   CONTEXT+="\n  - Start in fresh session (recommended)"
   CONTEXT+="\n  - Get a briefing (/phx:brief)"
   CONTEXT+="\n  - Start here"
-  CONTEXT+="\n  - Review the plan"
-  CONTEXT+="\n  - Adjust the plan"
+  CONTEXT+="\n  - Review or adjust the plan"
   CONTEXT+="\nWait for user response. This is Iron Law #1 of /phx:plan."
 fi
 

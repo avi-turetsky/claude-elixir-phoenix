@@ -636,7 +636,7 @@ make help             # Show all available commands
 make eval             # Quick: lint + score changed skills/agents only
 make eval-all         # Full structural: all 50 skills + all 25 agents
 make eval-fix         # Auto-fix lint + show failures + suggest autoresearch
-make test             # 52 pytest tests for eval framework
+make test             # 75 pytest tests for eval framework
 make ci               # Full CI: lint + test + eval (same as GitHub Actions)
 ```
 

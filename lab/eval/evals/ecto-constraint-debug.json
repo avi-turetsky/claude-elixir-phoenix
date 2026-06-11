@@ -96,6 +96,10 @@
         {
           "type": "no_dangerous_patterns",
           "desc": "No unsafe code patterns"
+        },
+        {
+          "type": "askuserquestion_option_limit",
+          "desc": "AskUserQuestion lists within 4-option tool limit"
         }
       ]
     },

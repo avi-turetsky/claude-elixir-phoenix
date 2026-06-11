@@ -106,6 +106,10 @@
           "type": "content_present",
           "pattern": "NEVER|MUST NOT|DO NOT|CRITICAL",
           "desc": "Has explicit prohibitions or critical rules"
+        },
+        {
+          "type": "askuserquestion_option_limit",
+          "desc": "AskUserQuestion lists within 4-option tool limit"
         }
       ]
     },

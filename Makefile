@@ -51,7 +51,7 @@ eval-agents: ## Score all agents only
 
 # --- Test ---
 
-test: ## Run pytest (52 tests for eval framework)
+test: ## Run pytest (75 tests for eval framework)
 	@python3 -m pytest lab/eval/tests/ -v --tb=short
 
 test-quick: ## Run pytest (no verbose, fast)

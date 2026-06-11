@@ -37,6 +37,12 @@ run_skills() {
         if [ -n "$staged" ]; then
             changed_files=$(printf "%s\n%s" "$changed_files" "$staged")
         fi
+        # Untracked (brand-new skills are invisible to git diff)
+        local untracked
+        untracked=$(git ls-files --others --exclude-standard -- 'plugins/elixir-phoenix/skills/' 2>/dev/null || echo "")
+        if [ -n "$untracked" ]; then
+            changed_files=$(printf "%s\n%s" "$changed_files" "$untracked")
+        fi
         # 2. Changes since last eval commit
         if [ -f "$LAST_EVAL_FILE" ]; then
             local last_commit
@@ -112,6 +118,10 @@ run_agents() {
         local staged
         staged=$(git diff --cached --name-only -- 'plugins/elixir-phoenix/agents/' 2>/dev/null || echo "")
         if [ -n "$staged" ]; then changed=$(printf "%s\n%s" "$changed" "$staged"); fi
+        # Untracked (brand-new agents are invisible to git diff)
+        local untracked
+        untracked=$(git ls-files --others --exclude-standard -- 'plugins/elixir-phoenix/agents/' 2>/dev/null || echo "")
+        if [ -n "$untracked" ]; then changed=$(printf "%s\n%s" "$changed" "$untracked"); fi
         # Since last eval
         if [ -f "$LAST_EVAL_FILE" ]; then
             local last_commit
@@ -133,7 +143,7 @@ run_agents() {
 
     python3 -m lab.eval.agent_scorer --all 2>&1 | tail -1
     local count
-    count=$(python3 -m lab.eval.agent_scorer --all 2>&1 | grep "NEEDS WORK" | wc -l | tr -d ' ')
+    count=$(python3 -m lab.eval.agent_scorer --all 2>&1 | grep -c "NEEDS WORK" || true)
     if [ "$count" -gt 0 ]; then
         return 1
     fi
@@ -159,6 +169,12 @@ run_triggers_cached() {
         staged=$(git diff --cached --name-only -- 'plugins/elixir-phoenix/skills/' 2>/dev/null || echo "")
         if [ -n "$staged" ]; then
             changed_files=$(printf "%s\n%s" "$changed_files" "$staged")
+        fi
+        # Untracked (brand-new skills are invisible to git diff)
+        local untracked
+        untracked=$(git ls-files --others --exclude-standard -- 'plugins/elixir-phoenix/skills/' 2>/dev/null || echo "")
+        if [ -n "$untracked" ]; then
+            changed_files=$(printf "%s\n%s" "$changed_files" "$untracked")
         fi
         if [ -f "$LAST_EVAL_FILE" ]; then
             local last_commit

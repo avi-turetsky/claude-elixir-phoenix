@@ -116,8 +116,7 @@ After writing `.claude/plans/{slug}/plan.md`:
    - "Start in fresh session" (recommended for 5+ tasks)
    - "Get a briefing" (`/phx:brief` — interactive walkthrough)
    - "Start here"
-   - "Review the plan"
-   - "Adjust the plan"
+   - "Review or adjust the plan"
 3. Wait for user response. Never auto-start work.
 
 **When user selects "Start in fresh session"**, print:
