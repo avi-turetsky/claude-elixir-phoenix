@@ -17,6 +17,17 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   ~0% firing rate across 400 sessions. One suggestion per category per session,
   silent on explicit slash commands, gated on `mix.exs`, always exits 0
   (UserPromptSubmit exit 2 would erase the user's prompt).
+- **`/phx:deps-update` — generic dependency freshness workflow** (dependency
+  maintenance was a recurring session pattern with no plugin support). Inventory
+  via `mix hex.outdated` (exit 1 = normal "outdated" signal), changelog deltas via
+  the built-in `mix hex.package diff <pkg> <v1>..<v2>` (no project-specific mix
+  tasks), updates with coupled-group enforcement (Phoenix core, Ecto, Ash, Oban,
+  telemetry families move together), breaking-change fixes, and PR splitting
+  (patches bundled, minors by area, majors solo). Majors require an explicit
+  `mix.exs` edit; `override: true` only when the per-package constraint table
+  shows a transitive blocker. Hands off security to `/phx:deps-audit` (Mode B) and
+  verification to `/phx:verify`. The only mutating deps skill — audit/vet stay
+  read-only. 89% trigger accuracy.
 - **`/phx:watch-pr` — token-conscious PR/CI watching** (replaces hand-rolled
   60-min foreground `sleep` loops observed in session analysis). A quiet
   background watcher (`scripts/watch-pr.sh`, Monitor-tool-first with

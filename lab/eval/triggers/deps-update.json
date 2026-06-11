@@ -1,0 +1,16 @@
+{
+  "skill": "deps-update",
+  "should_trigger": [
+    "Update our Hex dependencies to the latest versions",
+    "What's outdated in mix.exs? Bump the safe ones",
+    "Upgrade phoenix_live_view and whatever has to move with it",
+    "Do a deps refresh and split the bumps into reviewable PRs",
+    "Bump all the patch-level dependency updates in one go",
+    "We're three minors behind on ecto — bring it current and fix any breakage"
+  ],
+  "should_not_trigger": [
+    "Is this new hex package safe to add? Check it for supply-chain risk",
+    "Record ecto 3.13.5 as vetted in our audit ledger",
+    "mix deps.get is failing with a dependency resolution conflict"
+  ]
+}
