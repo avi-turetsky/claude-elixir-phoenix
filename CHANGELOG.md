@@ -11,7 +11,32 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **`security-analyzer`** — new end-to-end flow checks from the 400-session analysis: IDOR
+  via `handle_params` URL params, data-flow through multi-step transforms, failure-path
+  consistency in `Ecto.Multi`/`with` chains, soft-delete leakage in authz lookups — all bug
+  classes external review bots caught after plugin review passed.
+- **`elixir-reviewer`** — failure-path review section (Multi/with error branches,
+  short-circuit side effects, multi-step transforms, soft-delete filters), known
+  false-positive traps (`nil[:key]` is nil-safe via Access), and diff-scoped reading rule
+  to stop turn exhaustion on large PRs.
+- **`verification-runner`** — compiles FIRST (turn 1 combines discovery + `mix compile`),
+  maxTurns 10 → 15, earlier findings-file write; stops "compiling… let me check again"
+  turn exhaustion observed on large PRs.
+- **`parallel-reviewer` + `/phx:audit`** — rate-limit circuit breaker: when 2+ subagents
+  fail with rate-limit/API errors, synthesize from existing outputs and tell the user to
+  re-run after reset instead of dead-waiting on "continue".
+- **`ecto-schema-designer`** — pre-UNIQUE-index migration safety check (duplicates +
+  soft-deleted rows silently block production migrations).
+
 ### Fixed
+
+- **`liveview-architect` + `ecto-schema-designer` missing Write** — both agents still had
+  the pre-v2.8.1 `disallowedTools: Write, ...` frontmatter and fell back to inline output
+  when spawned as reviewers ("I only have Read, Grep, and Glob"). Write now allowed for
+  their own findings file; Edit stays disallowed.
+- **`web-researcher` could never write its output file** — research workers were asked to
+  save findings but had Write disallowed; agents burned all turns on fetches then lost the
+  output. Write allowed + reserve-last-turns-for-output guard.
 
 ## [2.11.0] - 2026-06-08
 

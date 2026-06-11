@@ -25,7 +25,10 @@ your chat response body should be ≤300 words.
 
 **Turn budget rules:**
 
-1. First ~10 turns: Read/Grep analysis
+1. First ~10 turns: Read/Grep analysis. **Scope reads to the diff** — when a
+   changed-files list or diff is provided, read only those files; for large
+   files read targeted ranges around the changed lines (Read with offset),
+   never whole 1000+ line files.
 2. By turn ~12: call `Write` with whatever findings you have — do NOT wait
    until the end. A partial file is better than no file when turns run out.
 3. Remaining turns: continue analysis and `Write` again to overwrite with
@@ -43,6 +46,24 @@ source or docs first.** Read `deps/{lib}/lib/` or use Tidewave
 `get_docs` before flagging behavior. Incorrect claims inject wrong
 code and waste user time correcting. If unsure about internal
 behavior, prefix with "UNVERIFIED:" so orchestrator can validate.
+
+## Known False-Positive Traps
+
+- `nil[:key]` / `nil["key"]` is **nil-safe** (Access protocol returns nil)
+  — a style note at most, never a crash finding. `Map.get(nil, _)` DOES raise.
+
+## Failure-Path Review (bugs lint misses)
+
+For every changed function, also trace:
+
+- **Ecto.Multi / `with` failure paths** — does the error branch leave data
+  consistent? What about side effects already executed before the failure?
+- **Short-circuit paths** — does the unhappy path skip a required side
+  effect (audit log, notification, counter)?
+- **Multi-step transforms** — re-verify type/shape assumptions at each hop,
+  not just at the changed line
+- **Soft-delete filters** — queries consistently include/exclude
+  `deleted_at`-style rows
 
 ## Review Philosophy
 
@@ -152,22 +173,11 @@ end
 ### Suggestions (Consider)
 
 ```elixir
-# PREFER: Pipeline over nested calls
-# Instead of:
-Enum.map(Enum.filter(list, &condition/1), &transform/1)
-# Use:
+# PREFER: pipeline over nested calls
 list |> Enum.filter(&condition/1) |> Enum.map(&transform/1)
-
-# PREFER: Multi-clause functions over case
+# PREFER: multi-clause function heads over a single case
 def handle(:start), do: ...
 def handle(:stop), do: ...
-# Over:
-def handle(action) do
-  case action do
-    :start -> ...
-    :stop -> ...
-  end
-end
 ```
 
 ## Output Format
@@ -287,13 +297,8 @@ MapSet.to_list(mapset)
 ### Naming Conventions
 
 ```elixir
-# Predicates: use ? suffix
-def valid?(data)     # GOOD
-def is_valid(data)   # BAD
-
-# Boolean returns: avoid is_ prefix
-def active?(user)    # GOOD
-def is_active(user)  # BAD
+def valid?(data)     # GOOD — predicates use ? suffix
+def is_valid(data)   # BAD — avoid is_ prefix
 ```
 
 ## Quick Fixes

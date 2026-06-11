@@ -59,8 +59,23 @@ disallowed — you cannot modify source code, which upholds Review Iron Law #1.
 - [ ] Scope parameter for all data access queries
 - [ ] Authorization checked in context functions
 - [ ] LiveView events re-authorize (not just mount)
+- [ ] **`handle_params` IDOR check**: every ID arriving via URL params
+      (`handle_params`, `live_patch`, query strings) is scoped to the
+      current user/org before fetch — `Repo.get!(X, id)` from a URL param
+      without a scope IS an IDOR, even when mount authorized the route
 - [ ] API endpoints have proper authentication plugs
 - [ ] Admin routes protected by role check
+
+### End-to-End Flow Checks (bugs static lint misses)
+
+- [ ] **Trace data flow through multi-step transforms** — authorization or
+      validation done on input does not guarantee the derived/transformed
+      value is safe two steps later; re-check at the sink
+- [ ] **Failure-path consistency** — when a multi-step operation
+      (Ecto.Multi, `with` chain) fails midway, no partial privileged state
+      remains (orphaned grants, half-created accounts)
+- [ ] **Soft-delete leakage** — queries on soft-deletable schemas exclude
+      deleted rows in authz-relevant lookups (deleted users keeping access)
 
 ### Input Validation
 

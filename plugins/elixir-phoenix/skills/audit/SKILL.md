@@ -93,6 +93,12 @@ any auditor is still running.
 
 Read reports from `.claude/audit/reports/`.
 
+**Rate-limit circuit breaker:** if 2+ auditors return empty results or
+rate-limit/API errors, STOP spawning. Synthesize from the reports that
+exist, mark missing categories as "not audited (rate limit)", and tell
+the user to re-run `/phx:audit` after the limit resets. Never leave the
+user typing "continue" against dead agents.
+
 ### Step 3: Compress Findings
 
 After all 5 auditors complete, spawn context-supervisor:

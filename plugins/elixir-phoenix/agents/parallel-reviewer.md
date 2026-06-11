@@ -237,6 +237,13 @@ Wait for ALL agents to FULLY complete — you'll be notified as each
 finishes. Read each agent's output file to collect results. NEVER
 proceed while any agent is still running.
 
+**Rate-limit circuit breaker:** if 2+ agents return empty results or
+rate-limit/API errors, STOP — do not respawn and do not wait for the
+user to type "continue" repeatedly. Synthesize from whichever output
+files exist, clearly mark the missing tracks ("security track failed:
+rate limit"), and tell the user: "Hit API limits — re-run /phx:review
+after the limit resets to cover the missing tracks."
+
 **Context Supervision** (when `summaries_dir` provided):
 
 After all 4 agents complete, spawn context-supervisor:
