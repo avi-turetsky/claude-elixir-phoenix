@@ -1,132 +1,148 @@
 ---
 name: phx:pr-review
-description: Address PR review comments on Elixir/Phoenix code — fetch comments, draft responses, optionally fix code. Use when the user shares a PR URL or mentions reviewer feedback.
+description: Address PR review threads on Elixir/Phoenix code — fetch unresolved threads, fix code, reply, and resolve each thread. Use when the user shares a PR URL or mentions reviewer feedback.
 effort: high
-argument-hint: <PR number or URL> [--fix]
+argument-hint: <PR number or URL> [--fix] [--bots-only] [--no-resolve]
 ---
 
 # PR Review Response
 
-Fetch PR review comments, categorize them, draft responses,
-and optionally apply code fixes.
+Close the review loop: fetch unresolved threads → fix → reply → resolve.
+GitHub's `isResolved` is the state — re-runs are idempotent, handled
+threads drop out automatically.
 
 ## Usage
 
 ```
-/phx:pr-review 42              # Address comments on PR #42
-/phx:pr-review 42 --fix        # Address + apply code fixes
-/phx:pr-review https://...     # Full URL also works
+/phx:pr-review 42                  # Triage unresolved threads on PR #42
+/phx:pr-review 42 --fix            # Triage + apply approved code fixes
+/phx:pr-review https://...         # Full URL also works (repo parsed from URL)
+/phx:pr-review 42 --bots-only      # Triage only CI bot threads (Copilot, Codex...)
+/phx:pr-review 42 --no-resolve     # Reply but leave threads open
 ```
 
-## Arguments
+## Step 1: Resolve PR + Fetch Threads
 
-`$ARGUMENTS` = PR number (or URL), optionally followed by `--fix`.
+`gh pr view "$PR" --json number,title,state,baseRefName,headRefName,url,author`
+(accepts number or URL; URL also yields owner/repo). Then fetch ALL review
+threads with thread IDs + resolved status — REST alone cannot do this:
 
-## Workflow
-
-### Step 1: Fetch PR Context
-
-Run `gh pr view {number} --json title,body,state,baseRefName,headRefName` for PR metadata.
-Run `gh api repos/{owner}/{repo}/pulls/{number}/comments --paginate` and `gh api repos/{owner}/{repo}/pulls/{number}/reviews --paginate` for all review comments.
-Run `gh pr diff {number}` for the diff context.
-
-Parse the PR number from `$ARGUMENTS`. If a URL, extract the
-number from it. Detect `--fix` flag.
-
-### Step 2: Categorize Comments
-
-Group each comment into one of these categories:
-
-| Category | Signal | Action |
-|----------|--------|--------|
-| **Code change** | "should be", "change to", "use X instead" | Draft fix + response |
-| **Question** | "why", "what if", "how does" | Draft explanation |
-| **Nitpick** | "nit:", style-only, formatting | Quick acknowledgment |
-| **Praise** | "nice", "good", "LGTM" | No action needed |
-| **Discussion** | Architecture, trade-offs, alternatives | Draft thoughtful response |
-
-### Step 3: Map to Code Locations
-
-For each code-change comment:
-
-1. Find the file and line from the comment's `path` and `position`
-2. Read the current code at that location
-3. Understand the reviewer's suggestion in context
-4. Check if the suggestion conflicts with Iron Laws
-
-### Step 4: Draft Responses
-
-For each comment, draft a response following patterns in
-`${CLAUDE_SKILL_DIR}/references/response-patterns.md`.
-
-Present ALL draft responses to the user for review:
-
-```
-## PR #{number}: {title}
-### {n} comments to address
-
-**Code changes ({n}):**
-1. {file}:{line} — {reviewer suggestion} → {proposed fix}
-
-**Questions ({n}):**
-1. {question summary} → {draft answer}
-
-**Nitpicks ({n}):**
-1. {nit} → Acknowledged
-
-**Discussion ({n}):**
-1. {topic} → {draft response}
+```bash
+cat > /tmp/review_threads.graphql <<'GQL'
+query($owner:String!, $repo:String!, $pr:Int!, $cursor:String) {
+  repository(owner:$owner, name:$repo) {
+    pullRequest(number:$pr) {
+      reviewThreads(first:50, after:$cursor) {
+        pageInfo { hasNextPage endCursor }
+        nodes {
+          id isResolved isOutdated path line originalLine
+          comments(first:20) { nodes {
+            databaseId body createdAt
+            author { login __typename } } }
+        }
+      }
+    }
+  }
+}
+GQL
+gh api graphql --paginate -F owner="$OWNER" -F repo="$REPO" -F pr="$PR" \
+  -F query=@/tmp/review_threads.graphql \
+  --jq '.data.repository.pullRequest.reviewThreads.nodes[]
+        | select(.isResolved == false)
+        | {threadId: .id, isOutdated, path, line: (.line // .originalLine),
+           firstCommentId: .comments.nodes[0].databaseId,
+           author: .comments.nodes[0].author.login,
+           isBot: (.comments.nodes[0].author.__typename == "Bot"),
+           body: .comments.nodes[0].body}'
 ```
 
-### Step 5: Apply Fixes (if --fix)
+Also fetch review summaries (`gh api "repos/$OWNER/$REPO/pulls/$PR/reviews"`)
+— they are NOT threads and cannot be resolved; surface `CHANGES_REQUESTED`
+bodies separately. Bot detection: `__typename == "Bot"` / `user.type == "Bot"`
+(the `[bot]` login suffix is NOT reliable across endpoints).
 
-If `--fix` flag provided AND user approves:
+## Step 2: Triage Table
 
-1. Apply code changes from approved code-change responses
-2. Run `mix compile --warnings-as-errors && mix test`
-3. If tests pass, present the changes
-4. Do NOT commit or push — leave that to the user
+Group by file, one row per thread. With `--bots-only`, keep only `isBot` rows.
 
-### Step 6: Post Responses (with user approval)
+| # | file:line | author | category | proposed action |
+|---|-----------|--------|----------|-----------------|
 
-**STOP and ask user to review all draft responses.**
+Categories: **code-change** ("should be", "use X instead") · **question**
+("why", "how does") · **nitpick** ("nit:", style) · **praise** (no action) ·
+**discussion** (architecture) · **bot-finding** (CI bot inline comment —
+verify before accepting, many are false positives) · **outdated**
+(`isOutdated: true` — line moved; default: reply "addressed in {commit}" +
+resolve). Present the table and let the user greenlight threads.
 
-After user approves (may edit some):
+## Step 3: Per-Thread Loop
 
-Post each approved response as a reply using `gh api repos/{owner}/{repo}/pulls/{number}/comments/{id}/replies -f body="{response}"`.
+For each greenlit thread:
+
+1. Read code at `path:line`; check the suggestion against Iron Laws
+2. Apply fix with a user-visible diff (only with `--fix` or explicit ok)
+3. Draft reply (templates: `${CLAUDE_SKILL_DIR}/references/response-patterns.md`)
+4. **STOP — show diff + reply, get confirmation**
+5. Post reply — REST, targeting the thread's root comment:
+
+   ```bash
+   gh api --method POST \
+     "repos/$OWNER/$REPO/pulls/$PR/comments/$FIRST_COMMENT_ID/replies" \
+     -f body="$REPLY_TEXT"
+   ```
+
+6. Resolve the thread (skip with `--no-resolve`):
+
+   ```bash
+   gh api graphql -f query='mutation($threadId:ID!){
+     resolveReviewThread(input:{threadId:$threadId}){
+       thread { id isResolved } }}' -F threadId="$THREAD_ID"
+   ```
+
+Mistake recovery: `unresolveReviewThread` takes the same input shape.
+
+## Step 4: Verify
+
+`mix compile --warnings-as-errors && mix test` scoped to changed files.
+Do NOT commit or push — leave that to the user.
+
+## Step 5: Final Summary
+
+Print rollup: `# | thread | action | status (replied/resolved/skipped)`.
+List changed files. Optionally post a top-level conversation comment
+(`gh api --method POST "repos/$OWNER/$REPO/issues/$PR/comments" -f body=...`)
+with the rollup — **only on user approval**.
 
 ## Iron Laws
 
 1. **NEVER auto-post responses** — Always show drafts and get explicit approval
 2. **NEVER dismiss a review** — Only the reviewer should dismiss
-3. **Iron Laws override reviewer suggestions** — If a reviewer suggests code that violates an Iron Law, explain why in the response
+3. **Iron Laws override reviewer suggestions** — If a suggestion violates an Iron Law, explain why in the reply
 4. **Keep responses constructive** — Acknowledge the feedback, explain reasoning
-5. **Separate fixes from responses** — Apply code changes in a separate step
+5. **Separate fixes from responses** — Apply code changes in a distinct step
+6. **NEVER resolve a thread without first posting a reply** — every resolve is preceded by a reply on that thread explaining what was done
+7. **NEVER claim a fix without a shown diff** — no "should be fixed" replies without a user-visible change
+8. **Bot findings get the same scrutiny as humans** — decline Iron-Law-violating bot suggestions with explanation; never bulk-resolve "bot noise" without replies
 
 ## Integration
 
 ```text
-PR receives review comments
-       ↓
-/phx:pr-review {number}  ← YOU ARE HERE
-       ↓
-   Fix code? → --fix flag applies changes
-       ↓
-   Post responses (after user approval)
-       ↓
-   Push changes → user handles git push
+PR receives review → /phx:pr-review {number}  ← YOU ARE HERE
+   ↓ fetch unresolved threads (GraphQL, paginated)
+   ↓ triage table → user greenlights
+   ↓ per thread: fix (diff) → reply → resolve
+   ↓ verify (mix compile + test) → summary
+Push changes → user handles git push
 ```
 
 ## Next Steps
 
-After addressing review comments, suggest follow-up:
-
-```
-- `/phx:plan` — Create a plan if findings reveal scope gaps
-- `/phx:verify` — Run full verification before pushing
-- Push changes — user handles git push
-```
+- `/phx:plan` — if findings reveal scope gaps
+- `/phx:verify` — full verification before pushing
+- Re-run `/phx:pr-review` after the next review round (idempotent)
 
 ## References
 
-- `${CLAUDE_SKILL_DIR}/references/response-patterns.md` — Response templates and common patterns
+- `${CLAUDE_SKILL_DIR}/references/response-patterns.md` — Response templates and tone
+- `${CLAUDE_SKILL_DIR}/references/gh-commands.md` — Full gh command reference (3 comment surfaces, pagination, bot detection)
+- `${CLAUDE_SKILL_DIR}/references/bot-triage.md` — Batch-triaging CI bot review passes

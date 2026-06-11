@@ -17,6 +17,18 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   ~0% firing rate across 400 sessions. One suggestion per category per session,
   silent on explicit slash commands, gated on `mix.exs`, always exits 0
   (UserPromptSubmit exit 2 would erase the user's prompt).
+- **`/phx:pr-review` v2 — closes the review loop** (fetch → fix → reply → resolve).
+  The old skill drafted replies but used REST endpoints that expose neither thread
+  IDs nor resolved status, so it could never resolve a thread or skip handled ones.
+  v2 fetches threads via GraphQL `reviewThreads` (thread ID + `isResolved` +
+  `isOutdated`, paginated), replies via REST to the thread root, resolves via
+  `resolveReviewThread`, and is idempotent across review rounds — GitHub's
+  `isResolved` is the state. New flags: `--bots-only` (triage CI bot passes —
+  Copilot/Codex/CodeRabbit detected via `__typename == "Bot"`), `--no-resolve`.
+  New Iron Laws: never resolve without a reply, never claim a fix without a shown
+  diff, bot findings get the same scrutiny as humans. New references:
+  `gh-commands.md` (3 comment surfaces, pagination, bot detection),
+  `bot-triage.md` (batch flow + Elixir false-positive patterns).
 - **Three new Iron Laws (#23–#25)** from the 400-session analysis, wired into
   `elixir-idioms`, `liveview-patterns`, the `/phx:init` template, the SubagentStart
   injection hook, and `iron-law-judge` detection patterns:
