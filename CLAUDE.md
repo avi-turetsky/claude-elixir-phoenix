@@ -100,14 +100,14 @@ claude-elixir-phoenix/
 │   └── elixir-phoenix/
 │       ├── .claude-plugin/
 │       │   └── plugin.json
-│       ├── agents/                  # 20 specialist agents
+│       ├── agents/                  # 25 specialist agents
 │       │   ├── workflow-orchestrator.md   # Full cycle coordination
 │       │   ├── planning-orchestrator.md
 │       │   ├── context-supervisor.md     # Generic output compressor (haiku)
 │       │   └── ...
 │       ├── hooks/
 │       │   └── hooks.json           # Format, progress tracking, Stop warning
-│       └── skills/                  # 38 skills
+│       └── skills/                  # 50 skills
 │           ├── work/                # Execution phase
 │           ├── full/                # Autonomous cycle
 │           ├── plan/                # Planning + deepening (--existing)
@@ -716,6 +716,9 @@ When working on code, automatically consult relevant reference documentation bef
 | N+1 queries | `/ecto:n1-check` |
 | LiveView memory | `/lv:assigns` |
 | PR review comments | `/phx:pr-review` |
+| Waiting on CI / reviewers | `/phx:watch-pr` |
+| Update dependencies | `/phx:deps-update` |
+| "Have we done this before?" | `/phx:recall` |
 | Performance analysis | `/phx:perf` |
 | Project health | `/phx:audit` |
 | Reduce permission prompts | `/phx:permissions` |

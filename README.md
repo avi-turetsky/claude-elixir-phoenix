@@ -34,7 +34,7 @@ that prevent the mistakes Elixir developers actually make in production.
 │  ⚗  Elixir/Phoenix Plugin for Claude Code                           │
 │                                                                     │
 │  ┌──────────┬──────────┬──────────┬──────────┬──────────┐           │
-│  │    20    │    40    │    96    │    18    │    22    │           │
+│  │    25    │    50    │   137    │    31    │    25    │           │
 │  │  Agents  │  Skills  │   Refs   │  Hooks   │Iron Laws │           │
 │  └──────────┴──────────┴──────────┴──────────┴──────────┘           │
 │                                                                     │
@@ -71,7 +71,7 @@ that prevent the mistakes Elixir developers actually make in production.
 │    web-researcher                  progress-tracking · block-danger │
 │                                                                     │
 │  ───────────────────────────────────────────────────────────        │
-│  22 Iron Laws · Tidewave MCP · plan→work→verify→review→compound     │
+│  25 Iron Laws · Tidewave MCP · plan→work→verify→review→compound     │
 │  github.com/oliver-kriska/claude-elixir-phoenix                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -512,7 +512,8 @@ The plugin enforces critical rules and **stops with an explanation** if code wou
 | `/phx:learn-from-fix <lesson>`   | Capture lessons learned                                      |
 | `/phx:brief <plan>`     | Interactive plan walkthrough                                 |
 | `/phx:perf`             | Performance analysis with specialist agents                  |
-| `/phx:pr-review`        | Address PR review comments                                   |
+| `/phx:pr-review`        | Address PR review threads — fetch, fix, reply, resolve       |
+| `/phx:watch-pr <PR#>`   | Background-watch a PR for reviews + CI (token-conscious)     |
 
 ### Utility
 
@@ -529,6 +530,7 @@ The plugin enforces critical rules and **stops with an explanation** if code wou
 | `/phx:trace <function>`  | Build call trees to trace function flow                    |
 | `/phx:boundaries`        | Analyze Phoenix context boundaries with mix xref           |
 | `/phx:examples`          | Practical examples and pattern walkthroughs                |
+| `/phx:recall <question>` | Recall prior work — solution docs, git history, sessions   |
 | `/ecto:constraint-debug` | Debug Ecto constraint violations                           |
 
 ### Analysis
@@ -545,10 +547,11 @@ The plugin enforces critical rules and **stops with an explanation** if code wou
 
 | Command                      | Description                                          |
 | ---------------------------- | ---------------------------------------------------- |
+| `/phx:deps-update`           | Bump outdated Hex deps — changelogs, coupled groups, grouped PRs |
 | `/phx:deps-audit [--base R]` | Hex supply-chain audit (8 rules + CVE + differential) |
 | `/phx:deps-vet <pkg> <ver>`  | Manage the `hex_vet.exs` audit ledger (cargo-vet style) |
 
-## Agents (22)
+## Agents (25)
 
 | Agent                        | Model  | Memory  | Role                                         |
 | ---------------------------- | ------ | ------- | -------------------------------------------- |
@@ -631,7 +634,7 @@ Every PR must pass the CI quality gate (lint + test + eval). Run locally before 
 ```bash
 make help             # Show all available commands
 make eval             # Quick: lint + score changed skills/agents only
-make eval-all         # Full structural: all 47 skills + all 25 agents
+make eval-all         # Full structural: all 50 skills + all 25 agents
 make eval-fix         # Auto-fix lint + show failures + suggest autoresearch
 make test             # 52 pytest tests for eval framework
 make ci               # Full CI: lint + test + eval (same as GitHub Actions)

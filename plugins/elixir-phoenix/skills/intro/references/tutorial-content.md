@@ -321,7 +321,10 @@ The plugin works best when all layers are active: `/phx:init` for persistent rul
 | `/phx:investigate <bug>` | Structured bug investigation |
 | `/phx:verify` | Run all quality checks |
 | `/phx:research <topic>` | Research with parallel workers, Tidewave-first |
-| `/phx:pr-review <PR#>` | Address PR review comments |
+| `/phx:pr-review <PR#>` | Address PR review threads — fix, reply, resolve |
+| `/phx:watch-pr <PR#>` | Background-watch a PR for reviews + CI (token-conscious) |
+| `/phx:deps-update` | Bump outdated Hex deps, grouped PRs |
+| `/phx:recall <question>` | Recall prior work from past sessions/git |
 | `/phx:permissions` | Scan sessions, recommend safe Bash permissions |
 | `/phx:help [description]` | Interactive command advisor — helps pick the right command |
 
