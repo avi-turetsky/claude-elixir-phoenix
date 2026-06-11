@@ -27,7 +27,11 @@ consistent. **Contributor tooling — not shipped in the plugin.**
 ## Step 0: Preconditions
 
 - On `main`, working tree clean except intended release files. If feature work is uncommitted, commit it first.
-- Determine version. Read current `plugins/elixir-phoenix/.claude-plugin/plugin.json`. Pick bump from `## [Unreleased]` contents:
+- Determine version. Run `git describe --tags --abbrev=0` FIRST — the last
+  released tag is the bump base, NOT `plugin.json` (which may carry an
+  unreleased phased bump). If `plugin.json` is already ahead of the tag,
+  apply the consolidation check below before picking a number.
+- Read current `plugins/elixir-phoenix/.claude-plugin/plugin.json`. Pick bump from `## [Unreleased]` contents:
   - **MAJOR** — breaking change (removed command, workflow redesign)
   - **MINOR** — new skill / agent / command / hook
   - **PATCH** — bug fix, doc/reference update, description tweak

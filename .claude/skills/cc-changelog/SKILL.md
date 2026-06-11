@@ -27,15 +27,15 @@ components (agents, skills, hooks, config).
 ### Step 1: Fetch & Extract New Entries
 
 ```bash
-bash scripts/fetch-cc-changelog.sh
+bash "${CLAUDE_PROJECT_DIR}/scripts/fetch-cc-changelog.sh"
 ```
 
 If output starts with `STATUS: UP_TO_DATE` → report "No new CC versions" and stop.
 
 If `STATUS: NEW_VERSIONS` → continue with the changelog content below the header.
 
-For `--full`: run `bash scripts/fetch-cc-changelog.sh --all`
-For `--set=X`: run `bash scripts/fetch-cc-changelog.sh --set=X`, then re-run without flag.
+For `--full`: run `bash "${CLAUDE_PROJECT_DIR}/scripts/fetch-cc-changelog.sh" --all`
+For `--set=X`: run `bash "${CLAUDE_PROJECT_DIR}/scripts/fetch-cc-changelog.sh" --set=X`, then re-run without flag.
 
 ### Step 2: Analyze Impact
 
@@ -87,7 +87,7 @@ After user reviews the report, ask:
 > CC internals memory file. [Yes/No]"
 
 If yes:
-1. Run `bash scripts/fetch-cc-changelog.sh --set={latest}`
+1. Run `bash "${CLAUDE_PROJECT_DIR}/scripts/fetch-cc-changelog.sh" --set={latest}`
 2. Update memory file `reference_cc_source_internals.md` with new findings
 3. If BREAKING or DEPRECATION items found, offer to create a plan
 

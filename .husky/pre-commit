@@ -75,4 +75,18 @@ if [ -n "$STAGED_EVAL_FW" ]; then
   fi
 fi
 
+# Release guard: a staged plugin.json version bump means this is a release
+# commit — require FULL make ci, not just the scope-gated checks above.
+# (v2.10.1 shipped without it; scope-gating misses cross-file breakage.)
+if git diff --cached --name-only --diff-filter=ACM | grep -q 'plugins/elixir-phoenix/.claude-plugin/plugin.json'; then
+  if git diff --cached -- plugins/elixir-phoenix/.claude-plugin/plugin.json | grep -q '"version"'; then
+    echo "→ Release commit detected (plugin.json version bump) — running full make ci..."
+    if ! make ci > /tmp/precommit-ci.log 2>&1; then
+      echo "make ci failed. See /tmp/precommit-ci.log"
+      tail -30 /tmp/precommit-ci.log
+      exit 1
+    fi
+  fi
+fi
+
 echo "✔ Pre-commit checks passed"

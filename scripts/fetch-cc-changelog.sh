@@ -15,7 +15,9 @@
 set -euo pipefail
 
 CHANGELOG_URL="https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md"
-STATE_DIR=".claude/cc-changelog"
+# Anchor state to the project root, not cwd — running from another directory
+# once created a stray .claude/skills/cc-changelog/.claude/ nested state dir.
+STATE_DIR="${CLAUDE_PROJECT_DIR:-$PWD}/.claude/cc-changelog"
 STATE_FILE="${STATE_DIR}/last-checked-version.txt"
 CACHE_FILE="${STATE_DIR}/changelog-cache.md"
 MAX_AGE_HOURS=1
