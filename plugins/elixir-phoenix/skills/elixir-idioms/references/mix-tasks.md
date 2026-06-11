@@ -66,19 +66,33 @@ Enum.each(items, fn item ->
 end)
 ```
 
-## Chaining Tasks
+## App Startup (Iron Law #10)
+
+NEVER `Mix.Task.run("app.start")` — it boots the FULL supervision tree:
+the endpoint binds its port and Oban starts consuming jobs, inside what
+should be a one-off task. Start only what the task needs:
 
 ```elixir
-# Run another mix task from within a task
 def run(args) do
-  # Ensure app is started (needed for DB access)
-  Mix.Task.run("app.start")
+  # Load config without starting the app
+  Mix.Task.run("app.config")
 
-  # Run another task
-  Mix.Task.run("ecto.migrate")
+  # Start only the dependency apps + repo this task uses
+  {:ok, _} = Application.ensure_all_started(:ecto_sql)
+  {:ok, _} = MyApp.Repo.start_link()
 
   # Your logic here
 end
+```
+
+## Chaining Tasks
+
+```elixir
+# Run another task (after the startup above)
+Mix.Task.run("ecto.migrate")
+
+# Re-run a task that already ran this VM session
+Mix.Task.rerun("ecto.migrate")
 ```
 
 ## Credo Complexity

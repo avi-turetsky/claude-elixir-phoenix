@@ -9,6 +9,11 @@ user-invocable: false
 
 When user describes work WITHOUT specifying a `/phx:` command, analyze their intent and suggest the appropriate workflow BEFORE starting work.
 
+**Hard guard — check FIRST**: if the message starts with any slash command
+(`/phx:`, `/ecto:`, `/lv:`, or any other `/command`), this skill does not apply.
+Follow the invoked command directly — no routing analysis, no suggestion, zero
+output from this skill.
+
 ## Routing Table
 
 | Signal | Detected Intent | Suggest |

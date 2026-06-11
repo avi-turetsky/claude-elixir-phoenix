@@ -50,6 +50,11 @@ steps, root cause, solution code, and prevention advice.
 Validate frontmatter against `compound-docs/references/schema.md`,
 then create file using `compound-docs/references/resolution-template.md`.
 
+**Write-blocked fallback**: if writing to `.claude/solutions/` is denied
+by permissions, do NOT silently drop the solution. Output the full
+solution doc inline (fenced markdown the user can paste), then suggest
+`/phx:permissions` to allow `.claude/solutions/` writes for next time.
+
 ### Step 4: Decision Menu
 
 1. **Continue** (default)

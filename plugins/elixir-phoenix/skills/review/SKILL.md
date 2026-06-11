@@ -155,8 +155,10 @@ thing the user sees.
 anything.
 
 **On BLOCKED or REQUIRES CHANGES**: Show finding count by severity,
-then offer via `AskUserQuestion`: `/phx:triage` (recommended), `/phx:plan`,
-fix directly, or "I'll handle it myself".
+then offer via `AskUserQuestion`: `/phx:triage` (recommended),
+`/phx:plan .claude/plans/{slug}/reviews/{feature}-review.md` (converts
+findings into a follow-up plan — pass the review file path, not a
+re-description), fix directly, or "I'll handle it myself".
 
 **On PASS / PASS WITH WARNINGS**: Suggest `/phx:compound`, `/phx:learn-from-fix`.
 

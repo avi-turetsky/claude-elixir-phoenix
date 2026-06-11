@@ -27,6 +27,7 @@ Reference for building with Phoenix LiveView 1.0/1.1.
 7. **CHECK CHANGESET ERRORS BEFORE UI DEBUGGING** — Silent form save = check `{:error, changeset}` first, not viewport/JS
 8. **HIDDEN INPUTS FOR ALL REQUIRED EMBEDDED FIELDS** — Every required field in an embedded schema MUST have a `hidden_input` if not directly editable
 9. **NEVER USE `assign_new` FOR LIFECYCLE VALUES** — `assign_new` skips the function if key exists. Use `assign/3` for locale, current user, or any value refreshed every mount
+10. **MATCH `{:error, %Ecto.Changeset{}}` EXPLICITLY** — Bare `{:error, _}` merges changeset and non-changeset errors; the form silently never re-renders validation errors. Handle other errors separately
 
 ## Memory Impact
 

@@ -116,19 +116,22 @@ If code would violate ANY of these, you MUST:
 1. NO DB queries in disconnected mount → use `assign_async`
 2. Use streams for lists >100 items
 3. Check `connected?/1` before PubSub subscribe
+4. Match `{:error, %Ecto.Changeset{}}` explicitly — bare `{:error, _}` silently hides form errors
 
 **Ecto**:
-4. NO `:float` for money → `:decimal` or `:integer` (cents)
-5. Pin values with `^` in queries — never interpolate
-6. Separate queries for `has_many`, JOIN for `belongs_to`
+5. NO `:float` for money → `:decimal` or `:integer` (cents)
+6. Pin values with `^` in queries — never interpolate
+7. Separate queries for `has_many`, JOIN for `belongs_to`
 
 **Security**:
-7. NO `String.to_atom(user_input)` — atom exhaustion attack
-8. AUTHORIZE every `handle_event` — mount auth is not enough
-9. NO `raw/1` with untrusted content — XSS vulnerability
+8. NO `String.to_atom(user_input)` — atom exhaustion attack
+9. AUTHORIZE every `handle_event` — mount auth is not enough
+10. NO `raw/1` with untrusted content — XSS vulnerability
 
 **OTP**:
-10. NO process without runtime reason — processes are for concurrency/state/isolation
+11. NO process without runtime reason — processes are for concurrency/state/isolation
+12. Mix tasks: `Mix.Task.run("app.config")` + `Application.ensure_all_started/1`, NEVER `Mix.Task.run("app.start")` (boots full tree: endpoint port, Oban consuming)
+13. Capture Gettext/CLDR locale BEFORE spawning Task/GenServer — locale is process-local, spawned processes reset to default
 
 {OBAN_SECTION}
 

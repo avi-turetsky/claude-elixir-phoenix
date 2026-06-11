@@ -63,6 +63,34 @@ def change do
 end
 ```
 
+## Pre-Migration Safety: Check Data BEFORE Unique Index
+
+A unique index on a table with existing duplicates fails at deploy time —
+in the worst case mid-release. Check FIRST, and include soft-deleted rows:
+they're invisible in the app but still block the index.
+
+```sql
+-- Find duplicates the index would reject (run before writing the migration)
+SELECT email, COUNT(*) FROM users
+GROUP BY email HAVING COUNT(*) > 1;
+
+-- Soft-deleted rows count too — check whether they collide
+SELECT email, COUNT(*) FILTER (WHERE deleted_at IS NOT NULL) AS deleted,
+       COUNT(*) FILTER (WHERE deleted_at IS NULL) AS live
+FROM users GROUP BY email HAVING COUNT(*) > 1;
+```
+
+Resolutions, in order of preference:
+
+1. **Partial index** when soft-deleted rows may legitimately collide:
+   `create unique_index(:users, [:email], where: "deleted_at IS NULL")`
+2. **Data-fix migration first** (separate deploy), then the index
+3. **Composite key** if the duplicates are actually valid scoping
+   (e.g., unique per tenant: `unique_index(:users, [:org_id, :email])`)
+
+Same discipline applies before adding NOT NULL (check for NULLs) and
+before foreign keys (check for orphaned rows).
+
 ## Concurrent Index (Large Tables)
 
 ```elixir

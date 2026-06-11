@@ -236,6 +236,30 @@ for the canonical implementation. Do NOT flag this pattern as a violation.
   Read matched files to check if the call is at module level (not inside a function).
   If so, check for `@external_resource` declaration. Flag if missing.
 
+**#16 Mix tasks must not boot the full app**
+
+- Severity: HIGH
+- Files: `lib/mix/tasks/*.ex`
+- Detection: `Mix.Task.run("app.start")` — boots full tree (endpoint binds port, Oban consumes jobs)
+- Confidence: DEFINITE
+- Detection approach: Grep pattern `Mix\.Task\.run\("app\.start"\)` on `lib/mix/tasks/`. Fix: `Mix.Task.run("app.config")` + `Application.ensure_all_started/1` + `Repo.start_link()`.
+
+**#17 LiveView must match changeset errors explicitly**
+
+- Severity: HIGH
+- Files: `*_live.ex`
+- Detection: `{:error, _}` clause handling a context-call result in `handle_event` — swallows changesets, form never re-renders errors
+- Confidence: LIKELY — verify the matched value can be a changeset
+- Detection approach: Grep pattern `\{:error, _\}` on `*_live.ex`. Read the clause; if the call site returns `{:error, %Ecto.Changeset{}}`, flag it.
+
+**#18 Capture locale before spawning**
+
+- Severity: MEDIUM
+- Files: `*.ex` using Gettext/CLDR
+- Detection: `Task.async`/`Task.start`/`GenServer.cast` whose body calls Gettext without receiving locale as argument
+- Confidence: REVIEW — locale is process-local; spawned process resets to default
+- Detection approach: Grep `Gettext\.put_locale|gettext\(` near `Task\.(async|start)`. Flag spawns whose closure translates but takes no locale param.
+
 ## Execution Strategy
 
 **IMPORTANT: You do NOT have Bash access. Use Grep and Read tools ONLY.**
@@ -266,14 +290,14 @@ Run checks by category using parallel Grep tool calls:
 
 **IMPORTANT: Only report VIOLATIONS. Do NOT list passing checks.**
 A passing check adds zero value and wastes tokens. One summary line
-suffices: "Checked {N} of 22 Iron Laws: {N} violations found."
+suffices: "Checked {N} of 25 Iron Laws: {N} violations found."
 
 ```markdown
 # Iron Law Violations Report
 
 ## Summary
 - Files scanned: {count}
-- Iron Laws checked: {count} of 22
+- Iron Laws checked: {count} of 25
 - Violations found: {count} ({critical} critical, {high} high, {medium} medium)
 
 ## Critical Violations

@@ -113,6 +113,13 @@ what will be added/removed and ask for confirmation.
 Merge approved additions into `~/.claude/settings.json` under `permissions.allow`.
 Remove approved garbage entries. Report final counts.
 
+### Workflow-artifact permissions (always check)
+
+The plugin's workflow writes to `.claude/plans/`, `.claude/solutions/`, and
+`.claude/reviews/`. If these aren't covered, `/phx:compound` and review agents
+get write-blocked mid-workflow. Recommend (GREEN):
+`Write(.claude/plans/**)`, `Write(.claude/solutions/**)`, `Write(.claude/reviews/**)`.
+
 ## References
 
 - `${CLAUDE_SKILL_DIR}/references/risk-classification.md` — Full classification rules

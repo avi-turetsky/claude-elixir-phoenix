@@ -107,6 +107,15 @@ changeset}` with no visible UI feedback.
 
 Find what's actually happening vs what should happen.
 
+### Step 7: Hand Off
+
+Present root cause + evidence. Then route by fix size:
+
+- Small, contained fix → offer to apply directly or via `/phx:quick`
+- Multi-file or risky fix → suggest `/phx:plan {root cause summary}` so
+  the fix gets task structure and review
+- Non-obvious root cause → after the fix lands, suggest `/phx:compound`
+
 ## Autonomous Iteration
 
 Use `/ralph-loop:ralph-loop` for autonomous debugging with

@@ -78,15 +78,19 @@ Never let the conversation flow past this point without a formal choice.
 
 1. Write current state to `.claude/plans/{slug}/interview.md`
 2. Show coverage summary: "Coverage: What 2/2 | Why 2/2 | Scope 1/2 | ..."
-3. Use AskUserQuestion with EXACTLY these options:
+3. Use AskUserQuestion with EXACTLY these options (4 max — the tool's
+   hard limit; the auto-added "Other" covers freeform discussion):
 
    - **Research** — search codebase + internet for approaches (2 agents)
    - **Continue interview** — ask more questions
    - **Make a plan** — I'll suggest: `/phx:plan .claude/plans/{slug}/interview.md`
    - **Store & exit** — save everything, come back later
-   - **Discuss** — freeform conversation about what we've gathered
 
 4. Wait for user response. Do NOT proceed without explicit choice
+
+**AskUserQuestion discipline**: decisions only, never narration or
+rhetorical check-ins. Every option states concrete impact (what happens,
+what it costs) so the user can pick without follow-up questions.
 
 ## Phase 3: Research (Diverge → Evaluate → Converge)
 

@@ -601,6 +601,18 @@ These rules are NEVER violated. If code would violate them, **STOP and explain**
 
 22. **VERIFY BEFORE CLAIMING DONE** - Never say "should work" or "this fixes it." Run `mix compile && mix test` and show the result. If you can't verify, explicitly state what remains unverified
 
+### Elixir Iron Laws (continued)
+
+23. **MIX TASKS START ONLY WHAT THEY NEED** - `Mix.Task.run("app.config")` + `Application.ensure_all_started/1`, never `Mix.Task.run("app.start")` (boots full tree: endpoint port, Oban consuming)
+
+### LiveView Iron Laws (continued)
+
+24. **MATCH `{:error, %Ecto.Changeset{}}` EXPLICITLY** - Bare `{:error, _}` merges changeset and non-changeset errors; the form never re-renders validation errors. Handle others separately
+
+### Elixir Iron Laws (continued)
+
+25. **CAPTURE LOCALE BEFORE SPAWNING** - Gettext/CLDR locale is process-local. Read it in the caller and pass it explicitly — a spawned Task/GenServer starts with the default locale
+
 ### Violation Response
 
 When detecting a potential Iron Law violation:

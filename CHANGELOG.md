@@ -9,7 +9,44 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Three new Iron Laws (#23–#25)** from the 400-session analysis, wired into
+  `elixir-idioms`, `liveview-patterns`, the `/phx:init` template, the SubagentStart
+  injection hook, and `iron-law-judge` detection patterns:
+  - **#23** Mix tasks start only what they need — `Mix.Task.run("app.config")` +
+    `Application.ensure_all_started/1`, never `Mix.Task.run("app.start")` (boots the
+    full tree: endpoint binds the port, Oban starts consuming jobs). The
+    `mix-tasks.md` reference previously taught the anti-pattern; now fixed.
+  - **#24** LiveView handlers match `{:error, %Ecto.Changeset{}}` explicitly — bare
+    `{:error, _}` silently swallows form validation errors.
+  - **#25** Capture Gettext/CLDR locale before spawning Task/GenServer — locale is
+    process-local; spawned processes reset to default.
+- **Pre-migration safety section** in `ecto-patterns/references/migrations.md` —
+  check duplicates (including soft-deleted rows) before unique indexes, with
+  partial-index/data-fix/composite-key resolutions.
+- **Tidewave reliability guards** in `tidewave-integration` — worktree/port
+  verification (multi-worktree setups debug the wrong server), schema introspection
+  before SQL, output-size caps, `browser_eval` server-side fallbacks, and a
+  QA-walkthrough pattern for feature smoke tests.
+
 ### Changed
+
+- **Workflow handoffs between phases** — `/phx:investigate` now ends with a routing
+  step (quick fix vs `/phx:plan` vs `/phx:compound`); `/phx:review` passes the review
+  file path to `/phx:plan` for follow-up plans; `/phx:work` suggests `/phx:compound`
+  after non-obvious fixes and re-verifies stale plans from earlier sessions.
+- **`/phx:full` deflects existing plan files** — description and a usage guard route
+  `.claude/plans/*/plan.md` arguments to `/phx:work` instead of re-planning.
+- **`intent-detection` hard guard** — skips entirely when the message starts with any
+  slash command; no more routing suggestions on top of explicit commands.
+- **`/phx:work` batches checkbox updates** — one edit pass when several tasks complete
+  together, not one Edit call per checkbox.
+- **`/phx:compound` write-block fallback** — outputs the solution doc inline and
+  points at `/phx:permissions` instead of silently dropping knowledge;
+  `/phx:permissions` now always recommends workflow-artifact write grants
+  (`.claude/plans/`, `.claude/solutions/`, `.claude/reviews/`).
+- **AskUserQuestion discipline in `brainstorm`/`triage`** — decisions only, concrete
+  impact per option; fixed brainstorm's Decision Point exceeding the tool's 4-option
+  limit (5 options meant one was always silently dropped).
 
 - **`security-analyzer`** — new end-to-end flow checks from the 400-session analysis: IDOR
   via `handle_params` URL params, data-flow through multi-step transforms, failure-path

@@ -1,6 +1,6 @@
 ---
 name: phx:full
-description: Use for large features spanning multiple contexts, new domain modules, or when the user wants autonomous end-to-end implementation. Runs the full plan-implement-review-compound cycle with specialist agents and Iron Laws enforcement.
+description: Use for large features spanning multiple contexts or autonomous end-to-end implementation. Runs the full plan-implement-review-compound cycle with specialist agents. NOT for executing an existing plan file — use /phx:work for that.
 effort: high
 argument-hint: <feature description>
 ---
@@ -18,6 +18,10 @@ Cycles back automatically if review finds issues.
 /phx:full Real-time notification system with Phoenix PubSub
 /phx:full Background job processing for email campaigns --max-cycles 5
 ```
+
+**Wrong input guard**: if the argument is a path to an existing plan file
+(`.claude/plans/*/plan.md`), do NOT re-plan it. Say so and run `/phx:work {path}`
+instead — the plan phase already happened.
 
 ## Workflow Overview
 

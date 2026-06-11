@@ -80,6 +80,35 @@ config :phoenix_live_view,
   debug_attributes: true
 ```
 
+## Reliability Guards
+
+**Worktree/port check (FIRST, in multi-worktree setups)**: multiple
+worktrees = multiple dev servers on different ports. Before trusting any
+Tidewave result, confirm the endpoint belongs to THIS checkout: grep
+`config/dev.exs` for the configured port, and verify with
+`project_eval File.cwd!()` — if it returns a different worktree path,
+you're debugging the wrong server.
+
+**Schema introspection BEFORE SQL**: never guess column names. Run
+`get_ecto_schemas` (or query `information_schema.columns`) before writing
+SQL against a table you haven't already introspected this session. A
+guessed-column error costs more than the introspection.
+
+**Output-size guard**: runtime output is unbounded. Always cap it —
+`LIMIT 20` in SQL, `Enum.take(20)` in evals, `inspect(x, limit: 50,
+printable_limit: 500)` for large structs. Re-query narrower rather than
+dumping wide.
+
+**browser_eval fallback**: if `mcp__Tidewave-Web__browser_eval` is absent
+or errors, don't stall — inspect the same state server-side: LiveView
+assigns via `:sys.get_state(pid)` in `project_eval`, rendered HTML via
+`Phoenix.LiveViewTest`, or read the template source directly.
+
+**QA walkthrough pattern**: after a feature completes, run a short
+checklist through `project_eval`/`browser_eval`: create the record, fetch
+it back, exercise the main event, check `get_logs level: :error` is clean.
+Report each step's pass/fail — not just "smoke test passed".
+
 ## Proactive Runtime Checks
 
 Don't just use Tidewave reactively. **Query runtime state at

@@ -33,9 +33,9 @@ Best when review has 5+ findings and you want to prioritize.
 
 Read the review file. Parse all findings with severity.
 
-**Auto-approve Iron Law violations**: Findings matching the 13
-Iron Laws are auto-approved as "Fix it" without asking. These
-are non-negotiable in Elixir/Phoenix development.
+**Auto-approve Iron Law violations**: Findings matching any Iron Law
+are auto-approved as "Fix it" without asking. These are non-negotiable
+in Elixir/Phoenix development.
 
 ### Step 2: Present ALL Findings for Batch Selection
 
@@ -61,6 +61,10 @@ AskUserQuestion:
 If >4 options, batch into groups of 4 with severity shortcuts in
 the first batch. Severity shortcuts select all findings of that
 level — user can mix shortcuts with individual picks.
+
+**AskUserQuestion discipline**: decisions only — never use it to
+narrate progress. Every option carries `{file}:{line}` + counts so
+the user decides without opening the review file.
 
 ### Step 3: Gather Context on Selected Items
 

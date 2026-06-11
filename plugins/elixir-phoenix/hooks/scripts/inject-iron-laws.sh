@@ -27,4 +27,7 @@ jq -n '{hookSpecificOutput: {hookEventName: "SubagentStart", additionalContext:
 - HIDDEN INPUTS FOR ALL REQUIRED EMBEDDED FIELDS
 - WRAP THIRD-PARTY LIBRARY APIs behind project-owned modules
 - NEVER use assign_new for values refreshed every mount
+- MATCH {:error, %Ecto.Changeset{}} explicitly in LiveView handlers — bare {:error, _} hides form errors
+- MIX TASKS: Mix.Task.run(\"app.config\") + Application.ensure_all_started/1, never Mix.Task.run(\"app.start\")
+- CAPTURE Gettext/CLDR locale before spawning Task/GenServer — locale is process-local
 - VERIFY BEFORE CLAIMING DONE — run mix compile && mix test, never say should work"}}'

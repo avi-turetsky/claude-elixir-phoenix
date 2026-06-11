@@ -93,6 +93,9 @@ blocked by Phase 1 tasks).
 
 With `--from P2-T3`: Skip to that specific task.
 
+**Stale-plan check**: if the plan predates this session (file mtime), spot-check
+2-3 files it references before executing — assumptions may have drifted.
+
 See `${CLAUDE_SKILL_DIR}/references/resume-strategies.md` for all resume modes.
 
 ## Step 4: Execute Tasks
@@ -128,7 +131,9 @@ for spawning pattern, prompt template, and checkpoint flow.
 
 **Token efficiency**: Do NOT narrate each verification step. Execute
 tool calls directly without "Let me now run..." preamble. Only narrate
-when explaining a non-obvious decision or reporting a failure.
+when explaining a non-obvious decision or reporting a failure. When
+several checkboxes complete together (parallel groups, resume catch-up),
+batch them into ONE edit pass — never one Edit call per checkbox.
 
 > **Linter note**: The PostToolUse hook checks formatting but does
 > NOT modify files. Run `mix format` explicitly during verification
@@ -144,6 +149,8 @@ Summarize results with `AskUserQuestion`:
 Options: 1. **Run review** (`/phx:review`) (Recommended),
 2. **Get a briefing** (`/phx:brief` — understand what was built),
 3. **Commit changes** (`/commit`), 4. **Continue manually**.
+If any task fixed a non-obvious bug, also mention `/phx:compound`
+to capture the solution.
 
 With blockers: list them, offer **Replan** (`/phx:plan`),
 **Review first** (`/phx:review`), or **Handle myself**.

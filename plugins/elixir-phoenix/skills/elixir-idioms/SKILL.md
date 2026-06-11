@@ -20,6 +20,8 @@ Reference for writing idiomatic Elixir code with BEAM-aware patterns.
 7. **@external_resource FOR COMPILE-TIME FILES** — Modules reading files at compile time MUST declare `@external_resource`
 8. **SUPERVISE ALL LONG-LIVED PROCESSES** — Never bare `GenServer.start_link`/`Agent.start_link` in production. Use supervision trees
 9. **WRAP THIRD-PARTY LIBRARY APIs** — Always facade external deps behind a project-owned module. Enables swapping without touching callers
+10. **MIX TASKS START ONLY WHAT THEY NEED** — `Mix.Task.run("app.config")` + `Application.ensure_all_started/1`, never `Mix.Task.run("app.start")` (boots the FULL tree: endpoint port, Oban consuming)
+11. **CAPTURE LOCALE BEFORE SPAWNING** — Gettext/CLDR locale is process-local. Read it in the caller and pass explicitly; a spawned Task/GenServer starts with the default locale
 
 ## BEAM Architecture (Why Elixir Works This Way)
 
