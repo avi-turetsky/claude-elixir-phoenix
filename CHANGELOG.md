@@ -17,6 +17,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   ~0% firing rate across 400 sessions. One suggestion per category per session,
   silent on explicit slash commands, gated on `mix.exs`, always exits 0
   (UserPromptSubmit exit 2 would erase the user's prompt).
+- **`/phx:recall` — session and history archaeology** (git-archaeology sessions
+  ran manual `git log`/`diff` pipelines with no plugin support). Three evidence
+  layers, cheapest first: `.claude/solutions/` compound docs → git archaeology
+  (`--grep`, `-S` pickaxe, `--follow`, `-L`) → ccrider MCP session search, gated
+  with graceful degradation when the MCP is absent. ONE ccrider fetch = ONE
+  subagent (3–15KB responses; writes a ≤30-line summary file). Every answer cites
+  its evidence; clean misses are stated, then routed to `/phx:compound` so the
+  next recall stops at layer 1. 100% trigger accuracy.
 - **`/phx:deps-update` — generic dependency freshness workflow** (dependency
   maintenance was a recurring session pattern with no plugin support). Inventory
   via `mix hex.outdated` (exit 1 = normal "outdated" signal), changelog deltas via
