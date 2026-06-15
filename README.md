@@ -71,7 +71,7 @@ that prevent the mistakes Elixir developers actually make in production.
 │    web-researcher                  progress-tracking · block-danger │
 │                                                                     │
 │  ───────────────────────────────────────────────────────────        │
-│  25 Iron Laws · Tidewave MCP · plan→work→verify→review→compound     │
+│  26 Iron Laws · Tidewave MCP · plan→work→verify→review→compound     │
 │  github.com/oliver-kriska/claude-elixir-phoenix                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -493,6 +493,8 @@ The plugin enforces critical rules and **stops with an explanation** if code wou
 **OTP:** No process without a runtime reason. Supervise all long-lived processes.
 
 **Elixir:** Declare `@external_resource` for compile-time files. Wrap third-party library APIs behind project-owned modules. Never use `assign_new` for values refreshed every mount.
+
+**Code style:** Comments aren't commit messages — a change's reasoning goes in the commit/PR, not the code. No issue-reference tags inline (`# ENA-1234`).
 
 ## Commands Reference
 

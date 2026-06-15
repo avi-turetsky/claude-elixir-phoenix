@@ -133,6 +133,9 @@ If code would violate ANY of these, you MUST:
 12. Mix tasks: `Mix.Task.run("app.config")` + `Application.ensure_all_started/1`, NEVER `Mix.Task.run("app.start")` (boots full tree: endpoint port, Oban consuming)
 13. Capture Gettext/CLDR locale BEFORE spawning Task/GenServer — locale is process-local, spawned processes reset to default
 
+**Code Style**:
+14. Comments aren't commit messages — change reasoning (the bug, what it replaces) goes in the commit/PR, not code. No issue tags inline (`# ENA-1234`). Keep only durable facts: footguns, quirks
+
 {OBAN_SECTION}
 
 {OBAN_PRO_SECTION}

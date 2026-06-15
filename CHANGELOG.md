@@ -9,6 +9,18 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Iron Law #26 — Comments aren't commit messages** (session analysis found
+  Oliver asking "remove unnecessary comments" on essentially every PR, 8+
+  sessions clustered June 2026). A change's reasoning — the bug, what it
+  replaces, the task — belongs in the commit/PR/squash, which git persists; not
+  in code comments. No issue-reference tags inline (`# ENA-1234`). Keep only
+  durable intrinsic facts a future reader needs regardless of history:
+  footguns, invariants, library quirks. Wired into CLAUDE.md, the
+  `inject-iron-laws.sh` SubagentStart hook (code-writing subagents inherit it),
+  the `iron-law-judge` agent as detection `#19` (so `/phx:review` flags ticket
+  tags, change-narration, and what-comments), and the `init` injectable
+  template. Stops the comments being added during `/phx:work`/`/phx:quick`
+  rather than stripping them at PR time. Law count 25 → 26.
 - **UserPromptSubmit routing hook (`route-intent.sh`)** — injects one-line `/phx:`
   suggestions directly into Claude's context for three high-signal intents: GitHub
   PR URLs / review-feedback phrasing → `/phx:pr-review`, Tidewave

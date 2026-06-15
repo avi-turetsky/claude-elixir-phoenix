@@ -30,4 +30,5 @@ jq -n '{hookSpecificOutput: {hookEventName: "SubagentStart", additionalContext:
 - MATCH {:error, %Ecto.Changeset{}} explicitly in LiveView handlers — bare {:error, _} hides form errors
 - MIX TASKS: Mix.Task.run(\"app.config\") + Application.ensure_all_started/1, never Mix.Task.run(\"app.start\")
 - CAPTURE Gettext/CLDR locale before spawning Task/GenServer — locale is process-local
+- COMMENTS ARE NOT COMMIT MESSAGES — the reasoning behind a change (the bug, what it replaces, the task) belongs in the commit/PR/squash, which git persists; NOT in code comments. No issue-ref tags inline (ENA-1234). Keep only durable intrinsic facts a future reader needs: footguns, invariants, library quirks
 - VERIFY BEFORE CLAIMING DONE — run mix compile && mix test, never say should work"}}'

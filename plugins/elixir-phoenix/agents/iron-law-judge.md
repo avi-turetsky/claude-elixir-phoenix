@@ -260,6 +260,17 @@ for the canonical implementation. Do NOT flag this pattern as a violation.
 - Confidence: REVIEW — locale is process-local; spawned process resets to default
 - Detection approach: Grep `Gettext\.put_locale|gettext\(` near `Task\.(async|start)`. Flag spawns whose closure translates but takes no locale param.
 
+**#19 Comments aren't commit messages**
+
+- Severity: LOW
+- Files: `*.ex`, `*.exs`, `*.heex`, `*.js`
+- Detection — flag any of:
+  - inline issue tags (`ENA-1234`, ticket/PR numbers)
+  - change-narration: comments explaining why the change was made, what it replaces, or the bug fixed (that reasoning lives in the commit/PR)
+  - what-comments restating the adjacent line
+- Confidence: REVIEW — keep durable intrinsic notes (footguns, invariants, library quirks a reader needs regardless of history); flag the three above
+- Detection approach: Grep `#.*\b[A-Z]{2,}-[0-9]+` / `//.*\b[A-Z]{2,}-[0-9]+` for ticket tags. For prose, read it: flag change-narration or what-comments; keep durable facts.
+
 ## Execution Strategy
 
 **IMPORTANT: You do NOT have Bash access. Use Grep and Read tools ONLY.**
@@ -290,14 +301,14 @@ Run checks by category using parallel Grep tool calls:
 
 **IMPORTANT: Only report VIOLATIONS. Do NOT list passing checks.**
 A passing check adds zero value and wastes tokens. One summary line
-suffices: "Checked {N} of 25 Iron Laws: {N} violations found."
+suffices: "Checked {N} of 26 Iron Laws: {N} violations found."
 
 ```markdown
 # Iron Law Violations Report
 
 ## Summary
 - Files scanned: {count}
-- Iron Laws checked: {count} of 25
+- Iron Laws checked: {count} of 26
 - Violations found: {count} ({critical} critical, {high} high, {medium} medium)
 
 ## Critical Violations

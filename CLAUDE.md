@@ -610,6 +610,10 @@ These rules are NEVER violated. If code would violate them, **STOP and explain**
 
 25. **CAPTURE LOCALE BEFORE SPAWNING** - Gettext/CLDR locale is process-local. Read it in the caller and pass it explicitly — a spawned Task/GenServer starts with the default locale
 
+### Code Style Iron Laws
+
+26. **COMMENTS AREN'T COMMIT MESSAGES** - A change's reasoning belongs in the commit/PR — git persists it, not code. No issue tags inline. Keep only durable facts: footguns, invariants, quirks
+
 ### Violation Response
 
 When detecting a potential Iron Law violation:
