@@ -9,6 +9,22 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [2.12.0] - 2026-06-16
+
+Workflow-completion release driven by 400-session analysis: three new skills
+(`/phx:recall`, `/phx:deps-update`, `/phx:watch-pr`), `/phx:pr-review` v2 that
+closes the review loop (fetch → fix → reply → resolve), a `route-intent.sh`
+UserPromptSubmit hook replacing ~0%-firing CLAUDE.md prose routing, four new
+Iron Laws (#23–#26), and an eval-hardening pass that backfilled the
+AskUserQuestion 4-option check, cross-file consistency tests, and untracked-file
+detection. Law count 22 → 26.
+
+### Added
+
 - **Iron Law #26 — Comments aren't commit messages** (session analysis found
   Oliver asking "remove unnecessary comments" on essentially every PR, 8+
   sessions clustered June 2026). A change's reasoning — the bug, what it
