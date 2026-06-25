@@ -1,0 +1,60 @@
+# SkillSpector baseline — findings listed here are suppressed on future scans.
+# Edit 'reason' fields and add glob 'rules' as needed. See docs/SUPPRESSION.md.
+version: 1
+rules: []
+fingerprints:
+- hash: sha256:78fede7c9d60c260
+  rule_id: LP3
+  file: SKILL.md
+  reason: 'Hex supply-chain SCANNER: bidi chars, base64, rm -rf are detection signatures
+    and smoke-test fixtures, not runtime behavior.'
+- hash: sha256:5a7f69039fd93fec
+  rule_id: P2
+  file: references/heuristics.md
+  reason: 'Hex supply-chain SCANNER: bidi chars, base64, rm -rf are detection signatures
+    and smoke-test fixtures, not runtime behavior.'
+- hash: sha256:5a7f69039fd93fec
+  rule_id: P2
+  file: references/heuristics.md
+  reason: 'Hex supply-chain SCANNER: bidi chars, base64, rm -rf are detection signatures
+    and smoke-test fixtures, not runtime behavior.'
+- hash: sha256:5a7f69039fd93fec
+  rule_id: P2
+  file: references/heuristics.md
+  reason: 'Hex supply-chain SCANNER: bidi chars, base64, rm -rf are detection signatures
+    and smoke-test fixtures, not runtime behavior.'
+- hash: sha256:5a7f69039fd93fec
+  rule_id: P2
+  file: references/heuristics.md
+  reason: 'Hex supply-chain SCANNER: bidi chars, base64, rm -rf are detection signatures
+    and smoke-test fixtures, not runtime behavior.'
+- hash: sha256:8193663c19311fb4
+  rule_id: SC3
+  file: smoke-test/fixtures.d/07_base64/setup.sh
+  reason: 'Hex supply-chain SCANNER: bidi chars, base64, rm -rf are detection signatures
+    and smoke-test fixtures, not runtime behavior.'
+- hash: sha256:abfd07d92ff7633d
+  rule_id: TM1
+  file: priv/cassettes/capture.sh
+  reason: 'Hex supply-chain SCANNER: bidi chars, base64, rm -rf are detection signatures
+    and smoke-test fixtures, not runtime behavior.'
+- hash: sha256:6440b61143d402f5
+  rule_id: TM1
+  file: priv/cassettes/capture.sh
+  reason: 'Hex supply-chain SCANNER: bidi chars, base64, rm -rf are detection signatures
+    and smoke-test fixtures, not runtime behavior.'
+- hash: sha256:77bc0d52195ffc57
+  rule_id: TM1
+  file: references/tarball-fetcher.md
+  reason: 'Hex supply-chain SCANNER: bidi chars, base64, rm -rf are detection signatures
+    and smoke-test fixtures, not runtime behavior.'
+- hash: sha256:0946c42aa32ebc9e
+  rule_id: TM1
+  file: smoke-test/corpus.d/fetch.sh
+  reason: 'Hex supply-chain SCANNER: bidi chars, base64, rm -rf are detection signatures
+    and smoke-test fixtures, not runtime behavior.'
+- hash: sha256:b2a679132f1e92c9
+  rule_id: TM1
+  file: smoke-test/corpus.d/fetch.sh
+  reason: 'Hex supply-chain SCANNER: bidi chars, base64, rm -rf are detection signatures
+    and smoke-test fixtures, not runtime behavior.'

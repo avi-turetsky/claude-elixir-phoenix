@@ -1,0 +1,20 @@
+# SkillSpector baseline — findings listed here are suppressed on future scans.
+# Edit 'reason' fields and add glob 'rules' as needed. See docs/SUPPRESSION.md.
+version: 1
+rules: []
+fingerprints:
+- hash: sha256:e3b88b43340a11a6
+  rule_id: AR3
+  file: ash-policy-reviewer.md
+  reason: '''bypass'' is the Ash policy DSL keyword and the audit target (''undocumented
+    bypass is a critical finding'').'
+- hash: sha256:5f7d661fe1e3dd1d
+  rule_id: AR3
+  file: ash-policy-reviewer.md
+  reason: '''bypass'' is the Ash policy DSL keyword and the audit target (''undocumented
+    bypass is a critical finding'').'
+- hash: sha256:9697c6d6e580cfb2
+  rule_id: YR4
+  file: ash-policy-reviewer.md
+  reason: '''bypass'' is the Ash policy DSL keyword and the audit target (''undocumented
+    bypass is a critical finding'').'

@@ -1,0 +1,25 @@
+# SkillSpector baseline — findings listed here are suppressed on future scans.
+# Edit 'reason' fields and add glob 'rules' as needed. See docs/SUPPRESSION.md.
+version: 1
+rules: []
+fingerprints:
+- hash: sha256:4e103ccdac075832
+  rule_id: EA2
+  file: SKILL.md
+  reason: 'Negation-blind matches: lines read ''NEVER skip verification'' and ''NEVER
+    bypass security checks for speed''.'
+- hash: sha256:b49da3362b2c6cfb
+  rule_id: P1
+  file: SKILL.md
+  reason: 'Negation-blind matches: lines read ''NEVER skip verification'' and ''NEVER
+    bypass security checks for speed''.'
+- hash: sha256:9f91c3c3d4d504e9
+  rule_id: RA1
+  file: SKILL.md
+  reason: 'Negation-blind matches: lines read ''NEVER skip verification'' and ''NEVER
+    bypass security checks for speed''.'
+- hash: sha256:a6a43ae3143b730a
+  rule_id: YR4
+  file: SKILL.md
+  reason: 'Negation-blind matches: lines read ''NEVER skip verification'' and ''NEVER
+    bypass security checks for speed''.'

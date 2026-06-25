@@ -1,0 +1,107 @@
+# SkillSpector baseline — findings listed here are suppressed on future scans.
+# Edit 'reason' fields and add glob 'rules' as needed. See docs/SUPPRESSION.md.
+version: 1
+rules: []
+fingerprints:
+- hash: sha256:13e16391c23a6956
+  rule_id: AS1
+  file: SKILL.md
+  reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
+    (chmod 777, git push --force) appear in a RED risk table the skill forbids ('NEVER
+    auto-allow').
+- hash: sha256:7e685984a2a49ab2
+  rule_id: AS1
+  file: references/extraction-script.md
+  reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
+    (chmod 777, git push --force) appear in a RED risk table the skill forbids ('NEVER
+    auto-allow').
+- hash: sha256:e234de367d0a7cda
+  rule_id: AS1
+  file: references/settings-format.md
+  reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
+    (chmod 777, git push --force) appear in a RED risk table the skill forbids ('NEVER
+    auto-allow').
+- hash: sha256:ea0f862722520977
+  rule_id: AS1
+  file: references/settings-format.md
+  reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
+    (chmod 777, git push --force) appear in a RED risk table the skill forbids ('NEVER
+    auto-allow').
+- hash: sha256:9efc8ab66303793a
+  rule_id: PE2
+  file: SKILL.md
+  reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
+    (chmod 777, git push --force) appear in a RED risk table the skill forbids ('NEVER
+    auto-allow').
+- hash: sha256:a09533cd91234fad
+  rule_id: RA2
+  file: SKILL.md
+  reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
+    (chmod 777, git push --force) appear in a RED risk table the skill forbids ('NEVER
+    auto-allow').
+- hash: sha256:ab9ebc9d0c990dd1
+  rule_id: SC2
+  file: references/risk-classification.md
+  reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
+    (chmod 777, git push --force) appear in a RED risk table the skill forbids ('NEVER
+    auto-allow').
+- hash: sha256:290cda23ae256825
+  rule_id: SC2
+  file: references/risk-classification.md
+  reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
+    (chmod 777, git push --force) appear in a RED risk table the skill forbids ('NEVER
+    auto-allow').
+- hash: sha256:50495b502cc60792
+  rule_id: SC2
+  file: references/risk-classification.md
+  reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
+    (chmod 777, git push --force) appear in a RED risk table the skill forbids ('NEVER
+    auto-allow').
+- hash: sha256:7974c5cc0a2f1d58
+  rule_id: TM1
+  file: SKILL.md
+  reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
+    (chmod 777, git push --force) appear in a RED risk table the skill forbids ('NEVER
+    auto-allow').
+- hash: sha256:7974c5cc0a2f1d58
+  rule_id: TM1
+  file: SKILL.md
+  reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
+    (chmod 777, git push --force) appear in a RED risk table the skill forbids ('NEVER
+    auto-allow').
+- hash: sha256:9c27a9e0707224a7
+  rule_id: TM1
+  file: references/risk-classification.md
+  reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
+    (chmod 777, git push --force) appear in a RED risk table the skill forbids ('NEVER
+    auto-allow').
+- hash: sha256:9f1f43d64bd9adc0
+  rule_id: TM1
+  file: references/risk-classification.md
+  reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
+    (chmod 777, git push --force) appear in a RED risk table the skill forbids ('NEVER
+    auto-allow').
+- hash: sha256:3e333f7838e296b9
+  rule_id: TM1
+  file: references/risk-classification.md
+  reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
+    (chmod 777, git push --force) appear in a RED risk table the skill forbids ('NEVER
+    auto-allow').
+- hash: sha256:f1ce2dbdf8db33e1
+  rule_id: TM2
+  file: references/risk-classification.md
+  reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
+    (chmod 777, git push --force) appear in a RED risk table the skill forbids ('NEVER
+    auto-allow').
+- hash: sha256:65c24de33b2a0fec
+  rule_id: TM1
+  file: references/settings-format.md
+  reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
+    (chmod 777, git push --force) appear in a RED risk table the skill forbids ('NEVER
+    auto-allow').
+- hash: sha256:c515484fb8aab9fa
+  rule_id: TM1
+  file: references/settings-format.md
+  reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
+    (chmod 777, git push --force) appear in a RED risk table the skill forbids ('NEVER
+    auto-allow').

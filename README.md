@@ -1,5 +1,7 @@
 # Elixir Phoenix Plugin for Claude Code
 
+[![Security: scanned with SkillSpector](https://img.shields.io/badge/security-scanned%20with%20SkillSpector-2ea44f)](SECURITY.md)
+
 **Claude Code is great. But it doesn't know that `assign_new` silently skips on reconnect, that `:float` will corrupt your money fields, or that your Oban job isn't idempotent.**
 
 This plugin does. It coordinates **25 specialist agents** that plan, implement,
@@ -624,6 +626,24 @@ Available runtime tools: execute Elixir code, run SQL queries, get docs for your
 - **Tidewave** for runtime debugging
 - **[ccrider](https://github.com/neilberkman/ccrider)** for session analysis (see Contributing)
 - **Ralph Wiggum Loop** for autonomous iteration across context resets
+
+## Security
+
+This plugin runs skills, agents, and hooks inside Claude Code with your tool
+permissions, so it ships a verifiable security posture:
+
+- **Independently scanned** with [NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector)
+  (static analysis, **zero data egress**): **65 / 75 components SAFE** out of the box,
+  **75 / 75 after reviewed baselines**. The four higher-scoring components are
+  documented false positives — a static scanner flags the *safety-enforcing* and
+  *security-auditing* skills precisely because they name dangerous patterns in
+  order to forbid or detect them (e.g. the line literally reads
+  `NEVER bypass security checks for speed`).
+- **No data exfiltration**, **read-only review agents** (source edits disallowed),
+  and **auditable bash hooks** you can read in `plugins/elixir-phoenix/hooks/`.
+
+Full report, line-by-line triage, and a reproduce-it-yourself command live in
+**[SECURITY.md](SECURITY.md)**. Re-run the scan anytime with `make security`.
 
 ## Contributing
 

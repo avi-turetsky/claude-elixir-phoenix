@@ -9,6 +9,17 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Security posture / `SECURITY.md`** — all 50 skills + 25 agents scanned with
+  [NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector) (static, zero
+  egress): 65/75 SAFE raw, 75/75 after reviewed baselines. The 4 higher-scoring
+  components are documented false positives (a static scanner flags
+  safety-enforcing / security-auditing skills because they name dangerous
+  patterns to forbid or detect them; e.g. a line that reads `NEVER bypass
+  security checks for speed`). Ships `SECURITY.md` with line-by-line triage,
+  a README "scanned with SkillSpector" badge, `lab/skillspector/scan.sh`
+  (reproducible, CI-gated) + reviewed baselines, and a `make security` target
+  wired into `make ci` (graceful skip when the binary is absent).
+
 ### Changed
 
 ### Fixed

@@ -1,4 +1,4 @@
-.PHONY: help lint lint-fix eval eval-all eval-fix eval-full eval-ci eval-triggers eval-tournament eval-skills eval-agents eval-multimodel eval-compare-models test validate ci clean
+.PHONY: help lint lint-fix eval eval-all eval-fix eval-full eval-ci eval-triggers eval-tournament eval-skills eval-agents eval-multimodel eval-compare-models test validate security ci clean
 
 # Default target
 help: ## Show available commands
@@ -62,9 +62,19 @@ test-quick: ## Run pytest (no verbose, fast)
 validate: ## Run claude plugin validate on plugin structure
 	@claude plugin validate plugins/elixir-phoenix
 
+# --- Security ---
+
+security: ## SkillSpector scan of all skills + agents (skips if not installed)
+	@if command -v skillspector >/dev/null 2>&1; then \
+		bash lab/skillspector/scan.sh; \
+	else \
+		echo "⊘ skillspector not installed — skipping security scan."; \
+		echo "  Install: pipx install --python python3.13 \"git+https://github.com/NVIDIA/skillspector.git\""; \
+	fi
+
 # --- CI (full pipeline) ---
 
-ci: lint test validate eval-all ## Full CI: lint + test + validate + eval (same as GitHub Actions)
+ci: lint test validate eval-all security ## Full CI: lint + test + validate + eval + security (same as GitHub Actions)
 
 # --- Clean ---
 
