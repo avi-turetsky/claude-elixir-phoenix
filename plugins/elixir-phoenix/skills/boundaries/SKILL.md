@@ -2,7 +2,7 @@
 name: phx:boundaries
 description: Analyze Phoenix context boundaries and module coupling via mix xref. Use when checking cross-context calls, validating dependencies, before splitting modules, or reviewing architecture.
 effort: medium
-argument-hint: [--assess|--fix]
+argument-hint: "[--assess|--fix]"
 allowed-tools: Read, Grep, Glob, Bash
 ---
 

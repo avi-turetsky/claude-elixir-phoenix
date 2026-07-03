@@ -2,7 +2,7 @@
 name: phx:compound
 description: Capture solved problems as searchable solution docs. Use after fixing bugs, when "that worked", or after successful /phx:review or /phx:investigate.
 effort: low
-argument-hint: [description of what was fixed]
+argument-hint: "[description of what was fixed]"
 ---
 
 # Compound — Capture Solutions as Knowledge

@@ -2,7 +2,7 @@
 name: phx:audit
 description: Project health audit and health check — architecture, performance, tests, dependencies, code quality. Use when assessing overall project health, before releases, or after refactors.
 effort: high
-argument-hint: [--quick|--full|--focus=area|--since=commit]
+argument-hint: "[--quick|--full|--focus=area|--since=commit]"
 ---
 
 # Project Health Audit

@@ -2,7 +2,7 @@
 name: phx:init
 description: Initialize plugin in a project — install Iron Laws, auto-activation rules, and reference auto-loading into CLAUDE.md. Use when setting up or updating the plugin.
 effort: low
-argument-hint: [--update]
+argument-hint: "[--update]"
 ---
 
 # Plugin Initialization

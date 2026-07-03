@@ -2,7 +2,7 @@
 name: phx:triage
 description: Triage review findings interactively — approve, skip, or prioritize each issue. Use after /phx:review to filter findings before fixing.
 effort: low
-argument-hint: [path to review file]
+argument-hint: "[path to review file]"
 ---
 
 # Triage — Interactive Review Resolution
