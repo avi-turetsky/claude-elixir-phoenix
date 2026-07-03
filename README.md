@@ -36,7 +36,7 @@ that prevent the mistakes Elixir developers actually make in production.
 │  ⚗  Elixir/Phoenix Plugin for Claude Code                           │
 │                                                                     │
 │  ┌──────────┬──────────┬──────────┬──────────┬──────────┐           │
-│  │    25    │    50    │   137    │    31    │    25    │           │
+│  │    25    │    50    │   137    │    31    │    26    │           │
 │  │  Agents  │  Skills  │   Refs   │  Hooks   │Iron Laws │           │
 │  └──────────┴──────────┴──────────┴──────────┴──────────┘           │
 │                                                                     │
@@ -51,7 +51,7 @@ that prevent the mistakes Elixir developers actually make in production.
 │  Reviewers (sonnet)              Investigation & Debug              │
 │    elixir-reviewer                 /phx:investigate /phx:trace      │
 │    testing-reviewer                /ecto:n1-check   /phx:perf       │
-│    security-analyzer               /ecto:constraint-debug           │
+│    security-analyzer (opus)        /ecto:constraint-debug           │
 │    iron-law-judge                  /lv:assigns                      │
 │                                                                     │
 │  Architecture (sonnet)           Analysis & Review                  │
@@ -70,7 +70,7 @@ that prevent the mistakes Elixir developers actually make in production.
 │    oban-specialist                 auto-format · auto-compile       │
 │    deployment-validator            iron-law-verify · security-scan  │
 │    hex-library-researcher          debug-stmt-detect · error-critic │
-│    web-researcher                  progress-tracking · block-danger │
+│    web-researcher (haiku)          progress-tracking · block-danger │
 │                                                                     │
 │  ───────────────────────────────────────────────────────────        │
 │  26 Iron Laws · Tidewave MCP · plan→work→verify→review→compound     │
@@ -78,7 +78,12 @@ that prevent the mistakes Elixir developers actually make in production.
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-> **v2.10.0** -- new framework-agnostic **`catchup`** companion plugin: `/catchup` return-from-absence briefing. [Issues](https://github.com/oliver-kriska/claude-elixir-phoenix/issues) welcome.
+> **v2.13.0** -- security-posture + deep-audit release: SkillSpector scanning with `SECURITY.md`,
+> a 1,853-session audit that fixed the garbled resume banner and destructive-op blocker bypasses,
+> and `planning-orchestrator` reworked into a spawnable research sub-orchestrator. The
+> framework-agnostic **`catchup`** companion plugin (`/catchup` return-from-absence briefing) has
+> shipped since v2.10.0.
+> [Issues](https://github.com/oliver-kriska/claude-elixir-phoenix/issues) welcome.
 
 ## Installation
 
@@ -529,7 +534,7 @@ The plugin enforces critical rules and **stops with an explanation** if code wou
 | `/phx:quick <task>`      | Fast implementation, skip ceremony                         |
 | `/phx:investigate <bug>` | Systematic bug debugging (4 parallel investigation tracks) |
 | `/phx:research <topic>`  | Research Elixir topics on the web                          |
-| `/phx:verify`            | Run full verification (compile, format, credo, test)       |
+| `/phx:verify`            | Run full verification (compile, format, credo, test — plus dialyzer when configured) |
 | `/phx:permissions`       | Scan sessions, recommend safe Bash permissions             |
 | `/phx:trace <function>`  | Build call trees to trace function flow                    |
 | `/phx:boundaries`        | Analyze Phoenix context boundaries with mix xref           |
@@ -578,7 +583,12 @@ The plugin enforces critical rules and **stops with an explanation** if code wou
 | **oban-specialist**          | sonnet | --      | Worker idempotency, error handling           |
 | **otp-advisor**              | sonnet | --      | GenServer, Supervisor, process design        |
 | **deployment-validator**     | sonnet | --      | Docker, Kubernetes, Fly.io config            |
-| **web-researcher**           | sonnet | --      | ElixirForum, HexDocs, GitHub research        |
+| **web-researcher**           | haiku  | --      | ElixirForum, HexDocs, GitHub research        |
+| **ash-resource-designer**    | sonnet | --      | Ash resource design (the "Ash Way")          |
+| **ash-policy-reviewer**      | sonnet | --      | Ash policy authorization audit               |
+| **ash-query-optimizer**      | sonnet | --      | Ash N+1 loads, aggregates vs load            |
+| **requirements-verifier**    | sonnet | --      | Implementation vs task-requirement check     |
+| **hex-deps-triager**         | sonnet | --      | Hex supply-chain audit finding triage        |
 
 Agents with `project` memory build up knowledge across sessions
 in `.claude/agent-memory/<agent-name>/`. Orchestrators remember
@@ -633,12 +643,13 @@ This plugin runs skills, agents, and hooks inside Claude Code with your tool
 permissions, so it ships a verifiable security posture:
 
 - **Independently scanned** with [NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector)
-  (static analysis, **zero data egress**): **65 / 75 components SAFE** out of the box,
-  **75 / 75 after reviewed baselines**. The four higher-scoring components are
-  documented false positives — a static scanner flags the *safety-enforcing* and
-  *security-auditing* skills precisely because they name dangerous patterns in
-  order to forbid or detect them (e.g. the line literally reads
-  `NEVER bypass security checks for speed`).
+  (static analysis, **zero data egress**): **65 / 75 components SAFE**, 6 CAUTION,
+  4 DO_NOT_INSTALL raw. The four DO_NOT_INSTALL components are documented false
+  positives with reviewed baselines, so **after baselines 0 remain and the scan
+  gate passes** (the 6 CAUTION-tier components stay documented). A static scanner
+  flags the *safety-enforcing* and *security-auditing* skills precisely because
+  they name dangerous patterns in order to forbid or detect them (e.g. the line
+  literally reads `NEVER bypass security checks for speed`).
 - **No data exfiltration**, **read-only review agents** (source edits disallowed),
   and **auditable bash hooks** you can read in `plugins/elixir-phoenix/hooks/`.
 
@@ -659,7 +670,7 @@ make eval             # Quick: lint + score changed skills/agents only
 make eval-all         # Full structural: all 50 skills + all 25 agents
 make eval-fix         # Auto-fix lint + show failures + suggest autoresearch
 make test             # 75 pytest tests for eval framework
-make ci               # Full CI: lint + test + eval (same as GitHub Actions)
+make ci               # Full CI: lint + test + validate + eval + security (same as GitHub Actions)
 ```
 
 The eval framework scores skills across **8 dimensions** and agents across **5 dimensions**.

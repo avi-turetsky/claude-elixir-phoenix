@@ -9,9 +9,24 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [2.13.0] - 2026-07-03
+
+Security-posture + deep-audit release: SkillSpector scanning with `SECURITY.md`,
+a repo-wide audit (5 parallel audit agents cross-checked against 1,853 sessions)
+that fixed the long-standing garbled resume banner, destructive-op blocker
+bypasses, an issue-#33 recurrence, and stale docs throughout — plus
+`planning-orchestrator` repurposed into a spawnable research sub-orchestrator.
+
+### Added
+
 - **Security posture / `SECURITY.md`** — all 50 skills + 25 agents scanned with
   [NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector) (static, zero
-  egress): 65/75 SAFE raw, 75/75 after reviewed baselines. The 4 higher-scoring
+  egress): 65/75 SAFE raw; after reviewed baselines 0 DO_NOT_INSTALL (gate
+  passes; 6 CAUTION-tier remain documented). The 4 higher-scoring
   components are documented false positives (a static scanner flags
   safety-enforcing / security-auditing skills because they name dangerous
   patterns to forbid or detect them; e.g. a line that reads `NEVER bypass
@@ -22,7 +37,82 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **`planning-orchestrator` repurposed as a research sub-orchestrator**
+  (deep-audit 2026-07-03: 0 spawns across 1,853 sessions — nothing ever
+  invoked it, and its interactive design — AskUserQuestion, Iron Law #1 STOP —
+  cannot run in a subagent). Now a non-interactive agent that owns ONLY the
+  research fan-out: Tidewave context, cache reuse, parallel specialists,
+  context-supervisor compression, decision-council research; returns a ≤500-word
+  digest and never writes plans or asks the user. `/phx:plan` step 5 gains the
+  routing rule: 0–2 research agents → spawn directly, 3+ (broad multi-context
+  feature) → spawn the orchestrator and read only its digest. Right-sized
+  opus→sonnet (secondary orchestrator), 547→232 lines. Stale cross-references
+  in `planning-workflow.md` and `tool-catalog.md` corrected.
+- **SessionStart banner has a single owner** — removed the duplicate `echo`
+  hook entry from hooks.json; `check-resume.sh` owns the no-plan banner and is
+  now gated on `mix.exs` OR existing `.claude/plans/` (issue #55 class:
+  non-Elixir projects no longer get the Elixir banner).
+- **Skill naming consistency** — `freeze` → `phx:freeze` (self-referenced
+  `/phx:freeze` 8× but wasn't namespaced), `ecto-constraint-debug` →
+  `ecto:constraint-debug` (matches sibling `ecto:n1-check` and the command
+  docs advertise).
+- **`memory: project` agents allow Edit** (planning-orchestrator,
+  phoenix-patterns-analyst) — current CC docs confirm memory auto-enables
+  Read/Write/Edit for memory-file management; disallowing Edit conflicted.
+- **`context-supervisor` sets `omitClaudeMd: true`** (report-only writer);
+  the eval matcher's exemption list no longer misclassifies it as an
+  orchestrator.
+
 ### Fixed
+
+- **`check-resume.sh` garbled resume banner** — `grep -c ... || echo 0`
+  double-prints zero on no-match (grep emits `0` AND exits 1), rendering
+  `(0\n0 done)`; session evidence: 15,817 garbled renders across 436 session
+  files. Same latent idiom fixed in `check-scratchpad.sh` (there it raised a
+  bash arithmetic error).
+- **`block-dangerous-ops.sh` bypasses** — `MIX_ENV=test mix ecto.reset`,
+  `mix do ecto.drop`, `env MIX_ENV=prod mix release`, and multi-space variants
+  slipped past the anchors while bare `mix ecto.reset` blocked. Regexes now
+  tolerate env-var/`env` prefixes, `mix do`, comma task lists, and flexible
+  whitespace; quoted-mention false positives still allowed. 15 new regression
+  cases (56 total, all passing).
+- **Issue #33 recurrence in research agents** — `hex-library-researcher`,
+  `otp-advisor`, and `deep-bug-investigator` disallowed Write while their own
+  bodies (and the planning flow) expect written findings files. Write restored;
+  Edit stays blocked (dormant in sessions — the spawn path always asked for
+  inline returns — but fixed before the new orchestrator wiring makes it live).
+- **Deprecated `--detail` flag purged** — `plan/references/complexity-detail.md`,
+  `full/references/execution-steps.md`, `init/references/injectable-template.md`,
+  and `plan-template.md` still taught `--detail minimal|more|comprehensive`;
+  all now use `--depth quick|standard|deep` (sessions showed users only ever
+  passed `--depth`).
+- **Stale docs counts and tables** — intro tutorial said 47 skills / 22 Iron
+  Laws (actual 50 / 26, four spots); README "Agents (25)" table listed only 20
+  (added ash-policy-reviewer, ash-query-optimizer, ash-resource-designer,
+  hex-deps-triager, requirements-verifier); web-researcher listed as sonnet
+  (actual haiku); banner Iron Law stat 25→26; "40 skills + 20 agents" wording
+  purged from Makefile, CLAUDE.md, run_eval.sh, and contributor docs; `make ci`
+  descriptions now include the `validate` + `security` stages.
+- **SECURITY.md overclaim** — "75/75 SAFE after baselines" corrected to the
+  accurate "0 DO_NOT_INSTALL after reviewed baselines (gate passes; 6
+  CAUTION-tier documented)"; same phrasing fixed in README and this changelog.
+- **Eval trigger-cache drift** — pruned 6 ghost caches for deleted skills
+  (autoresearch, xray-*), added the missing `mix-compression` trigger run
+  (100% accuracy); behavioral coverage is now a true 50/50 instead of a
+  reported 55 with a silent gap.
+- **Path-form violations** — bare `references/` → `${CLAUDE_SKILL_DIR}/references/`
+  in help, narrow-bare-rescue, mix-compression, deps-audit, deps-vet; compound's
+  cross-skill path → `${CLAUDE_PLUGIN_ROOT}/skills/compound-docs/references/`.
+- **CLAUDE.md hook docs drift** — documented the four live-but-undocumented
+  hooks (`deps-audit-gate.sh`, `freeze-gate.sh`, `detect-ash.sh`,
+  `route-intent.sh`/UserPromptSubmit) and added the docs-drift note that
+  current Claude Code ignores `permissionMode` on plugin subagents (field kept
+  for back-compat). `workflow-orchestrator` now suggests `/phx:learn-from-fix`
+  (was nonexistent `/phx:learn`). Missing `effort:` added to help, permissions,
+  and the three contributor agents; contributor `phoenix-project-analyzer`
+  moved off `permissionMode: plan` and dropped the unrecognized `LS` tool.
+- **`permissions` SkillSpector baseline refreshed** — the frontmatter edit
+  shifted finding fingerprints; hashes updated with triage reasons preserved.
 
 ## [2.12.0] - 2026-06-16
 
