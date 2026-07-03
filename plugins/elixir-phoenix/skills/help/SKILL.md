@@ -2,6 +2,7 @@
 name: phx:help
 description: "Recommend the right /phx: command for planning, review, debug, deploy, or test tasks. Use when \"which command\", \"what should I use\", or \"how do I\". NOT for /help."
 argument-hint: "[description of what you want to do]"
+effort: low
 ---
 
 # Plugin Help — Interactive Command Advisor
@@ -35,7 +36,7 @@ Always gather ambient context (run in parallel):
 
 ### Step 2: Classify Intent
 
-Read `references/tool-catalog.md` for the full routing table.
+Read `${CLAUDE_SKILL_DIR}/references/tool-catalog.md` for the full routing table.
 
 Map the user's situation to one of these categories:
 

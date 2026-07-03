@@ -229,8 +229,9 @@ specifying the function signature — this causes compile stalls.
 with initial context (feature name, brief description, plan file
 path). This captures planning decisions for future sessions.
 
-**Do NOT read any reference files.** The plan template is inlined
-in the planning-orchestrator agent.
+For the full plan structure, read
+`${CLAUDE_SKILL_DIR}/references/plan-template.md` once when writing
+the plan — do not re-read other reference files.
 
 ## Self-Check (Deep Plans Only)
 

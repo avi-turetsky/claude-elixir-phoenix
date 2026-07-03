@@ -20,7 +20,7 @@ When analyzing CC changelog entries, map them to specific plugin components:
 
 | CC Change Pattern | Plugin Files to Check |
 |-------------------|-----------------------|
-| New frontmatter fields | All 20 agents in `plugins/elixir-phoenix/agents/*.md` |
+| New frontmatter fields | All 25 agents in `plugins/elixir-phoenix/agents/*.md` |
 | `model:` value changes | Agents using specific model values |
 | `permissionMode:` changes | All agents (all use `bypassPermissions`) |
 | `effort:` level changes | All agents with effort levels |

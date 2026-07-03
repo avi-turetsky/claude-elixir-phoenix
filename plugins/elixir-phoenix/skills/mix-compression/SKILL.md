@@ -84,7 +84,7 @@ step and `mix` calls run unfiltered.
 
 Add custom regex patterns to `strip_lines_matching` for project-specific noise
 sources (e.g., third-party hex deps spamming stack traces). See the inline
-example in `references/rtk-filters.toml` lines 57-59.
+example in `${CLAUDE_SKILL_DIR}/references/rtk-filters.toml` lines 57-59.
 
 ## What this is NOT
 

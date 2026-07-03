@@ -15,9 +15,9 @@ Run `make help` to see all available commands:
 
 ```bash
 make eval          # Quick: lint + score changed skills/agents
-make eval-all      # Full: all 40 skills + 20 agents
+make eval-all      # Full: all 50 skills + 25 agents
 make eval-fix      # Auto-fix + show failures
-make test          # 52 pytest tests for eval framework
+make test          # 75 pytest tests for eval framework
 make ci            # Full CI pipeline
 ```
 
@@ -77,7 +77,7 @@ make ci            # Full CI pipeline
 ## When Editing Eval Framework (lab/eval/*.py)
 
 1. Make your changes
-2. Run `make test` — 52 pytest tests must pass
+2. Run `make test` — 75 pytest tests must pass
 3. Run `make eval-all` — verify no skills/agents regressed
 4. If adding new matchers: add tests in `lab/eval/tests/test_matchers.py`
 

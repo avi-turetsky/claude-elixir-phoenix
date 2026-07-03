@@ -162,7 +162,7 @@ sidecar schema, exit-code rubric, and `--quiet` mode.
 
 - **NEVER modify** `mix.lock`, `mix.exs`, or any project file (non-mutating)
 - **NEVER auto-install** missing tools (warn + skip)
-- **Gate** `mix deps.{get,update,compile}` via `deps-audit-gate.sh`. See `references/hook.md`.
+- **Gate** `mix deps.{get,update,compile}` via `deps-audit-gate.sh`. See `${CLAUDE_SKILL_DIR}/references/hook.md`.
 - **Prompt** for `/phx:compound` after BLOCK findings — corpus self-feeds.
 - **Emit** SARIF 2.1.0 via `--sarif <path>` and gate CI via `--ci`.
 

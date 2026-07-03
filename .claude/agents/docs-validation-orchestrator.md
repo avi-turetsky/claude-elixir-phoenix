@@ -9,6 +9,7 @@ tools: Read, Write, Grep, Glob, Bash, Agent
 disallowedTools: Edit, NotebookEdit
 permissionMode: bypassPermissions
 model: opus
+effort: high
 ---
 
 # Docs Validation Orchestrator (Contributor Tool)

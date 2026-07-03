@@ -7,6 +7,7 @@ permissionMode: bypassPermissions
 model: haiku
 effort: low
 maxTurns: 10
+omitClaudeMd: true
 ---
 
 # Context Supervisor

@@ -313,7 +313,7 @@ orchestrator (which may be at 150k+ tokens by this point).
 
 2. Read the sub-agent's result
 3. Log compound outcome to progress file
-4. Auto-suggest: "Run `/phx:document` to generate documentation, or `/phx:learn` to capture quick patterns."
+4. Auto-suggest: "Run `/phx:document` to generate documentation, or `/phx:learn-from-fix` to capture quick patterns."
 5. Output completion signal: `<promise>DONE</promise>`
 
 ## Error Handling

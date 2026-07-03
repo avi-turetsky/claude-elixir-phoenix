@@ -7,7 +7,7 @@
 
 **Status**: PENDING
 **Created**: {date}
-**Detail Level**: {minimal|more|comprehensive}
+**Detail Level**: {quick|standard|deep}
 **Input**: {review path, or "from description"}
 
 ## Summary

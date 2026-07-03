@@ -4,10 +4,11 @@ description: |
   CONTRIBUTOR TOOL - Analyzes Phoenix projects to discover patterns, pain points, and plugin improvement opportunities.
   Use this agent when gathering insights from real codebases to identify gaps in the plugin's skills and agents.
   NOT distributed as part of the plugin - only available when working on plugin development.
-tools: Read, Grep, Glob, Bash, LS
+tools: Read, Grep, Glob, Bash
 disallowedTools: Write, Edit, NotebookEdit
-permissionMode: plan
+permissionMode: bypassPermissions
 model: sonnet
+effort: medium
 skills:
   - elixir-idioms
   - phoenix-contexts

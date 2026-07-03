@@ -1,8 +1,8 @@
 ---
 name: hex-library-researcher
 description: Researches Elixir libraries on hex.pm. Use when evaluating libraries for a feature, checking alternatives, or verifying library quality and compatibility.
-tools: Bash, Read, Grep, Glob, WebFetch
-disallowedTools: Write, Edit, NotebookEdit
+tools: Bash, Read, Grep, Glob, WebFetch, Write
+disallowedTools: Edit, NotebookEdit
 permissionMode: bypassPermissions
 model: sonnet
 effort: medium

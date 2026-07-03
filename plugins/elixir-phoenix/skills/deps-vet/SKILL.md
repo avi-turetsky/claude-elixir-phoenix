@@ -53,7 +53,7 @@ Run this BEFORE merging a `mix.lock` PR to certify new versions.
 If hex_vet.exs exists at project root:
     Read it via Code.eval_file/1
 Else:
-    Write the empty-ledger stub (see references/hex-vet.md §"Empty ledger")
+    Write the empty-ledger stub (see ${CLAUDE_SKILL_DIR}/references/hex-vet.md §"Empty ledger")
     Inform user: "Created hex_vet.exs at project root."
 ```
 

@@ -5,6 +5,7 @@ tools: Read, Grep, Glob, Write
 disallowedTools: Edit, NotebookEdit
 permissionMode: bypassPermissions
 model: sonnet
+effort: medium
 ---
 
 # Skill Effectiveness Analyzer

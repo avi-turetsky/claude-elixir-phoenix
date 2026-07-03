@@ -17,9 +17,11 @@ VALID_TOOLS = {
 # Keywords that indicate a read-only/analysis agent
 READONLY_KEYWORDS = {"review", "analyze", "audit", "check", "judge", "inspect", "trace", "scan"}
 
-# Agents that need Write despite having read-only keywords (orchestrators, research)
+# Agents that need Write despite having read-only keywords (orchestrators, research).
+# context-supervisor is NOT here: it's a report-only writer (Write allowed,
+# Edit blocked) and per the CLAUDE.md checklist should carry omitClaudeMd: true.
 WRITE_EXEMPT_NAMES = {
-    "workflow-orchestrator", "planning-orchestrator", "context-supervisor",
+    "workflow-orchestrator", "planning-orchestrator",
     "phoenix-patterns-analyst",  # writes analysis output files
 }
 

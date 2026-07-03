@@ -45,9 +45,13 @@ emit_block() {
 # Elixir-only: destructive Ecto operations.
 # Anchored on start-of-line or shell command separators (;, &, |, &&, ||) so a
 # quoted mention inside `echo "do not run mix ecto.reset"` doesn't trigger.
-# Trailing class requires `reset`/`drop` to be followed by whitespace, separator,
-# or end-of-command — preserving sibling tasks like `mix ecto.gen.migration`.
-if [[ "$is_elixir" == 1 ]] && echo "$COMMAND" | grep -qE '(^|[;&|]+[[:space:]]*)mix ecto\.(reset|drop)([[:space:];&|]|$)'; then
+# Tolerates an optional `env` and env-var assignment prefix run
+# (`MIX_ENV=test mix ecto.reset`), `mix do ecto.drop`, and multiple spaces —
+# a plain word like `echo` is not an assignment, so quoted mentions stay safe.
+# Trailing class requires `reset`/`drop` to be followed by whitespace, comma
+# (`mix do ecto.drop, ecto.create`), separator, or end-of-command — preserving
+# sibling tasks like `mix ecto.gen.migration`.
+if [[ "$is_elixir" == 1 ]] && echo "$COMMAND" | grep -qE '(^|[;&|]+[[:space:]]*)(env[[:space:]]+)?([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+)*mix[[:space:]]+(do[[:space:]]+)?ecto\.(reset|drop)([[:space:];&|,]|$)'; then
   emit_block \
 "BLOCKED: Destructive database operation detected.
 mix ecto.reset/drop will destroy all data. If intentional, run manually
@@ -84,8 +88,10 @@ Safer alternative: git push --force-with-lease" \
 fi
 
 # Elixir-only: production env warning. Anchored so a quoted mention inside
-# `echo "never use MIX_ENV=prod mix in dev"` doesn't trigger.
-if [[ "$is_elixir" == 1 ]] && echo "$COMMAND" | grep -qE '(^|[;&|]+[[:space:]]*)MIX_ENV=prod mix'; then
+# `echo "never use MIX_ENV=prod mix in dev"` doesn't trigger. Tolerates an
+# optional `env` prefix, other assignments around MIX_ENV=prod, and multiple
+# spaces (`env MIX_ENV=prod mix release`, `FOO=1 MIX_ENV=prod mix compile`).
+if [[ "$is_elixir" == 1 ]] && echo "$COMMAND" | grep -qE '(^|[;&|]+[[:space:]]*)(env[[:space:]]+)?([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+)*MIX_ENV=prod([[:space:]]+[A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*)*[[:space:]]+mix'; then
   emit_block \
 "WARNING: MIX_ENV=prod detected. This runs in production mode.
 If building a release, this is expected. Otherwise, reconsider." \

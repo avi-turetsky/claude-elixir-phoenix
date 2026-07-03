@@ -3,7 +3,7 @@
 version: 1
 rules: []
 fingerprints:
-- hash: sha256:13e16391c23a6956
+- hash: sha256:9bb9bb15aeef18df
   rule_id: AS1
   file: SKILL.md
   reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
@@ -27,13 +27,13 @@ fingerprints:
   reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
     (chmod 777, git push --force) appear in a RED risk table the skill forbids ('NEVER
     auto-allow').
-- hash: sha256:9efc8ab66303793a
+- hash: sha256:dc5b4d6c3abbcc74
   rule_id: PE2
   file: SKILL.md
   reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
     (chmod 777, git push --force) appear in a RED risk table the skill forbids ('NEVER
     auto-allow').
-- hash: sha256:a09533cd91234fad
+- hash: sha256:de9c444626dd422f
   rule_id: RA2
   file: SKILL.md
   reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
@@ -57,13 +57,13 @@ fingerprints:
   reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
     (chmod 777, git push --force) appear in a RED risk table the skill forbids ('NEVER
     auto-allow').
-- hash: sha256:7974c5cc0a2f1d58
+- hash: sha256:b339ff564a076034
   rule_id: TM1
   file: SKILL.md
   reason: Config helper reads ~/.claude/settings.json by design; dangerous commands
     (chmod 777, git push --force) appear in a RED risk table the skill forbids ('NEVER
     auto-allow').
-- hash: sha256:7974c5cc0a2f1d58
+- hash: sha256:b339ff564a076034
   rule_id: TM1
   file: SKILL.md
   reason: Config helper reads ~/.claude/settings.json by design; dangerous commands

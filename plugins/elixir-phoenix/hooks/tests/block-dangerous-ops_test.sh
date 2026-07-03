@@ -110,10 +110,22 @@ run_hook block "mix ecto.drop"
 run_hook block "mix ecto.reset --quiet"
 run_hook block "cd app && mix ecto.reset"
 
+# Env-prefix / mix-do / spacing bypasses (deep-audit 2026-07-03): MUST block
+run_hook block "MIX_ENV=test mix ecto.reset"
+run_hook block "MIX_ENV=dev mix ecto.reset"
+run_hook block "env MIX_ENV=test mix ecto.drop"
+run_hook block "mix do ecto.drop"
+run_hook block "mix do ecto.reset"
+run_hook block "mix do ecto.drop, ecto.create"
+run_hook block "mix  ecto.reset"  # double space
+
 run_hook allow "mix ecto.migrate"
 run_hook allow "mix ecto.rollback --step 1"
 run_hook allow "mix ecto.gen.migration add_users"
+run_hook allow "MIX_ENV=test mix ecto.migrate"
+run_hook allow "mix do ecto.migrate, test"
 run_hook allow 'echo "do not run mix ecto.reset" && mix test'  # scan-past
+run_hook allow 'echo "never MIX_ENV=test mix ecto.reset" && mix test'  # quoted env-prefix
 
 echo ""
 echo "── MIX_ENV=prod mix (Elixir-only) ───────────────────────────────"
@@ -122,9 +134,16 @@ run_hook block "MIX_ENV=prod mix release"
 run_hook block "MIX_ENV=prod mix compile"
 run_hook block "cd app && MIX_ENV=prod mix release"
 
+# Env-prefix / spacing bypasses (deep-audit 2026-07-03): MUST block
+run_hook block "env MIX_ENV=prod mix release"
+run_hook block "MIX_ENV=prod  mix release"  # double space
+run_hook block "FOO=1 MIX_ENV=prod mix compile"
+run_hook block "MIX_ENV=prod PORT=4000 mix release"
+
 run_hook allow "MIX_ENV=dev mix compile"
 run_hook allow "MIX_ENV=test mix test"
 run_hook allow 'echo "never use MIX_ENV=prod mix in dev" && mix compile'  # scan-past
+run_hook allow 'echo "env MIX_ENV=prod mix release is for CI" && mix test'  # quoted env form
 
 # Without mix.exs: MUST allow even for prod (cross-project bleed guard from #55)
 unset CLAUDE_PROJECT_DIR

@@ -40,8 +40,8 @@ Each phase reads from the previous phase's output. Plans become checkboxes. Chec
 | Feature | What It Does |
 |---------|-------------|
 | 25 specialist agents | Ecto, LiveView, security, OTP, Oban, Ash, deployment experts |
-| 47 skills | Commands for every phase of development |
-| 22 Iron Laws | Non-negotiable rules enforced automatically |
+| 50 skills | Commands for every phase of development |
+| 26 Iron Laws | Non-negotiable rules enforced automatically |
 | Auto-loaded references | Context-aware docs loaded when you edit relevant files |
 | Tidewave integration | Runtime debugging when Tidewave MCP is connected |
 
@@ -128,7 +128,7 @@ The plugin loads relevant reference docs based on what you're editing:
 
 This means you don't need to explicitly load anything — open a LiveView file and the plugin already knows the patterns.
 
-### Iron Laws (22 Rules, Always Enforced)
+### Iron Laws (26 Rules, Always Enforced)
 
 Iron Laws are non-negotiable rules that every agent enforces. If your code violates one, the plugin stops and explains before proceeding.
 
@@ -148,7 +148,7 @@ Iron Laws are non-negotiable rules that every agent enforces. If your code viola
 
 | Command | What It Does |
 |---------|-------------|
-| `/phx:verify` | Full check: compile, format, credo, test, dialyzer |
+| `/phx:verify` | Full check: compile, format, credo, test — plus dialyzer when the project has it configured |
 | `/phx:audit` | 5-agent project health audit with scores |
 | `/phx:deps-audit` | Audit Hex dep updates for supply-chain risk |
 | `/phx:deps-vet` | Record vetted Hex packages in hex_vet.exs ledger |
@@ -194,7 +194,7 @@ The plugin uses **layered enforcement** — some things run automatically, some 
 | Progress logging | Every file edit | Appends to `.claude/plans/{slug}/progress.md` (async) |
 | Failure hints | Bash command fails | Injects debugging hints via `additionalContext` |
 | Error critic | Repeated mix failures | Escalates to structured critic analysis after 3+ failures |
-| Iron Laws injection | Any subagent spawns | Injects all 22 Iron Laws into subagents via `additionalContext` |
+| Iron Laws injection | Any subagent spawns | Injects all 26 Iron Laws into subagents via `additionalContext` |
 | PreCompact rules | Before context compaction | Re-injects workflow rules via JSON `systemMessage` |
 
 Format check **warns only** — it doesn't auto-fix (that would cause race conditions with the editor).

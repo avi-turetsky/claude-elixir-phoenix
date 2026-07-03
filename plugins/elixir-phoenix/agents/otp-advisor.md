@@ -1,8 +1,8 @@
 ---
 name: otp-advisor
 description: OTP patterns specialist - GenServer, Supervisor, Agent, Task, Registry, ETS. Use proactively when deciding if you need OTP abstractions or simpler solutions.
-tools: Read, Grep, Glob, Bash
-disallowedTools: Write, Edit, NotebookEdit
+tools: Read, Grep, Glob, Bash, Write
+disallowedTools: Edit, NotebookEdit
 permissionMode: bypassPermissions
 model: sonnet
 effort: medium

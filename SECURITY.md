@@ -38,12 +38,14 @@ Scanned with SkillSpector v2.x, static analysis only:
 | CAUTION (21–50)       |  5 |  1 |  6 |
 | DO_NOT_INSTALL (51+)  |  3 |  1 |  4 |
 
-The 4 higher-scoring components are **documented false positives** — the scanner
+The 4 `DO_NOT_INSTALL` components are **documented false positives** — the scanner
 is a static regex/AST tool, so it's negation-blind and context-blind: it matches
 a dangerous keyword without seeing the prohibition or detection-context around
 it. Each is recorded in a reviewed baseline under
-[`lab/skillspector/baselines/`](lab/skillspector/baselines/); after baselines,
-all **75 / 75 components scan SAFE**.
+[`lab/skillspector/baselines/`](lab/skillspector/baselines/); after baselines
+**0 `DO_NOT_INSTALL` findings remain and the scan gate passes (exit 0)**. The 6
+`CAUTION`-tier components (scores 21–32, all below the 51 `DO_NOT_INSTALL`
+threshold) stay `CAUTION` and are not baselined — they are documented below.
 
 ### Triage of flagged components
 
@@ -59,6 +61,25 @@ all **75 / 75 components scan SAFE**.
 In short: the components that score "worst" are precisely the ones whose job is
 to **enforce safety or detect attacks** — they discuss dangerous things in order
 to forbid or find them.
+
+### CAUTION-tier components (not baselined)
+
+Six components land in the `CAUTION` band (21–50). They are left un-baselined —
+none crosses the `DO_NOT_INSTALL` threshold — and each is a benign artifact of
+the plugin's own workflow design:
+
+| Component | Score | Top flag | Why it's benign |
+|-----------|------:|----------|-----------------|
+| `skills/work` | 32 | AS1 agent-config access, EA2 autonomous | Reads/writes the plugin's own `.claude/plans/` artifacts and runs the execution phase. |
+| `skills/full` | 27 | AS1 agent-config access, EA2 autonomous | Drives the autonomous plan→work→review cycle over `.claude/` artifacts. |
+| `agents/ash-resource-designer` | 22 | AR3 anti-refusal | Its "design the Ash Way before hand-rolling" guidance matches the anti-refusal signature. |
+| `skills/brief` | 21 | AS1 agent-config access | Reads `.claude/plans/{slug}/plan.md` to explain a plan. |
+| `skills/compound` | 21 | RA1 self-modification | Writes solution docs into `.claude/solutions/`. |
+| `skills/recall` | 21 | AS1 agent-config access | Reads `.claude/solutions/` and past-session paths for archaeology. |
+
+The shared trigger is that these skills legitimately read and write the plugin's
+own `.claude/` artifact directories — the very state machine the workflow runs
+on — which the scanner flags as generic "agent config directory access."
 
 ## What this plugin does and doesn't do
 

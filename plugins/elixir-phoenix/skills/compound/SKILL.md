@@ -47,8 +47,8 @@ existing** (same root cause, new symptom), or **Skip**.
 Extract from session context: module, symptoms, investigation
 steps, root cause, solution code, and prevention advice.
 
-Validate frontmatter against `compound-docs/references/schema.md`,
-then create file using `compound-docs/references/resolution-template.md`.
+Validate frontmatter against `${CLAUDE_PLUGIN_ROOT}/skills/compound-docs/references/schema.md`,
+then create file using `${CLAUDE_PLUGIN_ROOT}/skills/compound-docs/references/resolution-template.md`.
 
 **Write-blocked fallback**: if writing to `.claude/solutions/` is denied
 by permissions, do NOT silently drop the solution. Output the full

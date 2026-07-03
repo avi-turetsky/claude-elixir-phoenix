@@ -59,16 +59,12 @@ Skip for plans with 3 or fewer simple tasks -- just start.
 
 ## Step 2: Check Context (MANDATORY)
 
-Read scratchpad and compound docs before writing any code.
-Skipping this causes rework — scratchpad captures dead-ends
-and decisions from planning that prevent taking wrong paths.
-
-Read the scratchpad at `.claude/plans/{slug}/scratchpad.md` — it's short and has critical context.
-Then search `.claude/solutions/` for relevant keywords using Grep to find solved patterns.
-
-Apply findings: skip dead-ends, follow decisions, reuse patterns.
-Always ask the user when a task's intent is ambiguous —
-never guess, corrections are expensive.
+Read scratchpad and compound docs before writing any code — skipping
+this causes rework. Read `.claude/plans/{slug}/scratchpad.md` (short,
+critical context) for dead-ends and decisions, then Grep `.claude/solutions/`
+for solved patterns. Apply findings: skip dead-ends, follow decisions,
+reuse patterns. Ask the user when a task's intent is ambiguous — never
+guess, corrections are expensive.
 
 ## Step 3: Load, Create Task List, and Resume
 
@@ -134,10 +130,8 @@ tool calls directly without "Let me now run..." preamble. Only narrate
 when explaining a non-obvious decision or reporting a failure. When
 several checkboxes complete together (parallel groups, resume catch-up),
 batch them into ONE edit pass — never one Edit call per checkbox.
-
-> **Linter note**: The PostToolUse hook checks formatting but does
-> NOT modify files. Run `mix format` explicitly during verification
-> steps or before committing.
+The PostToolUse hook checks formatting but does NOT modify files —
+run `mix format` explicitly during verification or before committing.
 
 ## Step 5: Completion
 
@@ -170,11 +164,9 @@ Include context beyond checkboxes for fresh session resume.
 
 ## Step 6: Check for Additional Plans
 
-Check for other pending plans after completion:
-
-Use Glob to find other plan files matching `.claude/plans/*/plan.md`.
-
-If pending plans exist, inform the user. Do NOT auto-start.
+After completion, use Glob to find other plan files matching
+`.claude/plans/*/plan.md`. If pending plans exist, inform the
+user. Do NOT auto-start.
 
 ## Integration
 

@@ -30,7 +30,7 @@ These commands form a connected pipeline — each reads the previous phase's out
 - **Output**: `.claude/plans/{slug}/plan.md` with checkboxed tasks
 - **Flags**: `--depth quick|standard|deep`, `--existing` (enhance existing plan)
 - **Next step**: `/phx:work .claude/plans/{slug}/plan.md`
-- **Agents used**: planning-orchestrator, research agents
+- **Agents used**: research specialists (phoenix-patterns-analyst + selected); planning-orchestrator compresses the fan-out when 3+ agents are needed
 
 ### `/phx:brief <plan-path>` — Interactive plan walkthrough
 

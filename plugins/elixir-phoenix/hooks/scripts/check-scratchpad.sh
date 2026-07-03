@@ -4,7 +4,10 @@ COUNT=$(ls .claude/plans/*/scratchpad.md 2>/dev/null | wc -l | tr -d ' ')
 if [[ "$COUNT" -gt 0 ]]; then
   LATEST=$(ls -t .claude/plans/*/scratchpad.md 2>/dev/null | head -1)
   # Check if scratchpad has Dead Ends (most valuable section for resume)
-  DEAD_ENDS=$(grep -c "^- " "$LATEST" 2>/dev/null || echo 0)
+  # grep -c prints the count even on zero matches (exiting 1) — no `|| echo 0`,
+  # which would append a second line and break the -gt comparison below.
+  DEAD_ENDS=$(grep -c "^- " "$LATEST" 2>/dev/null)
+  DEAD_ENDS=${DEAD_ENDS:-0}
   if [[ "$DEAD_ENDS" -gt 0 ]]; then
     echo "Scratchpad: $COUNT note(s) found — latest: $LATEST ($DEAD_ENDS dead-end entries — READ BEFORE RETRYING)"
   else

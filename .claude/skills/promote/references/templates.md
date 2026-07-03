@@ -120,7 +120,7 @@ Best used opportunistically, not for every release.
 | Concrete numbers | High trust signal | "32/40 descriptions rewritten under 200 chars" |
 | Real incident stories | High bookmarks | "72k+ orphaned jobs before someone caught it" |
 | Transparent methodology | Builds authority | "Validated across 75 real sessions" |
-| Eval scores | Credibility closer | "All 40 skills pass eval (avg 0.988)" |
+| Eval scores | Credibility closer | "All 50 skills pass eval (avg 0.988)" |
 
 ## Anti-Patterns (from analytics)
 

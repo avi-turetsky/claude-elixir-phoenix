@@ -49,16 +49,16 @@ git checkout -b feature/$FEATURE_SLUG
 4. **Route Based on Choice**:
    - "just do it" -> Skip to Step 4 (Work Phase)
    - "plan it" -> Continue to Step 3 (Plan Phase, standard)
-   - "research it" -> Continue to Step 3 (Plan Phase, comprehensive)
+   - "research it" -> Continue to Step 3 (Plan Phase, deep)
    - Security features -> Cannot skip planning
 
 **Exit condition**: User selects workflow depth.
 
 ## Step 3: Plan Phase
 
-Run `/phx:plan {feature}` (with `--detail comprehensive` for "research it"):
+Run `/phx:plan {feature}` (with `--depth deep` for "research it"):
 
-- Spawn research agents (1-2 for standard, 4+ for comprehensive)
+- Spawn research agents (1-2 for standard, 4+ for deep)
 - Create phased implementation plan
 - Write `.claude/plans/{feature}/plan.md`
 

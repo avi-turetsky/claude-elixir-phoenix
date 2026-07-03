@@ -43,6 +43,7 @@ Each plan owns all its artifacts in a namespace directory:
 .claude/
 ├── plans/{slug}/              # Everything for ONE plan
 │   ├── plan.md                # The plan itself
+│   ├── interview.md           # Brainstorm → plan contract (requirements handoff)
 │   ├── research/              # Research agent output
 │   ├── reviews/               # Review agent output (individual tracks)
 │   ├── summaries/             # Context-supervisor compressed output
@@ -90,10 +91,15 @@ claude-elixir-phoenix/
 │   │   ├── psql-query.md
 │   │   └── techdebt.md
 │   └── skills/
+│       ├── cc-changelog/            # /cc-changelog — track CC changelog impact
 │       ├── docs-check/              # /docs-check — validate against Claude Code docs
+│       ├── plugin-dev-workflow/     # plugin development workflow guide
+│       ├── promote/                 # /promote — release promotion posts
+│       ├── release/                 # /release — cut a plugin release
 │       ├── session-scan/            # /session-scan — Tier 1 metrics
 │       ├── session-deep-dive/       # /session-deep-dive — Tier 2 analysis
-│       └── session-trends/          # /session-trends — trend reporting
+│       ├── session-trends/          # /session-trends — trend reporting
+│       └── skill-monitor/           # /skill-monitor — skill effectiveness dashboard
 ├── scripts/
 │   └── fetch-claude-docs.sh         # Download Claude Code docs for validation
 ├── plugins/
@@ -153,6 +159,9 @@ skills:
 - Review agents are **read-only** (`disallowedTools: Write, Edit, NotebookEdit`)
 - Use `permissionMode: bypassPermissions` for all agents — `default` causes "Bash command permission check failed"
   when agents run in background (safety system scans skill content for shell-like patterns)
+  - **Docs-drift note**: current Claude Code docs state that *plugin* subagents IGNORE `permissionMode`
+    (also `hooks` and `mcpServers`). The field stays for backward-compat with older CC versions, and
+    `.claude/agents/` (non-plugin) agents still honor it.
 - Use `memory: project` for agents that benefit from cross-session learning (orchestrators, pattern analysts).
   Note: `memory` auto-enables Read, Write, Edit — only add to agents that already have Write access
 - Preload relevant skills via `skills:` field
@@ -216,11 +225,12 @@ Defined in `hooks/hooks.json`:
 ```json
 {
   "hooks": {
-    "PreToolUse": [...],            // Block dangerous ops (ecto.reset, force push, MIX_ENV=prod)
+    "PreToolUse": [...],           // Block dangerous ops + deps-audit gate + freeze edit-scope gate
     "PostToolUse": [...],          // Format + Iron Law verify + security + progress + plan STOP + debug stmt
     "PostToolUseFailure": [...],   // Elixir failure hints + error critic for mix commands
+    "UserPromptSubmit": [...],     // route-intent.sh — inject /phx: workflow suggestions
     "SubagentStart": [...],        // Iron Laws injection into all subagents
-    "SessionStart": [...],         // Setup dirs + Tidewave + resume detection
+    "SessionStart": [...],         // Setup dirs + Tidewave + Ash detection + resume detection
     "PreCompact": [...],           // Re-inject workflow rules before compaction
     "PostCompact": [...],          // Verify plan state survived compaction
     "StopFailure": [...],          // Log API failures to scratchpad for resume
@@ -232,6 +242,8 @@ Defined in `hooks/hooks.json`:
 **Current hooks:**
 
 - `PreToolUse` (Bash): Block destructive operations (`mix ecto.reset/drop`, `git push --force`, `MIX_ENV=prod`) before execution
+- `PreToolUse` (Bash, `"if": "Bash(*mix deps.*)"`): `deps-audit-gate.sh` — blocks unvetted dep operations after `/phx:deps-audit` flags them
+- `PreToolUse` (Edit|Write|NotebookEdit): `freeze-gate.sh` — enforces `/phx:freeze` edit-scope locks (sentinel-backed read-only/dir-scoped locks)
 - `PostToolUse` (Edit): Auto `mix format --check-formatted`, **programmatic Iron Law verification**,
   **debug statement detection** — all use `if` conditions to only fire on `.ex`/`.exs` files
   (e.g., `"if": "Edit(*.ex)"`) to avoid unnecessary shell spawns on non-Elixir files
@@ -240,10 +252,15 @@ Defined in `hooks/hooks.json`:
   (these fire on all file types — no `if` filtering)
 - `PostToolUseFailure` (Bash): Elixir-specific debugging hints and **error critic** —
   both use `"if": "Bash(*mix*)"` to only fire on mix command failures (via `additionalContext`)
+- `UserPromptSubmit`: `route-intent.sh` — inject one-line `/phx:` workflow suggestions for high-signal
+  intents (PR URLs → `/phx:pr-review`, Tidewave current-page + stack traces → `/phx:investigate`).
+  Gated on `mix.exs`, one suggestion per category per session, always exits 0
 - `SubagentStart`: Inject all Iron Laws into every spawned subagent via `additionalContext` (addresses zero skill auto-loading gap)
 - `PreCompact`: Re-inject workflow rules (plan/work/full) before compaction via JSON `systemMessage`
-- `SessionStart` (all): Setup `.claude/` directories + Tidewave detection (`async: true`)
-- `SessionStart` (startup|resume only): Scratchpad check + resume workflow detection + branch freshness (`async: true`) + workflow hints
+- `SessionStart` (all): Setup `.claude/` directories + Tidewave detection + Ash detection (`detect-ash.sh`) (`async: true`)
+- `SessionStart` (startup|resume only): Scratchpad check + resume workflow detection (`check-resume.sh` —
+  gated on `mix.exs` OR an existing `.claude/plans/*/plan.md`; sole owner of the resume/no-plan banner
+  after the duplicate echo hook was removed) + branch freshness (`async: true`) + workflow hints
 - `PostCompact`: Verify active plan state survived compaction, warn Claude to re-read plan and scratchpad
 - `StopFailure`: Log API failure to plan scratchpad for resume detection in next session
 - `Stop`: Warn if plans have unchecked tasks
@@ -327,10 +344,10 @@ make lint          # Lint markdown
 make lint-fix      # Auto-fix lint
 make test          # 75 pytest tests for eval framework
 make eval          # Quick: lint + score changed skills/agents + trigger accuracy (cached)
-make eval-all      # Score all 40 skills + 20 agents + trigger accuracy
+make eval-all      # Score all 50 skills + 25 agents + trigger accuracy
 make eval-fix      # Auto-fix lint + show failures + suggest autoresearch
 make eval-tournament # Run tournament on weak skills (<75% trigger accuracy)
-make ci            # Full CI pipeline: lint + test + eval
+make ci            # Full CI pipeline: lint + test + validate + eval + security
 ```
 
 ### Eval Framework (lab/eval/)

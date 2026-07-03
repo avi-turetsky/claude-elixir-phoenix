@@ -41,9 +41,13 @@ structured plan with checkboxes.
    brainstorm interview.md exists with Status: COMPLETE)
 3. **Detect depth** — Auto-detect quick/standard/deep
 4. **Runtime context** (Tidewave) — Gather live schemas, routes,
-   and warnings before spawning agents (see planning-orchestrator)
-5. **Spawn research agents** — Selective, parallel, based on need.
-   Create a Claude Code task per agent for progress visibility:
+   and warnings before spawning agents (direct path only — the
+   research orchestrator gathers its own)
+5. **Spawn research** — Selective, based on need. **0–2 agents**:
+   spawn directly in parallel. **3+ agents** (broad multi-context
+   feature): spawn ONE `planning-orchestrator` to run and compress
+   the fan-out, then read only its digest and
+   `summaries/consolidated.md`. Create a Claude Code task per spawn:
    `TaskCreate({subject: "{Agent} research", activeForm: "Researching..."})`,
    mark `in_progress` on spawn, `completed` when done
 6. **Wait for ALL agents** — Do NOT proceed until all return

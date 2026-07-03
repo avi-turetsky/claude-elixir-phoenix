@@ -219,11 +219,6 @@
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-branch-freshness.sh",
             "timeout": 30,
             "async": true
-          },
-          {
-            "type": "command",
-            "command": "echo",
-            "args": ["Elixir/Phoenix plugin loaded — describe your task and I'll suggest the right workflow"]
           }
         ]
       }

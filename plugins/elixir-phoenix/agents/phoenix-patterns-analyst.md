@@ -2,7 +2,7 @@
 name: phoenix-patterns-analyst
 description: Analyzes codebase for existing Phoenix patterns, contexts, module structure, scopes, plugs, and routing. Use proactively when planning features to understand current conventions.
 tools: Read, Write, Grep, Glob, Bash
-disallowedTools: Edit, NotebookEdit
+disallowedTools: NotebookEdit
 permissionMode: bypassPermissions
 model: sonnet
 effort: medium

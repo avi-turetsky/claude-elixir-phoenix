@@ -57,7 +57,7 @@ Add points from this table:
 |-------|--------|
 | ≤ 2 | Proceed directly, or offer `/phx:quick` |
 | 3-6 | Ask 1-2 questions, then `/phx:plan` |
-| 7-10 | Ask 2-4 questions, recommend `/phx:plan --detail comprehensive` |
+| 7-10 | Ask 2-4 questions, recommend `/phx:plan --depth deep` |
 | > 10 | Strongly recommend `/phx:full` |
 | Security ≥ 4 | MANDATORY: minimum `/phx:plan` + spawn security-analyzer |
 

@@ -87,7 +87,7 @@ For each hit, read the 3 lines after to classify:
 Read the `try` / `def` body and trace what each call can raise. Don't guess from the
 function name — verify. Consult order:
 
-1. **Check `references/taxonomy.md`** for the work type (JSON, Ecto, Money, HTTP, etc.).
+1. **Check `${CLAUDE_SKILL_DIR}/references/taxonomy.md`** for the work type (JSON, Ecto, Money, HTTP, etc.).
    Most sites map cleanly to one row.
 2. **Grep deps for `defexception`** when a specific library isn't in the taxonomy:
 
@@ -105,7 +105,7 @@ exceptions (see Iron Law #3), and prefer specific types (`Jason.DecodeError` bea
 ### Step 3 — Apply the narrowing
 
 For files with ≥3 rescues sharing a taxonomy, hoist to a module attribute — see
-`references/patterns.md` for the module-attribute pattern, Oban reraise, ExCmd exit
+`${CLAUDE_SKILL_DIR}/references/patterns.md` for the module-attribute pattern, Oban reraise, ExCmd exit
 errors, and `is_exception/1` replacements.
 
 ### Step 4 — Verify

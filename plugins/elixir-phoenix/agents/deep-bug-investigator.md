@@ -1,8 +1,8 @@
 ---
 name: deep-bug-investigator
 description: Deep bug investigation using 4 parallel subagents (reproduction, root cause, impact, fix strategy). Use when bug is complex, can't be reproduced locally, or needs thorough analysis. Spawns fresh-context subagents for each investigation track.
-tools: Read, Grep, Glob, Bash, Agent
-disallowedTools: Write, Edit, NotebookEdit
+tools: Read, Grep, Glob, Bash, Agent, Write
+disallowedTools: Edit, NotebookEdit
 permissionMode: bypassPermissions
 model: sonnet
 effort: medium
