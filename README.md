@@ -78,11 +78,12 @@ that prevent the mistakes Elixir developers actually make in production.
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-> **v2.13.0** -- security-posture + deep-audit release: SkillSpector scanning with `SECURITY.md`,
-> a 1,853-session audit that fixed the garbled resume banner and destructive-op blocker bypasses,
-> and `planning-orchestrator` reworked into a spawnable research sub-orchestrator. The
-> framework-agnostic **`catchup`** companion plugin (`/catchup` return-from-absence briefing) has
-> shipped since v2.10.0.
+> **v2.14.0** -- optional **Codex** external-reviewer integration: `/phx:review --codex` adds a
+> cross-model second opinion (consensus findings marked HIGH CONFIDENCE), `/phx:codex-loop` runs a
+> bounded review→fix→verify loop, and `/phx:watch-pr --codex` drives the Codex cloud review to
+> clean. Plus a CC 2.1.206 compatibility pass: the `Stop` hook now surfaces forgotten background
+> servers / scheduled jobs, and model docs move to Sonnet 5. The framework-agnostic **`catchup`**
+> companion plugin (`/catchup` return-from-absence briefing) has shipped since v2.10.0.
 > [Issues](https://github.com/oliver-kriska/claude-elixir-phoenix/issues) welcome.
 
 ## Installation

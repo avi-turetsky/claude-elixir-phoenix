@@ -9,6 +9,19 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [2.14.0] - 2026-07-10
+
+Optional Codex external-reviewer integration (`/phx:review --codex`,
+`/phx:codex-loop`, `/phx:watch-pr --codex`), plus a CC 2.1.206 compatibility
+pass: make the `Stop` hook actually reach the user, clean up `StopFailure`,
+refresh model docs for Sonnet 5, and document the subagent nesting-depth budget.
+
+### Added
+
 - **Codex integration (optional)** — use OpenAI Codex as an external reviewer
   when the codex CLI / Codex GitHub connector is available. Zero impact
   without it: every touchpoint is flag-gated and degrades gracefully.
