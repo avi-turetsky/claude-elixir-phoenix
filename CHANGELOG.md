@@ -45,8 +45,30 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **`Stop` hook (`check-pending-plans.sh`) now reaches the user.** A Stop hook's
+  plain stdout goes to the debug log only (CC hooks ref), so the previous `echo`
+  warnings were invisible in normal use. It now emits a JSON `systemMessage`
+  (user-visible; Claude still stops), gated on the rare, session-created signals
+  — running `background_tasks[]` / `session_crons[]` (a forgotten `mix phx.server`
+  / scheduled job) — with pending plans + dirty tree folded in only as supporting
+  context. Clean stops stay silent (no per-turn noise); pending plans and an
+  uncommitted tree are already surfaced at `SessionStart`. Deliberately NOT
+  `additionalContext`/`exit 2`, which would force Claude to continue every stop.
+- **CC changelog audit advanced v2.1.145 → v2.1.206** (48 versions). CLAUDE.md +
+  README agent-model note updated: the `sonnet` alias now resolves to Sonnet 5 (CC's
+  default model since 2.1.197, 1M context). Hook-output contributor notes updated
+  for Stop (`systemMessage` vs `additionalContext`) and StopFailure (output
+  ignored). Verified the `Edit(*.ex)` / `Bash(*mix deps.*)` hook `if`-conditions
+  remain correct after the 2.1.176/2.1.163 matching changes (`deps-audit-gate.sh`
+  self-guards; `Edit(*.ts)` is the canonical documented form).
+
 ### Fixed
 
+- **`StopFailure` hook cleanup** — CC ignores a StopFailure hook's exit code and
+  output entirely, so `stop-failure-log.sh`'s trailing `exit 2` + stderr was a
+  no-op that misled contributors into thinking it blocked/messaged. Removed; the
+  scratchpad write (read by the next session's `check-resume.sh`) is the actual
+  mechanism and is unchanged.
 - **`/phx:brief` showed no briefing content** — with extended thinking
   enabled, the model composed each ★ Briefing section inside its (invisible)
   reasoning and went straight to the `AskUserQuestion` "Continue?" dialog, so

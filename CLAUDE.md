@@ -77,6 +77,24 @@ Orchestrator (thin coordinator)
 
 Used by: planning-orchestrator, parallel-reviewer, audit skill, docs-validation-orchestrator.
 
+**Subagent nesting depth budget (CC 2.1.172+).** Sub-agents may spawn their own
+sub-agents up to **5 levels deep** (foreground and background alike; CC 2.1.181
+enforces the same cap on both). Spawns past the cap silently no-op, so keep chains
+inside it. Current deepest chain is **depth 3** — `/phx:full` → workflow-orchestrator
+→ parallel-reviewer → review specialists (elixir-reviewer / security-analyzer /
+testing-reviewer / verification-runner). That leaves 2 levels of headroom, but the
+review specialists and context-supervisor are intentionally leaf agents (no `Agent`
+tool). Before giving a leaf worker the `Agent` tool, or inserting another
+orchestrator layer (e.g. workflow-orchestrator → planning-orchestrator → decision
+council would reach depth 4), re-count the chain so it stays ≤5.
+
+**Background is the default (CC 2.1.198).** Subagents now run in the background by
+default and inherit the session's extended-thinking config (a free quality lift for
+review/research/council workers). Orchestrators already `run_in_background: true` and
+wait for all workers before compressing — that bg-then-wait model is now automatic
+even for workers spawned without the flag. Keep the explicit flag for self-documentation;
+no change is required to benefit.
+
 ## Structure
 
 ```
@@ -151,7 +169,8 @@ skills:
 
 **Rules:**
 
-- Use `sonnet` model by default (Sonnet 4.6 achieves near-opus quality at lower cost)
+- Use `sonnet` model by default — the `sonnet` alias resolves to Sonnet 5 (Claude Code's
+  default model since CC 2.1.197, native 1M context), which achieves near-opus quality at lower cost
 - Use `opus` for primary workflow orchestrators and security-critical agents only
 - Use `sonnet` for secondary orchestrators (investigation, tracing) and judgment-heavy tasks
 - Use `haiku` for mechanical tasks: compression, verification, dependency analysis
@@ -263,7 +282,12 @@ Defined in `hooks/hooks.json`:
   after the duplicate echo hook was removed) + branch freshness (`async: true`) + workflow hints
 - `PostCompact`: Verify active plan state survived compaction, warn Claude to re-read plan and scratchpad
 - `StopFailure`: Log API failure to plan scratchpad for resume detection in next session
-- `Stop`: Warn if plans have unchecked tasks
+  (CC ignores StopFailure exit code/output — the scratchpad **write** is the whole job)
+- `Stop` (`check-pending-plans.sh`): user-visible `systemMessage` reminder, gated on running
+  `background_tasks[]` / `session_crons[]` (a forgotten `mix phx.server` / scheduled job).
+  Stays silent on clean stops — pending plans + dirty tree are already surfaced at
+  `SessionStart`, so it does NOT re-warn them every turn. Deliberately NOT `additionalContext`
+  (that would force Claude to continue on every stop)
 
 **Hook output patterns (important for contributors):**
 
@@ -273,7 +297,11 @@ Defined in `hooks/hooks.json`:
 - `SubagentStart` uses `hookSpecificOutput.additionalContext` to inject context into subagents
 - `PostToolUseFailure` uses `hookSpecificOutput.additionalContext` for debugging hints
 - `PostCompact` uses `exit 2` + stderr to warn Claude (same pattern as PostToolUse)
-- `StopFailure` uses `exit 2` + stderr and writes to scratchpad file
+- `Stop` stdout is **debug-log only** — to reach the user use JSON `systemMessage` (Claude still
+  stops); `additionalContext`/`exit 2` instead **continue the turn**, so reserve them for cases
+  where you actually want Claude to keep working
+- `StopFailure` output and exit code are **ignored by CC** — it can't block or message; persist
+  state to a file (scratchpad) that a later `SessionStart` hook reads instead
 
 **MCP tool hooks (CC 2.1.118+)** — hooks can call MCP tools directly via
 `type: "mcp_tool"`. Required fields: `server`, `tool`; optional `input` with
