@@ -46,6 +46,10 @@ Rules:
 - Keep the title short — it's the section name from the flow tables
 - Content inside follows all normal rules (tables, bullets, max lines)
 - The closing line has no label — just the border
+- **The block is VISIBLE response text, emitted before the
+  `AskUserQuestion` call.** Composing the section in thinking and then
+  calling the tool shows the user an empty briefing — only the
+  "Continue?" dialog renders. Emit the block, then ask.
 
 ---
 

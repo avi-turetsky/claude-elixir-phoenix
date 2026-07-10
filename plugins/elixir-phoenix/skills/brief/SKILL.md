@@ -58,11 +58,17 @@ Read what's available (don't fail if missing):
 ### Step 3: Present Briefing Sections
 
 Present ONE section at a time, wrapped in the visual briefing block
-(see `${CLAUDE_SKILL_DIR}/references/briefing-guide.md` Visual Formatting). After each
-section, use `AskUserQuestion` with options:
+(see `${CLAUDE_SKILL_DIR}/references/briefing-guide.md` Visual Formatting).
 
-- If sections remain: **"Next: {title}"**, **"Ask me a question
-  about this"**, **"Stop here"**
+**The section MUST be emitted as visible response text BEFORE the
+`AskUserQuestion` call.** Content composed only in thinking/reasoning
+is invisible to the user, and the `question` field is too short to
+carry it. If the user would see only a "Continue?" dialog, the section
+was never shown. Write the ★ Briefing block as normal output first,
+then ask:
+
+- If sections remain: question "Continue the briefing?" with options
+  **"Next: {title}"**, **"Ask me a question about this"**, **"Stop here"**
 - If final section: no question needed, show closing message
 
 ### Section Flow (Pre-Work Mode)
@@ -96,6 +102,9 @@ See `${CLAUDE_SKILL_DIR}/references/briefing-guide.md` for section content templ
 5. **Keep each section under 20 lines** — this is a briefing,
    not a lecture
 6. **NEVER skip sections or auto-start work** — briefing is read-only; do not execute plan tasks or launch `/phx:work` without explicit user request
+7. **SECTION TEXT BEFORE THE QUESTION** — every ★ Briefing block is
+   visible response text emitted before its `AskUserQuestion`; never
+   deliver a section only inside thinking or the question field
 
 ## Closing Message
 

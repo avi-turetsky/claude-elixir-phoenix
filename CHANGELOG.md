@@ -13,6 +13,15 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **`/phx:brief` showed no briefing content** — with extended thinking
+  enabled, the model composed each ★ Briefing section inside its (invisible)
+  reasoning and went straight to the `AskUserQuestion` "Continue?" dialog, so
+  the user saw only the continue prompts and never the brief itself. The
+  skill and `briefing-guide.md` now require each section to be emitted as
+  visible response text BEFORE the question (new Iron Law #7), and the
+  question phrasing no longer implies the section was already shown. Same
+  guard added to `/phx:intro`'s section presentation loop.
+
 ## [2.13.0] - 2026-07-03
 
 Security-posture + deep-audit release: SkillSpector scanning with `SECURITY.md`,
