@@ -9,6 +9,40 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Codex integration (optional)** — use OpenAI Codex as an external reviewer
+  when the codex CLI / Codex GitHub connector is available. Zero impact
+  without it: every touchpoint is flag-gated and degrades gracefully.
+  - `/phx:review --codex` — new `codex-reviewer` bridge agent (haiku) joins
+    the review panel; issues flagged by both a Claude agent and codex are
+    marked HIGH CONFIDENCE (cross-model consensus)
+  - `/phx:codex-loop` — new skill: bounded review→fix→verify loop with the
+    Codex CLI as external critic (default 3 rounds, `--auto`, Iron Law
+    scrutiny on every finding)
+  - `/phx:watch-pr --codex` — posts the `@codex review` trigger, watches
+    reactions and reviews via new watcher events (`codex_ack`,
+    `codex_review`, `codex_clean`, `codex_timeout`), and loops
+    fix→re-request until codex + CI are clean (≤3 rounds). Skips the
+    trigger when codex already auto-registered the PR on ready (bot 👀/👍
+    on the PR body since the head commit — verified live); PR-level
+    reactions are time-filtered so stale 👀/👍 from earlier rounds can't
+    fire spurious events. Clean-pass bot COMMENTS ("Didn't find any major
+    issues" + `Reviewed commit: <sha>`) classify as `codex_clean` instead
+    of a generic `comment` event, and `Reviewed commit` sha comparison is
+    the preferred freshness check (committer timestamps are client-set
+    and can skew) — all from live-session analysis of 9 codex sessions
+  - `/phx:init` Step 4b — managed `## Review guidelines` block for
+    AGENTS.md: one Elixir rubric honored by BOTH the local CLI review and
+    the Codex cloud reviewer (verified live; the CLI rejects prompt +
+    diff-flag combinations, so AGENTS.md is the only injection point)
+  - `pr-review` bot-triage reference: codex thread anatomy (P1/P2/P3
+    badges, per-commit reviews, clean-pass semantics)
+  - Design note: a `--codex-panel` mode (3 dimension-focused codex passes
+    alongside the holistic review) was A/B-tested on 4 real branches and
+    rejected — real misses did not outnumber false positives on fresh
+    diffs, at 4× quota cost. The single holistic review + AGENTS.md
+    rubric is the shipped path; the A/B harness lives on as contributor
+    tooling (`.claude/skills/codex-ab/`)
+
 ### Changed
 
 ### Fixed
@@ -20,7 +54,8 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   skill and `briefing-guide.md` now require each section to be emitted as
   visible response text BEFORE the question (new Iron Law #7), and the
   question phrasing no longer implies the section was already shown. Same
-  guard added to `/phx:intro`'s section presentation loop.
+  guard added to `/phx:intro`'s section presentation loop and
+  `/phx:codex-loop`'s findings-triage step.
 
 ## [2.13.0] - 2026-07-03
 

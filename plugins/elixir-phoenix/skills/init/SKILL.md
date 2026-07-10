@@ -72,6 +72,19 @@ Write the following structure to CLAUDE.md:
 <!-- ELIXIR-PHOENIX-PLUGIN:END -->
 ```
 
+### Step 4b: Offer Codex Review Guidelines (optional)
+
+If `command -v codex` succeeds (or the user asks): offer to install a
+managed `## Review guidelines` block into the project's `AGENTS.md` —
+honored by BOTH `codex exec review` locally and the Codex cloud PR
+reviewer. Follow the install rules and exact block in
+`${CLAUDE_SKILL_DIR}/references/codex-review-guidelines.md`: markers
+`ELIXIR-PHOENIX-REVIEW-GUIDELINES:START/END`, upsert in place on
+`--update`, never touch content outside markers, and STOP to ask if an
+unmanaged `## Review guidelines` section already exists. When codex is
+absent and not requested, skip silently — never mention codex to users
+who don't have it.
+
 ### Step 5: Output Summary
 
 ```
@@ -90,6 +103,7 @@ Added to CLAUDE.md:
 - Reference auto-loading ({n} reference docs)
 - Iron Laws enforcement ({n} laws)
 - Verification rules
+{- Codex review guidelines → AGENTS.md (only if installed in Step 4b)}
 
 Run /phx:init --update after plugin updates.
 Run /phx:audit for a full project health check.

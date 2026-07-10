@@ -1,0 +1,17 @@
+{
+  "skill": "codex-loop",
+  "should_trigger": [
+    "Run a codex review on my changes and fix whatever it finds before I open the PR",
+    "Use codex as a reviewer on this branch and keep iterating until it's clean",
+    "I have the codex CLI installed — get an external second opinion on this diff and fix the issues",
+    "codex-loop these uncommitted changes",
+    "Loop codex review and fixes until it stops finding problems, max 2 rounds",
+    "Before I push, have codex critique my Elixir changes and apply the fixes it suggests"
+  ],
+  "should_not_trigger": [
+    "Review my changes with the specialist agents before committing",
+    "Comment @codex review on PR 42 and watch for its feedback",
+    "Fix the review comments codex left on my open pull request",
+    "Research whether we should adopt the codex CLI on our team"
+  ]
+}

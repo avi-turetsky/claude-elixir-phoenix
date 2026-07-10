@@ -39,8 +39,8 @@ Each phase reads from the previous phase's output. Plans become checkboxes. Chec
 
 | Feature | What It Does |
 |---------|-------------|
-| 25 specialist agents | Ecto, LiveView, security, OTP, Oban, Ash, deployment experts |
-| 50 skills | Commands for every phase of development |
+| 26 specialist agents | Ecto, LiveView, security, OTP, Oban, Ash, deployment experts |
+| 51 skills | Commands for every phase of development |
 | 26 Iron Laws | Non-negotiable rules enforced automatically |
 | Auto-loaded references | Context-aware docs loaded when you edit relevant files |
 | Tidewave integration | Runtime debugging when Tidewave MCP is connected |
@@ -322,7 +322,8 @@ The plugin works best when all layers are active: `/phx:init` for persistent rul
 | `/phx:verify` | Run all quality checks |
 | `/phx:research <topic>` | Research with parallel workers, Tidewave-first |
 | `/phx:pr-review <PR#>` | Address PR review threads — fix, reply, resolve |
-| `/phx:watch-pr <PR#>` | Background-watch a PR for reviews + CI (token-conscious) |
+| `/phx:watch-pr <PR#>` | Background-watch a PR for reviews + CI; `--codex` adds a Codex cloud review loop |
+| `/phx:codex-loop` | Fix until Codex CLI review is clean (optional — needs codex CLI) |
 | `/phx:deps-update` | Bump outdated Hex deps, grouped PRs |
 | `/phx:recall <question>` | Recall prior work from past sessions/git |
 | `/phx:permissions` | Scan sessions, recommend safe Bash permissions |

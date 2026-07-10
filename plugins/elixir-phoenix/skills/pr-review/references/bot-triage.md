@@ -26,6 +26,27 @@ login suffix is unreliable.
 3. Present the verdict table to the user BEFORE posting anything
 4. Post replies + resolve only after approval
 
+## Codex thread anatomy (chatgpt-codex-connector)
+
+Codex inline comments have a fixed shape — parse it, don't guess:
+
+- Priority badge: `![P1 Badge](https://img.shields.io/badge/P1-orange...)`
+  (P1 orange / P2 yellow / P3), then a **bold one-line title**, a detailed
+  body, and a `Useful? React with 👍 / 👎.` footer.
+- Mapping: P0/P1 → treat as code-change/blocker; P2 → verify-then-fix;
+  P3 → nitpick. Codex P1s on Elixir code have proven accurate (Ecto
+  schema-field crashes, tsquery guards) — verify, but don't dismiss.
+- Reviews are per-commit (`Reviewed commit: <sha>` in the summary body) —
+  after a force-push or big rebase, outdated codex threads are expected;
+  handle via the standard outdated-thread rule.
+- Reply + resolve works exactly like human threads. Optionally react 👍/👎
+  on the finding itself — it trains the reviewer.
+- A codex review summary with ZERO inline threads = clean pass (summary-only
+  round); nothing to triage.
+- A clean pass can also be a plain bot COMMENT ("Codex Review: Didn't find
+  any major issues" + `Reviewed commit: <sha>`) or a 👍 reaction on the
+  trigger comment / PR body — all three mean the same thing.
+
 ## Common false-positive patterns (Elixir)
 
 - **`nil[:key]` flagged as crash risk** — Access protocol on nil returns

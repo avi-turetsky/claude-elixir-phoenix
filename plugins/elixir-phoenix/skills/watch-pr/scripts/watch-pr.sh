@@ -28,6 +28,21 @@ has() { case ",$WATCH," in *",$1,"*) return 0;; *) return 1;; esac; }
 # Track what we've already reported (ids / conclusions) to avoid dupes.
 SEEN_REVIEWS=""; SEEN_COMMENTS=""; LAST_CHECK_STATE=""
 
+# Codex mode (WATCH_CODEX=1): poll the bot's reactions — 👀 = acknowledged,
+# 👍 = clean pass (codex posts NO review when it has nothing to flag) — and
+# tag the bot's reviews as codex_review. Two sub-modes:
+#   WATCH_CODEX_TRIGGER_ID set   → skill posted "@codex review"; poll that
+#                                  comment (+ PR body, time-filtered).
+#   WATCH_CODEX_TRIGGER_ID empty → codex auto-registered on PR-ready (👀 on
+#                                  the PR body); poll PR-level only.
+# WATCH_CODEX_SINCE (ISO-8601, default watcher baseline) filters PR-level
+# reactions — stale 👀/👍 from earlier rounds or pushes must not fire events.
+# One watcher per codex round: the skill restarts us per re-request.
+CODEX_ACKED=""; CODEX_CLEAN=""; CODEX_TIMEOUT_EMITTED=""
+CODEX_ACK_TIMEOUT="${CODEX_ACK_TIMEOUT:-300}"
+CODEX_SINCE="${WATCH_CODEX_SINCE:-$BASELINE_TS}"
+codex_on() { [[ "${WATCH_CODEX:-0}" == "1" ]]; }
+
 while :; do
   NOW_EPOCH=$(date -u +%s)
   if (( NOW_EPOCH - START_EPOCH >= MAX_DURATION )); then
@@ -52,24 +67,66 @@ while :; do
 
   # --- reviews (bot + human) newer than baseline, not yet seen ---
   if has reviews; then
-    while IFS=$'\t' read -r rid author rstate submitted; do
+    while IFS=$'\t' read -r rid author rstate submitted is_codex; do
       [[ -z "$rid" ]] && continue
       [[ "$submitted" > "$BASELINE_TS" ]] || continue
       case " $SEEN_REVIEWS " in *" $rid "*) continue;; esac
       SEEN_REVIEWS="$SEEN_REVIEWS $rid"
-      emit "{\"ts\":\"$submitted\",\"kind\":\"review\",\"author\":\"$author\",\"state\":\"$rstate\"}"
-    done < <(jq -r '.reviews[] | [(.id|tostring), .author.login, .state, .submittedAt] | @tsv' <<<"$VIEW")
+      RKIND="review"
+      # Match the body marker, not the bot login — login differs per endpoint.
+      if codex_on && [[ "$is_codex" == "true" ]]; then RKIND="codex_review"; fi
+      emit "{\"ts\":\"$submitted\",\"kind\":\"$RKIND\",\"author\":\"$author\",\"state\":\"$rstate\"}"
+    done < <(jq -r '.reviews[] | [(.id|tostring), .author.login, .state, .submittedAt, ((.body // "") | contains("Codex Review") | tostring)] | @tsv' <<<"$VIEW")
   fi
 
   # --- comments newer than baseline, not yet seen ---
   if has comments; then
-    while IFS=$'\t' read -r cid author created; do
+    while IFS=$'\t' read -r cid author created bodyhead; do
       [[ -z "$cid" ]] && continue
       [[ "$created" > "$BASELINE_TS" ]] || continue
       case " $SEEN_COMMENTS " in *" $cid "*) continue;; esac
       SEEN_COMMENTS="$SEEN_COMMENTS $cid"
-      emit "{\"ts\":\"$created\",\"kind\":\"comment\",\"author\":\"$author\"}"
-    done < <(jq -r '.comments[] | [(.id|tostring), (.author.login // "unknown"), .createdAt] | @tsv' <<<"$VIEW")
+      CKIND="comment"
+      # A codex clean pass can arrive as a bot COMMENT ("Codex Review:
+      # Didn't find any major issues" + Reviewed commit sha) — seen live.
+      if codex_on && [[ "$bodyhead" == *"Codex Review"* ]]; then
+        if [[ "$bodyhead" == *"find any major issues"* ]]; then
+          CKIND="codex_clean"; CODEX_CLEAN=1
+        else
+          CKIND="codex_review"
+        fi
+      fi
+      emit "{\"ts\":\"$created\",\"kind\":\"$CKIND\",\"author\":\"$author\"}"
+    done < <(jq -r '.comments[] | [(.id|tostring), (.author.login // "unknown"), .createdAt, ((.body // "") | gsub("[\n\r\t]"; " ") | .[0:160])] | @tsv' <<<"$VIEW")
+  fi
+
+  # --- codex mode: bot reactions (👀 ack / 👍 clean) ---
+  if codex_on; then
+    REACTS=""
+    if [[ -n "${WATCH_CODEX_TRIGGER_ID:-}" ]]; then
+      REACTS=$(gh api "repos/{owner}/{repo}/issues/comments/${WATCH_CODEX_TRIGGER_ID}/reactions" \
+        --jq '[.[].content] | unique | join(",")' 2>/dev/null) || REACTS=""
+    fi
+    # Auto-triggered (PR-ready) reviews react on the PR body — confirmed live
+    # on EnaiaInc/enaia. Time-filter so stale reactions can't fire.
+    # gh's --jq takes no --arg — bind $since via standalone jq instead.
+    # shellcheck disable=SC2016  # $since is a jq --arg variable, not shell
+    PR_REACTS=$(gh api "repos/{owner}/{repo}/issues/${PR}/reactions" 2>/dev/null \
+      | jq -r --arg since "$CODEX_SINCE" \
+          '[.[] | select(.created_at >= $since) | .content] | unique | join(",")' 2>/dev/null) || PR_REACTS=""
+    ALL_REACTS="${REACTS},${PR_REACTS}"
+    if [[ -z "$CODEX_ACKED" && "$ALL_REACTS" == *eyes* ]]; then
+      CODEX_ACKED=1
+      emit "{\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"kind\":\"codex_ack\",\"summary\":\"codex acknowledged the review request (eyes reaction)\"}"
+    fi
+    if [[ -z "$CODEX_CLEAN" && "$ALL_REACTS" == *"+1"* ]]; then
+      CODEX_CLEAN=1
+      emit "{\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"kind\":\"codex_clean\",\"summary\":\"codex reacted +1 — clean pass, no review will be posted\"}"
+    fi
+    if [[ -z "$CODEX_ACKED" && -z "$CODEX_TIMEOUT_EMITTED" ]] && (( NOW_EPOCH - START_EPOCH >= CODEX_ACK_TIMEOUT )); then
+      CODEX_TIMEOUT_EMITTED=1
+      emit "{\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"kind\":\"codex_timeout\",\"summary\":\"no ack after ${CODEX_ACK_TIMEOUT}s — repo may lack the Codex connector; continuing normal watch\"}"
+    fi
   fi
 
   # --- checks: emit on terminal conclusion change ---

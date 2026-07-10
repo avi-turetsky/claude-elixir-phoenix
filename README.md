@@ -4,7 +4,7 @@
 
 **Claude Code is great. But it doesn't know that `assign_new` silently skips on reconnect, that `:float` will corrupt your money fields, or that your Oban job isn't idempotent.**
 
-This plugin does. It coordinates **25 specialist agents** that plan, implement,
+This plugin does. It coordinates **26 specialist agents** that plan, implement,
 review, and verify your Elixir/Phoenix code in parallel -- each with domain
 expertise, fresh context, and enforced [Iron Laws](#iron-laws-non-negotiable-rules)
 that catch the bugs your tests won't.
@@ -36,7 +36,7 @@ that prevent the mistakes Elixir developers actually make in production.
 │  ⚗  Elixir/Phoenix Plugin for Claude Code                           │
 │                                                                     │
 │  ┌──────────┬──────────┬──────────┬──────────┬──────────┐           │
-│  │    25    │    50    │   137    │    31    │    26    │           │
+│  │    26    │    51    │   139    │    31    │    26    │           │
 │  │  Agents  │  Skills  │   Refs   │  Hooks   │Iron Laws │           │
 │  └──────────┴──────────┴──────────┴──────────┴──────────┘           │
 │                                                                     │
@@ -226,7 +226,7 @@ No more scattered files across `.claude/planning/`, `.claude/progress/`, `.claud
 
 ### Agent Hierarchy
 
-The plugin uses 25 agents organized into 3 tiers:
+The plugin uses 26 agents organized into 3 tiers:
 
 ```
                     ┌──────────────────────────────┐
@@ -522,7 +522,8 @@ The plugin enforces critical rules and **stops with an explanation** if code wou
 | `/phx:brief <plan>`     | Interactive plan walkthrough                                 |
 | `/phx:perf`             | Performance analysis with specialist agents                  |
 | `/phx:pr-review`        | Address PR review threads — fetch, fix, reply, resolve       |
-| `/phx:watch-pr <PR#>`   | Background-watch a PR for reviews + CI (token-conscious)     |
+| `/phx:watch-pr <PR#>`   | Background-watch a PR for reviews + CI; `--codex` adds a Codex cloud review loop |
+| `/phx:codex-loop`       | Fix until Codex CLI review is clean (optional, needs codex)  |
 
 ### Utility
 
@@ -560,7 +561,7 @@ The plugin enforces critical rules and **stops with an explanation** if code wou
 | `/phx:deps-audit [--base R]` | Hex supply-chain audit (8 rules + CVE + differential) |
 | `/phx:deps-vet <pkg> <ver>`  | Manage the `hex_vet.exs` audit ledger (cargo-vet style) |
 
-## Agents (25)
+## Agents (26)
 
 | Agent                        | Model  | Memory  | Role                                         |
 | ---------------------------- | ------ | ------- | -------------------------------------------- |
@@ -589,6 +590,7 @@ The plugin enforces critical rules and **stops with an explanation** if code wou
 | **ash-query-optimizer**      | sonnet | --      | Ash N+1 loads, aggregates vs load            |
 | **requirements-verifier**    | sonnet | --      | Implementation vs task-requirement check     |
 | **hex-deps-triager**         | sonnet | --      | Hex supply-chain audit finding triage        |
+| **codex-reviewer**           | haiku  | --      | Codex CLI bridge — cross-model review (opt.) |
 
 Agents with `project` memory build up knowledge across sessions
 in `.claude/agent-memory/<agent-name>/`. Orchestrators remember
@@ -636,6 +638,11 @@ Available runtime tools: execute Elixir code, run SQL queries, get docs for your
 - **Tidewave** for runtime debugging
 - **[ccrider](https://github.com/neilberkman/ccrider)** for session analysis (see Contributing)
 - **Ralph Wiggum Loop** for autonomous iteration across context resets
+- **[OpenAI Codex](https://developers.openai.com/codex)** as an external reviewer:
+  `/phx:review --codex` and `/phx:codex-loop` use the local codex CLI;
+  `/phx:watch-pr --codex` uses the Codex GitHub connector. Install the shared
+  Elixir review rubric into AGENTS.md via `/phx:init`. Users without codex
+  are unaffected — all codex behavior is flag-gated
 
 ## Security
 
@@ -667,7 +674,7 @@ Every PR must pass the CI quality gate (lint + test + eval). Run locally before 
 ```bash
 make help             # Show all available commands
 make eval             # Quick: lint + score changed skills/agents only
-make eval-all         # Full structural: all 50 skills + all 25 agents
+make eval-all         # Full structural: all 51 skills + all 26 agents
 make eval-fix         # Auto-fix lint + show failures + suggest autoresearch
 make test             # 75 pytest tests for eval framework
 make ci               # Full CI: lint + test + validate + eval + security (same as GitHub Actions)

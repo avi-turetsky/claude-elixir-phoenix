@@ -106,14 +106,14 @@ claude-elixir-phoenix/
 │   └── elixir-phoenix/
 │       ├── .claude-plugin/
 │       │   └── plugin.json
-│       ├── agents/                  # 25 specialist agents
+│       ├── agents/                  # 26 specialist agents
 │       │   ├── workflow-orchestrator.md   # Full cycle coordination
 │       │   ├── planning-orchestrator.md
 │       │   ├── context-supervisor.md     # Generic output compressor (haiku)
 │       │   └── ...
 │       ├── hooks/
 │       │   └── hooks.json           # Format, progress tracking, Stop warning
-│       └── skills/                  # 50 skills
+│       └── skills/                  # 51 skills
 │           ├── work/                # Execution phase
 │           ├── full/                # Autonomous cycle
 │           ├── plan/                # Planning + deepening (--existing)
@@ -344,7 +344,7 @@ make lint          # Lint markdown
 make lint-fix      # Auto-fix lint
 make test          # 75 pytest tests for eval framework
 make eval          # Quick: lint + score changed skills/agents + trigger accuracy (cached)
-make eval-all      # Score all 50 skills + 25 agents + trigger accuracy
+make eval-all      # Score all 51 skills + 26 agents + trigger accuracy
 make eval-fix      # Auto-fix lint + show failures + suggest autoresearch
 make eval-tournament # Run tournament on weak skills (<75% trigger accuracy)
 make ci            # Full CI pipeline: lint + test + validate + eval + security
@@ -738,6 +738,9 @@ When working on code, automatically consult relevant reference documentation bef
 | LiveView memory | `/lv:assigns` |
 | PR review comments | `/phx:pr-review` |
 | Waiting on CI / reviewers | `/phx:watch-pr` |
+| Codex review before PR (codex CLI installed) | `/phx:review --codex` |
+| Fix until Codex review is clean | `/phx:codex-loop` |
+| Codex cloud review loop on a PR | `/phx:watch-pr N --codex` |
 | Update dependencies | `/phx:deps-update` |
 | "Have we done this before?" | `/phx:recall` |
 | Performance analysis | `/phx:perf` |
@@ -753,7 +756,7 @@ When working on code, automatically consult relevant reference documentation bef
 
 **Review → Follow-up Plan**: After `/phx:review`, if findings reveal scope gaps or missing coverage, use `/phx:plan .claude/plans/{slug}/reviews/{review}.md` to create a follow-up plan from review output.
 
-**Standalone**: `/phx:quick`, `/phx:full`, `/phx:investigate`, `/phx:verify`, `/phx:research`, `/phx:brainstorm`, `/phx:help`, `/phx:permissions`
+**Standalone**: `/phx:quick`, `/phx:full`, `/phx:investigate`, `/phx:verify`, `/phx:research`, `/phx:brainstorm`, `/phx:help`, `/phx:permissions`, `/phx:codex-loop` (needs codex CLI)
 
 **Analysis**: `/ecto:n1-check`, `/lv:assigns`, `/phx:boundaries`, `/phx:trace`, `/phx:techdebt`
 

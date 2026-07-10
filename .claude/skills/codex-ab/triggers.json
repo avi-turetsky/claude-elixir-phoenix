@@ -1,0 +1,16 @@
+{
+  "skill": "codex-ab",
+  "should_trigger": [
+    "Run the codex A/B experiment on this branch before I request any review",
+    "Compare a holistic codex review against focused security and ecto passes on my diff",
+    "codex-ab against develop",
+    "Test whether focused codex reviewers find more than the holistic one on this fresh branch",
+    "Run the codex panel experiment and give me the verdict table"
+  ],
+  "should_not_trigger": [
+    "Run a codex review on my changes and fix whatever it finds",
+    "Review my changes with the specialist agents before committing",
+    "Comment @codex review on PR 42 and watch for its feedback",
+    "A/B test the new search backend against Algolia in production"
+  ]
+}

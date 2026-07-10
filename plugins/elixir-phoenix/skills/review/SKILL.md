@@ -23,6 +23,7 @@ explain issues — do NOT create tasks or fix anything.
 /phx:review #42                      # Force GitHub issue
 /phx:review .claude/plans/auth/plan.md    # Force plan / spec file
 /phx:review --no-requirements        # Skip requirements coverage check
+/phx:review --codex                  # Add Codex CLI as cross-model reviewer
 ```
 
 ## Arguments
@@ -88,6 +89,8 @@ will emit `NOT AVAILABLE` rather than block the review.
 8. Scope every agent to the diff: pass `git diff --name-only` output with
    "Focus on NEW code. Pre-existing: one-line `{file}:{line} — {brief}`. Do
    NOT deep-analyze unchanged files."
+9. **With `--codex`**: add `elixir-phoenix:codex-reviewer` to the same batch
+   (prompt template in agent-spawning.md). Missing CLI degrades to SKIPPED.
 
 ### Step 3: Collect and Compress Findings
 
@@ -130,6 +133,7 @@ Before writing the review, apply these overriding filters to each finding:
 3. Are any findings duplicates reworded by different agents?
 4. Does the finding affect code actually changed in this diff?
 5. Is the finding on unchanged code (not in diff)? → Mark PRE-EXISTING
+6. Flagged by both a Claude agent AND `[codex]`? → mark HIGH CONFIDENCE
 
 Demote or remove findings that fail filters 1-4. Mark pre-existing per filter 5.
 
@@ -158,7 +162,7 @@ anything.
 then offer via `AskUserQuestion`: `/phx:triage` (recommended),
 `/phx:plan .claude/plans/{slug}/reviews/{feature}-review.md` (converts
 findings into a follow-up plan — pass the review file path, not a
-re-description), fix directly, or "I'll handle it myself".
+re-description), fix directly (`/phx:codex-loop` when codex ran), or "I'll handle it myself".
 
 **On PASS / PASS WITH WARNINGS**: Suggest `/phx:compound`, `/phx:learn-from-fix`.
 
