@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# SessionStart hook: Check if Tidewave MCP server is running
+# SessionStart hook: Check if Tidewave MCP server is running.
+# Only probe when tidewave is actually a dependency — a blind probe logs
+# "POST /tidewave/mcp" in any Phoenix app listening on :4000 (issue #72).
+grep -qs "tidewave" mix.exs mix.lock apps/*/mix.exs 2>/dev/null || exit 0
+
 if curl -s --connect-timeout 2 http://localhost:4000/tidewave/mcp \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":1,"method":"ping"}' 2>/dev/null | grep -q "result"; then
