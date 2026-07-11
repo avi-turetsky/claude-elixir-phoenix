@@ -13,6 +13,26 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+## [2.14.1] - 2026-07-11
+
+Patch release: stop the Tidewave detection hook from probing apps that never
+opted into Tidewave (#72), and quote `argument-hint` frontmatter so skills
+load on GitHub Copilot CLI 1.0.65+ (#71).
+
+### Fixed
+
+- **Tidewave detection no longer probes apps that don't use Tidewave** —
+  `detect-tidewave.sh` fired a blind `POST http://localhost:4000/tidewave/mcp`
+  on every session start, showing up as `[info] POST /tidewave/mcp` noise in
+  any Phoenix app listening on :4000. The probe is now gated on `tidewave`
+  appearing in `mix.exs`/`mix.lock` (umbrella `apps/*/mix.exs` included);
+  non-Elixir and non-Tidewave projects exit silently (#72)
+- **`argument-hint` frontmatter quoted in 9 skills** — unquoted values starting
+  with `[` parse as a YAML flow sequence (array), not a string; GitHub Copilot
+  CLI 1.0.65+ rejects the array shape so those skills silently failed to load
+  there. Wrapped in double quotes — the safe form for both runtimes
+  (#71, PR #70 by @thejesh23)
+
 ## [2.14.0] - 2026-07-10
 
 Optional Codex external-reviewer integration (`/phx:review --codex`,
