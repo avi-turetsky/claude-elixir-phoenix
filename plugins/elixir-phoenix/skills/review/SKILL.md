@@ -2,7 +2,7 @@
 name: phx:review
 description: Review code with parallel agents — tests, security, Ecto, LiveView, Oban. Use after implementation to catch bugs and anti-patterns before committing.
 effort: high
-argument-hint: [test|security|oban|deploy|iron-laws|all]
+argument-hint: "[test|security|oban|deploy|iron-laws|all]"
 ---
 
 # Review Elixir/Phoenix Code
