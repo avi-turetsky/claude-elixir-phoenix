@@ -49,10 +49,14 @@ Extract PR number (from number or URL — URL also yields the repo). Detect
 timestamp = now; events are "new since baseline", so old reviews don't
 re-fire.
 
-With `--codex`, preflight first: the PR's repo needs the Codex GitHub
-connector (not detectable upfront — the `codex_timeout` event reports its
-absence). Codex auto-registers PRs when they go ready, so check the PR
-body's bot reactions BEFORE posting a redundant trigger:
+With `--codex`, the **default is to POST `@codex review`** — the flag IS
+that consent (Iron Law 4). Skip the trigger ONLY when the connector bot
+(`chatgpt-codex-connector[bot]`) has itself reacted to / reviewed the
+current head SHA. The repo's CI "Codex" check and any local `codex exec` /
+`/phx:review --codex` / `/phx:codex-loop` run are DIFFERENT mechanisms from
+the GitHub connector — they NEVER satisfy the skip. When unsure, post. The
+connector auto-registers PRs on ready (its absence surfaces later as
+`codex_timeout`), so check ITS reactions before posting a redundant trigger:
 
 ```bash
 HEAD_AT=$(gh api "repos/{owner}/{repo}/commits/$(gh pr view {n} --json headRefOid -q .headRefOid)" --jq .commit.committer.date)
@@ -62,14 +66,14 @@ BOT=$(gh api "repos/{owner}/{repo}/issues/{n}/reactions" | jq -r --arg t "$HEAD_
 
 (`gh api --jq` accepts no `--arg` — pipe through standalone `jq`.)
 
-**Definitive check first**: a bot comment or review containing
+**Definitive check first**: a **connector-bot** comment or review containing
 `Reviewed commit: {sha}` that matches the current head sha means that
 state IS reviewed (clean if it says "Didn't find any major issues") —
 trust it over timestamps, which are client-set and can skew. Then:
 
-| Bot reaction since head commit | Action |
+| Connector-bot signal on current head | Action |
 |-------------------------------|--------|
-| `+1` | Current head already reviewed clean — no trigger, no codex round; watch CI/humans only |
+| `+1` reaction | Connector already reviewed this head clean — no trigger, no codex round; watch CI/humans only |
 | `eyes` + a codex review already submitted since `$HEAD_AT` | Findings already posted — skip the watch; run the `codex_review` action (Step 3) now |
 | `eyes` only | Review in flight — do NOT post; export `WATCH_CODEX=1 WATCH_CODEX_SINCE=$HEAD_AT` (no trigger id) and watch |
 | none (or reactions predate head) | Post the trigger and capture its id: |

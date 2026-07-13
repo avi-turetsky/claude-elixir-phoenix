@@ -9,9 +9,27 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **`/phx:full --codex`** — the Codex CLI joins the review panel on every
+  review cycle of the autonomous full loop, parity with `/phx:review --codex`.
+  The flag propagates through both review paths (inline `/phx:review` and the
+  delegated `parallel-reviewer`, which now spawns `codex-reviewer` as a
+  conditional cross-model track). Consensus findings (a Claude agent **and**
+  codex) are marked HIGH CONFIDENCE. Requires the `codex` CLI; degrades to a
+  SKIPPED note when absent — never fails the cycle. Users without codex are
+  unaffected (flag-gated, no codex code paths without `--codex`).
+
 ### Changed
 
 ### Fixed
+
+- **`/phx:watch-pr --codex` no longer skips the `@codex review` trigger based
+  on the wrong signal** — the "already reviewed → don't post" gate is now
+  strictly scoped to the connector bot (`chatgpt-codex-connector[bot]`)
+  reacting to / reviewing the current head SHA. The repo's CI "Codex" check
+  and local `codex exec` / `/phx:review --codex` / `/phx:codex-loop` runs are
+  explicitly named as separate mechanisms that never satisfy the skip. With
+  `--codex`, the default is now unambiguously to POST the trigger (the flag is
+  that consent); skipping is the narrow exception.
 
 ## [2.14.1] - 2026-07-11
 

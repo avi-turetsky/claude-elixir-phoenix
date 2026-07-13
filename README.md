@@ -510,7 +510,7 @@ The plugin enforces critical rules and **stops with an explanation** if code wou
 
 | Command                 | Description                                                  |
 | ----------------------- | ------------------------------------------------------------ |
-| `/phx:full <feature>`   | Full autonomous cycle (plan, work, verify, review, compound) |
+| `/phx:full <feature>`   | Full autonomous cycle (plan, work, verify, review, compound); `--codex` adds a cross-model review track |
 | `/phx:brainstorm <topic>` | Adaptive requirements gathering before planning            |
 | `/phx:plan <input>`     | Create implementation plan with specialist agents            |
 | `/phx:plan --existing`  | Enhance existing plan with deeper research                   |
@@ -640,10 +640,10 @@ Available runtime tools: execute Elixir code, run SQL queries, get docs for your
 - **[ccrider](https://github.com/neilberkman/ccrider)** for session analysis (see Contributing)
 - **Ralph Wiggum Loop** for autonomous iteration across context resets
 - **[OpenAI Codex](https://developers.openai.com/codex)** as an external reviewer:
-  `/phx:review --codex` and `/phx:codex-loop` use the local codex CLI;
-  `/phx:watch-pr --codex` uses the Codex GitHub connector. Install the shared
-  Elixir review rubric into AGENTS.md via `/phx:init`. Users without codex
-  are unaffected — all codex behavior is flag-gated
+  `/phx:review --codex`, `/phx:full --codex`, and `/phx:codex-loop` use the
+  local codex CLI; `/phx:watch-pr --codex` uses the Codex GitHub connector.
+  Install the shared Elixir review rubric into AGENTS.md via `/phx:init`. Users
+  without codex are unaffected — all codex behavior is flag-gated
 
 ## Security
 

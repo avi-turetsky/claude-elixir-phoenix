@@ -83,9 +83,11 @@ WHILE unchecked tasks exist:
 
 ## Step 5: Review Phase
 
-Run `/phx:review`:
+Run `/phx:review` (append `--codex` when the full run was invoked with
+`--codex` — this forwards the flag to the existing `/phx:review --codex`
+path, adding the codex-reviewer track):
 
-Spawn 4 parallel review agents:
+Spawn 4 parallel review agents (5 with `--codex`):
 
 | Agent | Focus |
 |-------|-------|
@@ -93,6 +95,7 @@ Spawn 4 parallel review agents:
 | testing-reviewer | Test coverage, patterns |
 | security-analyzer | Security issues |
 | verification-runner | Full test suite |
+| codex-reviewer (`--codex` only) | Cross-model second opinion via Codex CLI; SKIPPED if CLI absent |
 
 **Exit condition**: Review complete.
 

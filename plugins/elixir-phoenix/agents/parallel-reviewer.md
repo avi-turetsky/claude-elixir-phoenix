@@ -81,8 +81,12 @@ The caller provides `output_dir` and optionally
   `summaries_dir=.claude/plans/{slug}/summaries/`
 - **Ad-hoc** (default): `output_dir=.claude/reviews/`
 
+The caller may also pass `codex: true` (from `/phx:full --codex`). When set,
+add the `codex-reviewer` track as a cross-model second opinion (Phase 1b /
+Phase 2). Absent or false → no codex track, zero codex code paths.
+
 When `summaries_dir` is provided, spawn context-supervisor
-after all 4 agents complete to deduplicate findings.
+after all tracks complete to deduplicate findings.
 
 ## Cross-Run Deduplication
 
@@ -145,6 +149,11 @@ the same Iron Law patterns in real-time on every Edit/Write.
 security-analyzer (if auth files changed). Skip testing-reviewer and
 verification-runner. This saves 30-50K tokens per small review.
 
+**Codex track** (only when `codex: true`): add `codex-reviewer` to the batch
+regardless of the lightweight path — the user explicitly opted in. It runs
+independently of the Claude agents (own CLI, own quota) and never counts
+toward Claude-side selection logic.
+
 ### Phase 2: Spawn Selected Specialist Agents in Parallel
 
 **CRITICAL**: Spawn selected agents in ONE Tool Use block with `run_in_background: true`.
@@ -170,7 +179,21 @@ use `general-purpose` impersonation — that was a v2.8.0 workaround for when
 specialists lacked Write. Real agents carry their domain checklists, skills,
 and Iron Laws automatically.
 
+**When `codex: true`, spawn `codex-reviewer` FIRST** (it's the slowest track
+at 1–5 min, so it overlaps the Claude agents; it self-preflights and SKIPs
+gracefully — never blocks the panel):
+
 ```
+Agent(subagent_type: "elixir-phoenix:codex-reviewer", mode: "bypassPermissions", prompt: """
+Codex CLI review of this diff; normalize findings.
+base_branch: {default branch, e.g. main}
+diff_files: {file_list}
+output_file: {output_dir}/codex.md
+Preflight `command -v codex`; missing/failed → write a SKIPPED note, never
+error. Don't pass custom instructions with --base (rubric is in AGENTS.md).
+Normalize P0/P1→BLOCKER, P2→WARNING, P3→SUGGESTION; tag source [codex].
+""", run_in_background: true)   # only when codex: true
+
 Agent(subagent_type: "elixir-phoenix:elixir-reviewer", mode: "bypassPermissions", prompt: """
 Review files for correctness, idioms, style, maintainability.
 
@@ -257,9 +280,16 @@ Priority: Findings grouped by severity
 (BLOCKER > WARNING > SUGGESTION), deduplicate findings
 that appear in multiple reviewer tracks, list affected
 files per finding.
+Consensus: a finding flagged by BOTH a Claude track and the
+codex track (source [codex]) is marked HIGH CONFIDENCE — keep
+it, never drop as a duplicate.
 Output file: review-consolidated.md
 """)
 ```
+
+The codex track (`codex.md`) may not exist — the codex-reviewer writes a
+SKIPPED note when the CLI is absent, and the supervisor should treat a
+missing/SKIPPED codex file as "no codex findings," not an error.
 
 Read `{summaries_dir}/review-consolidated.md` for synthesis.
 
@@ -297,6 +327,11 @@ Merge findings into unified report:
 ## Verification (verification-runner)
 
 {agent_4_findings}
+
+## Codex (codex-reviewer) — only when codex: true
+
+{codex_findings — or "SKIPPED: codex CLI not available" if the track skipped.
+Mark findings that also appear in a Claude track as HIGH CONFIDENCE.}
 
 ## Cross-Track Observations
 

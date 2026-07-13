@@ -210,14 +210,18 @@ that per-task compile checks miss (test failures, credo violations, type errors)
 
 ### REVIEWING
 
-1. Delegate to parallel-reviewer with output paths:
+1. Delegate to parallel-reviewer with output paths. When the `/phx:full`
+   run was invoked with `--codex`, pass `codex: true` so parallel-reviewer
+   spawns the codex-reviewer track as a cross-model second opinion (it
+   degrades to SKIPPED when the CLI is absent — never blocks the cycle):
 
    ```
    Agent(subagent_type: "parallel-reviewer", prompt: """
    Review changes for feature '{slug}'.
    Output directory: .claude/plans/{slug}/reviews/
    Summaries directory: .claude/plans/{slug}/summaries/
-   Run context-supervisor after all 4 tracks to deduplicate.
+   Run context-supervisor after all tracks to deduplicate.
+   codex: {true only if --codex was passed to /phx:full; otherwise omit}
 
    Changed files: {git diff --name-only}
    Diff: {relevant diff content}

@@ -317,7 +317,7 @@ The plugin works best when all layers are active: `/phx:init` for persistent rul
 | Command | Purpose |
 |---------|---------|
 | `/phx:quick <task>` | Fast implementation, skip ceremony |
-| `/phx:full <feature>` | Autonomous plan-work-review cycle |
+| `/phx:full <feature>` | Autonomous plan-work-review cycle; `--codex` adds a cross-model review track |
 | `/phx:investigate <bug>` | Structured bug investigation |
 | `/phx:verify` | Run all quality checks |
 | `/phx:research <topic>` | Research with parallel workers, Tidewave-first |

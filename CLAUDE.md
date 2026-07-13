@@ -767,6 +767,7 @@ When working on code, automatically consult relevant reference documentation bef
 | PR review comments | `/phx:pr-review` |
 | Waiting on CI / reviewers | `/phx:watch-pr` |
 | Codex review before PR (codex CLI installed) | `/phx:review --codex` |
+| Autonomous cycle + Codex second opinion | `/phx:full --codex` |
 | Fix until Codex review is clean | `/phx:codex-loop` |
 | Codex cloud review loop on a PR | `/phx:watch-pr N --codex` |
 | Update dependencies | `/phx:deps-update` |

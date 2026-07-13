@@ -2,7 +2,7 @@
 name: phx:full
 description: Use for large features spanning multiple contexts or autonomous end-to-end implementation. Runs the full plan-implement-review-compound cycle with specialist agents. NOT for executing an existing plan file — use /phx:work for that.
 effort: high
-argument-hint: <feature description>
+argument-hint: <feature description> [--codex]
 ---
 
 # Full Phoenix Feature Development
@@ -17,11 +17,21 @@ Cycles back automatically if review finds issues.
 /phx:full Add user authentication with magic links
 /phx:full Real-time notification system with Phoenix PubSub
 /phx:full Background job processing for email campaigns --max-cycles 5
+/phx:full Add magic-link auth --codex
 ```
 
 **Wrong input guard**: if the argument is a path to an existing plan file
 (`.claude/plans/*/plan.md`), do NOT re-plan it. Say so and run `/phx:work {path}`
 instead — the plan phase already happened.
+
+## Flags
+
+- **`--codex`** — Codex CLI joins the review panel on **every** review
+  cycle, matching `/phx:review --codex`.
+- **Requires** the `codex` CLI. A missing CLI degrades to a SKIPPED note —
+  the cycle never fails.
+- **Consensus** findings (flagged by a Claude agent **and** codex) are
+  marked HIGH CONFIDENCE.
 
 ## Workflow Overview
 
