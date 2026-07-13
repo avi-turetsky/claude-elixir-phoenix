@@ -9,6 +9,18 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [2.14.2] - 2026-07-13
+
+Patch release: extend the optional Codex reviewer to the autonomous full
+loop (`/phx:full --codex`) and fix a false-skip in the `/phx:watch-pr --codex`
+trigger gate surfaced in live use.
+
+### Added
+
 - **`/phx:full --codex`** — the Codex CLI joins the review panel on every
   review cycle of the autonomous full loop, parity with `/phx:review --codex`.
   The flag propagates through both review paths (inline `/phx:review` and the

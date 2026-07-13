@@ -78,12 +78,14 @@ that prevent the mistakes Elixir developers actually make in production.
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-> **v2.14.0** -- optional **Codex** external-reviewer integration: `/phx:review --codex` adds a
-> cross-model second opinion (consensus findings marked HIGH CONFIDENCE), `/phx:codex-loop` runs a
-> bounded review→fix→verify loop, and `/phx:watch-pr --codex` drives the Codex cloud review to
-> clean. Plus a CC 2.1.206 compatibility pass: the `Stop` hook now surfaces forgotten background
-> servers / scheduled jobs, and model docs move to Sonnet 5. The framework-agnostic **`catchup`**
-> companion plugin (`/catchup` return-from-absence briefing) has shipped since v2.10.0.
+> **v2.14.2** -- `/phx:full --codex` brings the optional **Codex** external
+> reviewer into every review cycle of the autonomous loop (parity with
+> `/phx:review --codex`), and the `/phx:watch-pr --codex` trigger gate is
+> hardened to fire on the connector bot's own review state only. Codex stays
+> fully opt-in across the suite: `/phx:review --codex` for a one-shot
+> cross-model second opinion (consensus findings marked HIGH CONFIDENCE),
+> `/phx:codex-loop` for a bounded review→fix→verify loop, and
+> `/phx:watch-pr --codex` to drive the Codex cloud review to clean.
 > [Issues](https://github.com/oliver-kriska/claude-elixir-phoenix/issues) welcome.
 
 ## Installation
