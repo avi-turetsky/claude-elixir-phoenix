@@ -78,14 +78,14 @@ that prevent the mistakes Elixir developers actually make in production.
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-> **v2.14.2** -- `/phx:full --codex` brings the optional **Codex** external
-> reviewer into every review cycle of the autonomous loop (parity with
-> `/phx:review --codex`), and the `/phx:watch-pr --codex` trigger gate is
-> hardened to fire on the connector bot's own review state only. Codex stays
-> fully opt-in across the suite: `/phx:review --codex` for a one-shot
-> cross-model second opinion (consensus findings marked HIGH CONFIDENCE),
-> `/phx:codex-loop` for a bounded review→fix→verify loop, and
-> `/phx:watch-pr --codex` to drive the Codex cloud review to clean.
+> **v2.14.3** -- the `ecto-patterns` skill now documents the
+> `Repo.transaction/1` changeset error-handling footgun: a bare
+> `{:ok, _} = Repo.update(cs)` inside the callback form raises `MatchError`,
+> which rolls back and **re-raises** — crashing the caller and losing the
+> changeset's validation errors. Covers the `case` + `Repo.rollback/1` and
+> `with ... else` fixes, and points at `Repo.transact/1` / `Ecto.Multi` as the
+> footgun-free forms. Thanks to [@ndrean](https://github.com/ndrean) for the
+> proposal.
 > [Issues](https://github.com/oliver-kriska/claude-elixir-phoenix/issues) welcome.
 
 ## Installation

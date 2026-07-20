@@ -9,6 +9,17 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [2.14.3] - 2026-07-20
+
+Patch release: document the `Repo.transaction/1` changeset error-handling
+footgun in the `ecto-patterns` skill (issue #76, proposed by @ndrean).
+
+### Added
+
 - **`ecto-patterns`: `Repo.transaction/1` changeset error handling** — new
   reference section (and an anti-pattern row in the auto-loaded SKILL.md) on the
   bare-match footgun inside `Repo.transaction(fn -> ... end)`: `{:ok, _} =
