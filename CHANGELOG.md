@@ -9,6 +9,12 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Optional runtime smoke harness** — `make codex-runtime-smoke` and
+  `make opencode-runtime-smoke` validate locally generated targets, native Codex
+  installation/enabled state, native OpenCode discovery, all 51 installed
+  skills, retained resources and modes, and fresh-process removal in isolated
+  temporary homes without credentials or model calls.
+
 - **Generated-target golden snapshots** — CI now pins aggregate path, byte, and
   executable-mode digests for Amp, Codex, Pi, and OpenCode before shared
   generator refactoring. Target changes require an explicit reviewed snapshot
