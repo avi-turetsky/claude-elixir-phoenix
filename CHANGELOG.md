@@ -36,6 +36,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **Portable plan/work workflow overlays** — generated Codex, Pi, and OpenCode
+  `phx-plan` and `phx-work` skills now use scratchpad research checklists, plan
+  checkboxes, and `progress.md` instead of Claude-only named agents, task APIs,
+  question tools, hooks, or MCP identifiers. Optional native subagents and
+  Tidewave retain complete same-session sequential fallbacks. Canonical Claude
+  skills and the frozen Amp target are unchanged; this does not claim parity for
+  other generated workflows.
+
 - **Codex skill descriptions now preserve routing signal within a compact
   budget** — generated descriptions are capped at 120 characters while retaining
   key capability and trigger cues. Route-sensitive skills keep explicit negative

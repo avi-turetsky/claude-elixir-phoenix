@@ -86,6 +86,14 @@ checks available requirements, cites file/line evidence, assigns severity,
 deduplicates findings, and returns a verdict. It may use native Codex subagents
 for independent tracks, but a sequential same-session review is fully supported.
 
+`$elixir-phoenix:phx-plan` and `$elixir-phoenix:phx-work` also have focused
+portable adaptations. Planning tracks research in the plan scratchpad and
+preserves the canonical `.claude/plans/{slug}/plan.md` schema. Work uses plan
+checkboxes plus `progress.md` for ordered, resumable execution and verification.
+Generic native subagents and Tidewave remain optional; the same-session
+sequential path is complete. These adaptations do not provide hooks or a
+separate task UI.
+
 ## Update
 
 Codex does not currently expose a separate plugin-update command. Refresh the
@@ -145,7 +153,8 @@ Supported now:
 - native plugin installation, `/skills`, explicit `$skill-name`, and implicit
   skill selection;
 - Codex-specific `$elixir-phoenix:phx-investigate` and
-  `$elixir-phoenix:phx-review` workflow adaptations.
+  `$elixir-phoenix:phx-review`, `$elixir-phoenix:phx-plan`, and
+  `$elixir-phoenix:phx-work` workflow adaptations.
 - compact discovery descriptions generated from canonical capability and trigger
   text to reduce shared skills-context pressure.
 
