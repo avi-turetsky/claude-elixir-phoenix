@@ -17,8 +17,9 @@ Code plugin.
 **Using Codex?** Install the native generated skills plugin for all 51 skills,
 including `$elixir-phoenix:phx-investigate` and
 `$elixir-phoenix:phx-review` workflows. See
-[Use with Codex](#use-with-codex); hooks, custom agents, and bundled Tidewave MCP
-are intentionally not included yet.
+[Use with Codex](#use-with-codex); a trust-gated destructive-command safeguard
+is included, while custom agents and bundled Tidewave MCP are intentionally not
+included yet.
 
 **Using Pi?** Install the native generated skills package for all 51 skills,
 including Pi-compatible `/skill:phx-investigate` and `/skill:phx-review`
@@ -221,10 +222,13 @@ Start a fresh Codex session, then invoke workflows explicitly with
 `$elixir-phoenix:phx-investigate` or `$elixir-phoenix:phx-review`, browse them
 with `/skills`, or let Codex select a relevant skill from its description. Codex
 namespaces plugin skills; unqualified `$phx-investigate` is not an explicit
-alias. This edition currently ships skills and bundled skill resources only—not
-Claude hooks, custom agents, plugin-root instructions, or Tidewave MCP
-configuration. See the complete [Codex guide](docs/codex.md) for updates,
-uninstall, isolation, troubleshooting, tested version, and capability details.
+alias. This edition also ships one synchronous native hook that blocks destructive
+Ecto resets/drops, unguarded force pushes, and accidental `MIX_ENV=prod mix`
+commands. Codex requires users to review and trust plugin hooks before they run;
+the skills work without it. Custom agents, plugin-root instructions, the remaining
+Claude hooks, and Tidewave MCP remain deferred. See the complete
+[Codex guide](docs/codex.md) for updates, uninstall, isolation, troubleshooting,
+tested version, and capability details.
 
 ### Use with Pi
 

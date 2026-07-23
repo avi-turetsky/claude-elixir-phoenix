@@ -4,11 +4,12 @@ The Codex edition is a generated native plugin containing all 51 canonical
 Elixir/Phoenix skills and their complete resource trees. It was tested with
 `codex-cli 0.145.0`.
 
-This is a skills baseline, not full Claude Code feature parity. The generator
+This is a skills-first baseline, not full Claude Code feature parity. The generator
 normalizes names (`phx:review` → `phx-review`), rewrites cross-skill and resource
 paths, converts Claude command references to Codex `$skill-name` syntax, and
 applies Codex-only workflow overlays without changing canonical Claude files.
-It also projects descriptions to at most 120 characters while preserving key
+It also projects one synchronous native safety hook from the canonical plugin.
+It projects descriptions to at most 120 characters while preserving key
 capability and trigger cues. Route-sensitive skills retain explicit exclusions
 to avoid collisions. This reduces pressure on Codex's shared skills catalog
 budget without changing canonical descriptions or skill bodies.
@@ -91,22 +92,36 @@ portable adaptations. Planning tracks research in the plan scratchpad and
 preserves the canonical `.claude/plans/{slug}/plan.md` schema. Work uses plan
 checkboxes plus `progress.md` for ordered, resumable execution and verification.
 Generic native subagents and Tidewave remain optional; the same-session
-sequential path is complete. These adaptations do not provide hooks or a
-separate task UI.
+sequential path is complete. These adaptations do not require hooks or a separate
+task UI.
 
-`$phx-plan` and `$phx-work` also have focused portable adaptations. Planning
-tracks research in the plan scratchpad and preserves the canonical
-`.claude/plans/{slug}/plan.md` schema. Work uses plan checkboxes plus
-`progress.md` for ordered, resumable execution and verification. Generic native
-subagents and Tidewave remain optional; the same-session sequential path is
-complete. These adaptations do not provide hooks or a separate task UI.
+`$elixir-phoenix:phx-pr-review` uses an available GitHub connector or
+authenticated `gh`, keeps triage read-only unless fixes are explicitly approved,
+and reports mutations only after confirmed replies/resolutions.
+`$elixir-phoenix:phx-full` preserves the gated, bounded plan → work → verify →
+read-only review → compound lifecycle by invoking portable skills or executing
+them sequentially in-session. Other workflows remain baseline projections and
+may not be fully portable.
 
-`$phx-pr-review` uses an available GitHub connector or authenticated `gh`, keeps
-triage read-only unless fixes are explicitly approved, and reports mutations only
-after confirmed replies/resolutions. `$phx-full` preserves the gated, bounded
-plan → work → verify → read-only review → compound lifecycle by invoking portable
-skills or executing them sequentially in-session. Other workflows remain baseline
-projections and may not be fully portable.
+## Optional Native Safety Hook
+
+The generated plugin includes one synchronous `PreToolUse` command hook for
+Codex's `Bash` tool. It blocks:
+
+- `mix ecto.reset` and `mix ecto.drop` in Elixir projects;
+- unguarded `git push --force` / `git push -f` while allowing
+  `--force-with-lease`;
+- accidental `MIX_ENV=prod mix ...` commands in Elixir projects.
+
+Codex discovers plugin hooks but does not silently trust them. Review and enable
+the hook through `/hooks`; if it is untrusted, disabled, or disallowed by policy,
+all skills still work. Plugin updates that change the hook may require another
+trust review. Do not use `--dangerously-bypass-hook-trust` for normal sessions.
+
+Only this audited synchronous safeguard is projected. The canonical Claude hook
+file contains runtime-specific conditions, events, and asynchronous handlers
+that are intentionally not copied. Codex 0.145.0 skips general async hooks;
+Claude-only fields and events are omitted rather than relied upon.
 
 ## Update
 
@@ -172,10 +187,11 @@ Supported now:
   `$elixir-phoenix:phx-full` workflow adaptations.
 - compact discovery descriptions generated from canonical capability and trigger
   text to reduce shared skills-context pressure.
+- an optional, trust-gated native safety hook for destructive shell commands.
 
 Intentionally deferred:
 
-- Codex plugin hooks;
+- the remaining Claude Code hooks, including async and unsupported events;
 - generated or automatically installed custom-agent TOMLs;
 - bundled Tidewave MCP configuration;
 - plugin-root `AGENTS.md` or copied `CLAUDE.md` instructions;
@@ -205,6 +221,14 @@ Start a new Codex session after install/reinstall. In the TUI, use `/skills` and
 search for `phx-review`. If the marketplace cache is stale, use the clean
 reinstall sequence above.
 
+### The safety hook does not run
+
+Open `/hooks` in a fresh Codex session and review the plugin hook's trust state.
+The hook is optional and may remain disabled under user or enterprise policy.
+If Codex reports skipped async hooks or invalid hook output, remove stale older
+plugin experiments and clean-reinstall this generated plugin; its hook config has
+no async handler or Claude-only `if` field.
+
 ### A branch install appears to use `main`
 
 Remove the marketplace and add it again with the desired `--ref`, then reinstall:
@@ -220,8 +244,9 @@ codex plugin add elixir-phoenix@oliver-kriska
 
 ## Generated Target Maintenance
 
-Canonical sources live in `plugins/elixir-phoenix/skills`; do not hand-edit
-`targets/codex`.
+Canonical skill sources live in `plugins/elixir-phoenix/skills`; the native
+safeguard comes from `plugins/elixir-phoenix/hooks/scripts/block-dangerous-ops.sh`.
+Do not hand-edit `targets/codex`.
 
 ```bash
 make codex-skills           # regenerate targets/codex
