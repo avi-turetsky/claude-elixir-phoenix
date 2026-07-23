@@ -9,6 +9,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Canonical multi-runtime support matrix** — documents native invocation,
+  distribution, supported and deferred capabilities, generated-target
+  acceptance requirements, and isolated Codex/OpenCode smoke-test contracts.
+
 - **All-runtime generated skills sync command** — contributors can run
   `make generated-skills-sync` to regenerate and validate Amp, Codex, Pi, and
   OpenCode in sequence, then validate the reviewed golden snapshots.

@@ -14,6 +14,9 @@ capability and trigger cues. Route-sensitive skills retain explicit exclusions
 to avoid collisions. This reduces pressure on Codex's shared skills catalog
 budget without changing canonical descriptions or skill bodies.
 
+See the [runtime support matrix](runtime-support.md) for a concise comparison
+with Claude Code, Amp, Pi, and OpenCode.
+
 ## Install from GitHub
 
 Marketplace registration and plugin installation are separate operations:
