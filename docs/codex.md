@@ -94,6 +94,20 @@ Generic native subagents and Tidewave remain optional; the same-session
 sequential path is complete. These adaptations do not provide hooks or a
 separate task UI.
 
+`$phx-plan` and `$phx-work` also have focused portable adaptations. Planning
+tracks research in the plan scratchpad and preserves the canonical
+`.claude/plans/{slug}/plan.md` schema. Work uses plan checkboxes plus
+`progress.md` for ordered, resumable execution and verification. Generic native
+subagents and Tidewave remain optional; the same-session sequential path is
+complete. These adaptations do not provide hooks or a separate task UI.
+
+`$phx-pr-review` uses an available GitHub connector or authenticated `gh`, keeps
+triage read-only unless fixes are explicitly approved, and reports mutations only
+after confirmed replies/resolutions. `$phx-full` preserves the gated, bounded
+plan → work → verify → read-only review → compound lifecycle by invoking portable
+skills or executing them sequentially in-session. Other workflows remain baseline
+projections and may not be fully portable.
+
 ## Update
 
 Codex does not currently expose a separate plugin-update command. Refresh the
@@ -154,7 +168,8 @@ Supported now:
   skill selection;
 - Codex-specific `$elixir-phoenix:phx-investigate` and
   `$elixir-phoenix:phx-review`, `$elixir-phoenix:phx-plan`, and
-  `$elixir-phoenix:phx-work` workflow adaptations.
+  `$elixir-phoenix:phx-work`, `$elixir-phoenix:phx-pr-review`, and
+  `$elixir-phoenix:phx-full` workflow adaptations.
 - compact discovery descriptions generated from canonical capability and trigger
   text to reduce shared skills-context pressure.
 
