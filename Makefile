@@ -19,7 +19,7 @@ lint-fix: ## Auto-fix markdown lint errors
 eval: ## Quick: lint + score changed skills/agents only
 	@bash lab/eval/run_eval.sh --changed
 
-eval-all: ## Score all 50 skills + 25 agents (structural)
+eval-all: ## Score all 51 skills + 26 agents (structural)
 	@bash lab/eval/run_eval.sh --all
 
 eval-fix: ## Auto-fix lint + show failures + suggest autoresearch command

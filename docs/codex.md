@@ -38,14 +38,14 @@ Start a fresh Codex session after installation. The marketplace entry resolves
 testing uses the target committed on the requested ref rather than silently
 falling back to `main`.
 
-To test a feature branch before merge:
+To test a feature branch or tag before merge:
 
 ```bash
 codex plugin remove elixir-phoenix@oliver-kriska 2>/dev/null || true
 codex plugin marketplace remove oliver-kriska 2>/dev/null || true
 codex plugin marketplace add \
   oliver-kriska/claude-elixir-phoenix \
-  --ref feat/codex-skills-plugin
+  --ref <branch-or-tag>
 codex plugin add elixir-phoenix@oliver-kriska
 ```
 

@@ -27,8 +27,10 @@ workflows. See [Use with Pi](#use-with-pi); extensions, prompt templates, MCP,
 and custom agents are intentionally not included yet.
 
 **Using OpenCode?** Install the generated skills-only target for all 51 skills,
-including `/phx-investigate` and `/phx-review`. See
-[Use with OpenCode](#use-with-opencode) and the [OpenCode guide](docs/opencode.md).
+including `phx-investigate` and `phx-review`. In the tested OpenCode 1.17.2 setup,
+they are also available as `/phx-investigate` and `/phx-review`; the skill tool
+is the portable explicit interface. See [Use with OpenCode](#use-with-opencode) and the
+[OpenCode guide](docs/opencode.md).
 
 Compare native invocation, installation, and deliberately deferred capabilities
 in the canonical [runtime support matrix](docs/runtime-support.md). Generated
@@ -61,8 +63,8 @@ that prevent the mistakes Elixir developers actually make in production.
 │  ⚗  Elixir/Phoenix Plugin for Claude Code                           │
 │                                                                     │
 │  ┌──────────┬──────────┬──────────┬──────────┬──────────┐           │
-│  │    26    │    51    │   139    │    31    │    26    │           │
-│  │  Agents  │  Skills  │   Refs   │  Hooks   │Iron Laws │           │
+│  │    26    │    51    │   140    │    30    │    26    │           │
+│  │  Agents  │  Skills  │   Refs   │Hook Regs │Iron Laws │           │
 │  └──────────┴──────────┴──────────┴──────────┴──────────┘           │
 │                                                                     │
 │  AGENTS                          COMMANDS                           │
@@ -263,13 +265,14 @@ git -C .opencode/skills/elixir-phoenix sparse-checkout set targets/opencode
 ```
 
 Start a fresh session and explicitly say “Use the skill tool to load the
-phx-investigate skill, then …”. Tested OpenCode 1.17.2 also accepts
-`/phx-investigate` and `/phx-review`, but the skill tool is the documented
-portable interface. OpenCode
+phx-investigate skill, then …”. In the tested OpenCode 1.17.2 setup,
+`/phx-investigate` and `/phx-review` also work when they do not collide with
+existing commands, but the skill tool is the documented portable interface. OpenCode
 selects the model implicitly. This target contains skills and complete bundled
-resources only—not hooks, custom agents, or Tidewave MCP configuration. The two
-flagship workflows are explicitly adapted; some other skills may still describe
-optional Claude-specific orchestration APIs. See the [OpenCode installation and
+resources only—not hooks, custom agents, or Tidewave MCP configuration.
+Investigation, review, plan, work, PR-review, and full-lifecycle workflows are
+explicitly adapted; some other skills may still describe optional
+Claude-specific orchestration APIs. See the [OpenCode installation and
 support guide](docs/opencode.md) for global setup, updates, uninstall,
 feature-branch review, discovery debugging, and limitations.
 
@@ -795,10 +798,10 @@ This plugin runs skills, agents, and hooks inside Claude Code with your tool
 permissions, so it ships a verifiable security posture:
 
 - **Independently scanned** with [NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector)
-  (static analysis, **zero data egress**): **65 / 75 components SAFE**, 6 CAUTION,
+  (static analysis, **zero data egress**): **66 / 77 components SAFE**, 7 CAUTION,
   4 DO_NOT_INSTALL raw. The four DO_NOT_INSTALL components are documented false
   positives with reviewed baselines, so **after baselines 0 remain and the scan
-  gate passes** (the 6 CAUTION-tier components stay documented). A static scanner
+  gate passes** (the 7 CAUTION-tier components stay documented). A static scanner
   flags the *safety-enforcing* and *security-auditing* skills precisely because
   they name dangerous patterns in order to forbid or detect them (e.g. the line
   literally reads `NEVER bypass security checks for speed`).
@@ -821,7 +824,7 @@ make help             # Show all available commands
 make eval             # Quick: lint + score changed skills/agents only
 make eval-all         # Full structural: all 51 skills + all 26 agents
 make eval-fix         # Auto-fix lint + show failures + suggest autoresearch
-make test             # 75 pytest tests for eval framework
+make test             # 207 pytest tests for eval framework and port tooling
 make generated-skills-sync # Regenerate and verify all four runtime targets
 make ci               # Full CI: lint + test + validate + eval + security (same as GitHub Actions)
 ```

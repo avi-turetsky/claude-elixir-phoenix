@@ -5,7 +5,9 @@ acceptance used `opencode/north-mini-code-free`; skill behavior still depends on
 the model selected by each user. OpenCode recursively discovers `SKILL.md` files
 below the documented `.opencode/skills/` project path and equivalent global
 config root. It does not provide a native Git or package installer for skills,
-so installation is a sparse Git checkout.
+so installation is a sparse Git checkout. The nested checkout layout relies on
+recursive discovery verified with OpenCode 1.17.2; the documented portable
+layout places each skill directly under `.opencode/skills/`.
 
 See the [runtime support matrix](runtime-support.md) for a concise comparison
 with Claude Code, Amp, Codex, and Pi.
@@ -63,8 +65,9 @@ resources are copied byte-for-byte.
 
 This is a focused baseline, not full Claude Code parity. It does not install
 hooks, custom agents, separate command definitions, MCP servers, AGENTS.md, or
-configuration. OpenCode 1.17.2 also exposes discovered skills as slash commands;
-the documented skill-tool prompt above is the portable explicit invocation.
+configuration. OpenCode 1.17.2 also projects discovered skills as slash commands
+when their names do not collide with existing commands; the documented
+skill-tool prompt above is the portable explicit invocation.
 Native OpenCode subagents are an optional optimization in the flagship
 workflows, and the sequential fallback is valid. Tidewave is optional and its
 MCP setup is deferred. Exact Claude colon syntax such as `/phx:review` is not

@@ -91,4 +91,4 @@ make eval              # confirm pass
 ```
 
 If only one skill or agent changed, `make eval` runs in <30 s. The
-full `make eval-all` over 50 skills + 25 agents takes ~5 min.
+full `make eval-all` over 51 skills + 26 agents takes ~5 min.

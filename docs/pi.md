@@ -27,10 +27,10 @@ Pi clones Git packages into its package cache. Start a fresh session after
 installation. The repository root manifest points Pi at the committed generated
 skills in `targets/pi/skills`.
 
-To test a branch before merge, pin that ref:
+To test a branch, tag, or commit before merge, configure that ref:
 
 ```bash
-pi install git:github.com/oliver-kriska/claude-elixir-phoenix@feat/pi-skills-package
+pi install git:github.com/oliver-kriska/claude-elixir-phoenix@<branch-tag-or-commit>
 ```
 
 ## Use skills
@@ -62,11 +62,11 @@ Update the installed Git package:
 pi update git:github.com/oliver-kriska/claude-elixir-phoenix
 ```
 
-Pi treats every explicit `@ref` as pinned to that configured ref name. Updating
-reconciles the checkout to that same ref; a moving branch name can therefore
-resolve to a newer commit, while a tag or commit SHA normally remains fixed.
-Pi does not model branch names as unpinned dependencies. Run
-`pi install ...@new-ref` to deliberately change the configured ref.
+Pi accepts an explicit `@ref` as a branch, tag, or commit. Updates keep targeting
+that configured ref: a moving branch—and a moved tag—can resolve to a newer
+commit, while a commit SHA remains fixed. Run `pi install ...@new-ref` to
+deliberately change the configured target.
+
 Remove the user-level package with:
 
 ```bash

@@ -20,7 +20,7 @@ When analyzing CC changelog entries, map them to specific plugin components:
 
 | CC Change Pattern | Plugin Files to Check |
 |-------------------|-----------------------|
-| New frontmatter fields | All 25 agents in `plugins/elixir-phoenix/agents/*.md` |
+| New frontmatter fields | All 26 agents in `plugins/elixir-phoenix/agents/*.md` |
 | `model:` value changes | Agents using specific model values |
 | `permissionMode:` changes | All agents (all use `bypassPermissions`) |
 | `effort:` level changes | All agents with effort levels |
@@ -75,6 +75,7 @@ When analyzing CC changelog entries, map them to specific plugin components:
 ### BREAKING — Requires Immediate Action
 
 Flag as BREAKING when CC changelog says:
+
 - "Breaking change" explicitly
 - "Removed" a feature/parameter we use
 - "Changed" behavior of a hook event we rely on
@@ -86,6 +87,7 @@ Flag as BREAKING when CC changelog says:
 ### OPPORTUNITY — New Feature We Could Use
 
 Flag as OPPORTUNITY when:
+
 - New hook event added (check "Available but NOT used" list in memory)
 - New agent frontmatter field that could improve our agents
 - New plugin capability (`userConfig`, new `${}` variables)
@@ -97,6 +99,7 @@ Flag as OPPORTUNITY when:
 ### RELEVANT FIX — CC Fixed Something We Workaround
 
 Flag as RELEVANT FIX when:
+
 - CC fixed a bug we documented in memory or CLAUDE.md
 - CC fixed a behavior our hooks explicitly handle
 - Error mentioned in our compound solutions
@@ -106,6 +109,7 @@ Flag as RELEVANT FIX when:
 ### DEPRECATION — Migration Needed
 
 Flag as DEPRECATION when:
+
 - CC deprecated a tool/parameter we use
 - CC will remove something in a future version
 - CC recommends migrating from X to Y (and we use X)
@@ -135,6 +139,7 @@ After analysis, update `reference_cc_source_internals.md` with:
 ```
 
 Add new sections for:
+
 - New hook events → "Available but NOT used" list
 - New agent frontmatter → Agent Frontmatter section
 - New plugin capabilities → Plugin Capabilities section
