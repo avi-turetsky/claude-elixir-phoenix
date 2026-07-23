@@ -9,6 +9,12 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **All-runtime generated skills sync command** — contributors can run
+  `make generated-skills-sync` to regenerate and validate Amp, Codex, Pi, and
+  OpenCode in sequence, then validate the reviewed golden snapshots.
+  Target-specific sync and validation commands remain the authoritative
+  implementation and keep failures attributable.
+
 - **Codex native destructive-command safeguard** — the generated Codex plugin
   now includes one trust-gated, synchronous `PreToolUse` hook that reuses the
   canonical audited blocker for destructive Ecto operations, unguarded force
