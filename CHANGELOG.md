@@ -37,6 +37,12 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **Portable command rewriting now requires complete invocation tokens** — Amp,
+  Codex, Pi, and OpenCode projections leave filesystem paths, URLs, uppercase
+  names, underscored suffixes, and malformed namespace wildcards unchanged. Pi
+  now emits native `/skill:*` syntax directly instead of passing through a
+  path-like intermediate form.
+
 - **Learning destination and skill-loading documentation** — project-keyed
   auto-memory is no longer described as applying to every Elixir project, and
   the intro now documents native `paths:` frontmatter as a file-path gate.
