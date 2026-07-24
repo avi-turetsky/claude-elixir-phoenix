@@ -55,7 +55,7 @@ without Tidewave, named custom agents, or Claude-only task APIs.
 | Amp | Command palette → `skill: invoke`, or explicitly request the skill in the prompt | Direct GitHub Agent Skills install | [Amp guide](amp.md) |
 | Codex | `$elixir-phoenix:phx-investigate`, `$elixir-phoenix:phx-review` | Native Codex Git marketplace plugin | [Codex guide](codex.md) |
 | Pi | `/skill:phx-investigate`, `/skill:phx-review` | Native Pi Git package | [Pi guide](pi.md) |
-| OpenCode | Ask the skill tool to load the skill; 1.17.2 also accepts `/phx-investigate` and `/phx-review` | Sparse Git checkout | [OpenCode guide](opencode.md) |
+| OpenCode | Ask the skill tool to load the skill; in the tested 1.17.2 setup, `/phx-investigate` and `/phx-review` also work | Sparse Git checkout | [OpenCode guide](opencode.md) |
 
 Codex plugin skills are qualified by the plugin manifest name. OpenCode 1.17.2
 does not provide a native Git skills-package installer, so a sparse checkout is
@@ -68,8 +68,8 @@ update, clean reinstall, ref change, and uninstall affect newly started
 processes. Standalone list/debug commands are already fresh processes; they do
 not refresh the catalog of an existing interactive session.
 
-The current local acceptance baseline is Amp 0.0.1784796539-g051498, Codex CLI
-0.145.0, Pi 0.81.1, and OpenCode 1.17.2.
+The local acceptance run recorded on 2026-07-23 used Amp
+0.0.1784809706-g96cc8a, Codex CLI 0.145.0, Pi 0.81.1, and OpenCode 1.17.2.
 
 ## Runtime-specific boundaries
 
@@ -156,6 +156,11 @@ Do not pass `--ignore-user-config` when testing Codex plugin hooks: that option
 suppresses the installed plugin hooks as well as unrelated user configuration.
 An isolated `HOME` and `CODEX_HOME` provide the required separation without
 disabling the behavior under test.
+
+For Pi, isolate `HOME`, `PI_CODING_AGENT_DIR`, and
+`PI_CODING_AGENT_SESSION_DIR`; remove inherited `PI_PACKAGE_DIR`. Set
+`PI_OFFLINE=1`, `PI_SKIP_VERSION_CHECK=1`, and `PI_TELEMETRY=0` to keep package
+discovery model-free and offline.
 
 For OpenCode, isolate every XDG root in addition to `HOME`:
 

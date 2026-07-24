@@ -19,7 +19,7 @@ machine — no skill or agent content leaves the local process.
 
 ```bash
 pipx install --python python3.13 "git+https://github.com/NVIDIA/skillspector.git"
-lab/skillspector/scan.sh        # scans all 75 components, exit 0 = clean
+lab/skillspector/scan.sh        # scans all 77; exit 0 = baseline-aware gate passes
 ```
 
 Or scan any single component directly:
@@ -30,12 +30,12 @@ skillspector scan plugins/elixir-phoenix/skills/work/ --no-llm
 
 ## Results
 
-Scanned with SkillSpector v2.x, static analysis only:
+Raw results without reviewed baselines, using SkillSpector v2.x static analysis:
 
 | Tier | Skills | Agents | Total |
 |------|-------:|-------:|------:|
-| SAFE (score 0–20)     | 42 | 23 | **65 / 75** |
-| CAUTION (21–50)       |  5 |  1 |  6 |
+| SAFE (score 0–20)     | 42 | 24 | **66 / 77** |
+| CAUTION (21–50)       |  6 |  1 |  7 |
 | DO_NOT_INSTALL (51+)  |  3 |  1 |  4 |
 
 The 4 `DO_NOT_INSTALL` components are **documented false positives** — the scanner
@@ -43,7 +43,7 @@ is a static regex/AST tool, so it's negation-blind and context-blind: it matches
 a dangerous keyword without seeing the prohibition or detection-context around
 it. Each is recorded in a reviewed baseline under
 [`lab/skillspector/baselines/`](lab/skillspector/baselines/); after baselines
-**0 `DO_NOT_INSTALL` findings remain and the scan gate passes (exit 0)**. The 6
+**the repository scan reports 0 components flagged and exits 0**. The 7
 `CAUTION`-tier components (scores 21–32, all below the 51 `DO_NOT_INSTALL`
 threshold) stay `CAUTION` and are not baselined — they are documented below.
 
@@ -64,7 +64,7 @@ to forbid or find them.
 
 ### CAUTION-tier components (not baselined)
 
-Six components land in the `CAUTION` band (21–50). They are left un-baselined —
+Seven components land in the `CAUTION` band (21–50). They are left un-baselined —
 none crosses the `DO_NOT_INSTALL` threshold — and each is a benign artifact of
 the plugin's own workflow design:
 
@@ -76,10 +76,12 @@ the plugin's own workflow design:
 | `skills/brief` | 21 | AS1 agent-config access | Reads `.claude/plans/{slug}/plan.md` to explain a plan. |
 | `skills/compound` | 21 | RA1 self-modification | Writes solution docs into `.claude/solutions/`. |
 | `skills/recall` | 21 | AS1 agent-config access | Reads `.claude/solutions/` and past-session paths for archaeology. |
+| `skills/learn-from-fix` | 21 | AS1 agent-config access | Reads project and user Claude guidance to identify and persist a corrected convention. |
 
-The shared trigger is that these skills legitimately read and write the plugin's
-own `.claude/` artifact directories — the very state machine the workflow runs
-on — which the scanner flags as generic "agent config directory access."
+The six skill entries legitimately read or write the plugin's own `.claude/`
+artifacts, which the scanner treats as generic agent-config access or
+self-modification. The agent entry has the separate anti-refusal match shown in
+the table.
 
 ## What this plugin does and doesn't do
 

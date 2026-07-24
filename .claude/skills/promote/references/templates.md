@@ -34,6 +34,7 @@ Use Unicode box-drawing characters for a polished look. Every line must be **exa
 ### Column widths
 
 The table area between `╞` borders has 3 columns:
+
 - Col 1 (Change): 35 chars
 - Col 2 (Before): 10 chars
 - Col 3 (After): 23 chars
@@ -110,7 +111,10 @@ Best used opportunistically, not for every release.
 
 ### Pattern E: Long-Form (v2.6.0 — 150 likes, best overall)
 
-**7-9 tweets** covering a major milestone. Data-heavy throughout. Works when the content is genuinely excellent (self-improving skills, 0/8 → 8/8 eval scores). Risk: longer threads lose casual readers. Only use for truly big releases.
+**7-9 tweets** covering a major milestone. Data-heavy throughout. Works when
+the content is genuinely excellent (self-improving skills, 0/8 → 8/8 eval
+scores). Risk: longer threads lose casual readers. Only use for truly big
+releases.
 
 ## Top-Performing Elements (from analytics)
 
@@ -120,7 +124,7 @@ Best used opportunistically, not for every release.
 | Concrete numbers | High trust signal | "32/40 descriptions rewritten under 200 chars" |
 | Real incident stories | High bookmarks | "72k+ orphaned jobs before someone caught it" |
 | Transparent methodology | Builds authority | "Validated across 75 real sessions" |
-| Eval scores | Credibility closer | "All 50 skills pass eval (avg 0.988)" |
+| Eval scores | Credibility closer | "All 51 skills pass eval (avg 0.986)" |
 
 ## Anti-Patterns (from analytics)
 
