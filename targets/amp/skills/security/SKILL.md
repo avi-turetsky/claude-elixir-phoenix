@@ -19,6 +19,7 @@ Quick reference for security patterns in Elixir/Phoenix.
 4. **AUTHORIZE EVERYWHERE** — Check in contexts AND re-validate in LiveView events
 5. **ESCAPE BY DEFAULT** — Never use `raw/1` with untrusted content
 6. **SECRETS NEVER IN CODE** — All secrets in `runtime.exs` from env vars
+7. **LIVEVIEW EVENT PARAMS ARE UNTRUSTED** — Users can alter forms, hooks, and every `phx-value-*` in DevTools. Validate and authorize against server-side state before acting
 
 ## Quick Patterns
 
@@ -43,6 +44,7 @@ end
 ### LiveView Authorization (CRITICAL)
 
 ```elixir
+# `id` is client input even when it came from phx-value-id.
 # RE-AUTHORIZE IN EVERY EVENT HANDLER
 def handle_event("delete", %{"id" => id}, socket) do
   post = Blog.get_post!(id)
@@ -56,6 +58,11 @@ def handle_event("delete", %{"id" => id}, socket) do
   end
 end
 ```
+
+Rendered LiveView events can expose IDs in HTML and websocket payloads. That is
+not automatically a vulnerability: treat IDs as public identifiers, never as
+proof of access. Use opaque references only when the identifier itself must not
+be disclosed, and still perform server-side authorization.
 
 ### SQL Injection Prevention
 
@@ -91,6 +98,7 @@ from(u in User, where: fragment("name = '#{user_input}'"))
 | `<%= raw @user_comment %>` | `<%= @user_comment %>` |
 | Hardcoded secrets in config | `runtime.exs` from env vars |
 | Auth only in mount | Re-auth in every `handle_event` |
+| Trusting `phx-value-*` or hidden IDs | Load server-side state and authorize it |
 
 ## References
 

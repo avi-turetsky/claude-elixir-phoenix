@@ -97,6 +97,43 @@ render_async(view)
 assert render(view) =~ "Data"  # Works
 ```
 
+### Trusting LiveView Event Parameters
+
+**Mistake**: Treating `phx-value-*`, form values, or hook payloads as trusted
+because the server rendered them
+
+**Pattern**: Do NOT authorize from client-supplied IDs - instead load the
+resource and authorize it against the current user and server-side state
+
+**Example**:
+
+```elixir
+# Bad - users can change phx-value-id or send the event directly
+def handle_event("delete", %{"id" => id}, socket) do
+  post = Blog.get_post!(id)
+  {:noreply, delete_and_remove(socket, post)}
+end
+
+# Good - the ID selects a candidate; scoped server state grants access
+def handle_event("delete", %{"id" => id}, socket) do
+  with {:ok, post} <- Blog.fetch_post_for_user(socket.assigns.current_user, id),
+       :ok <- Blog.authorize(:delete, socket.assigns.current_user, post) do
+    {:noreply, delete_and_remove(socket, post)}
+  else
+    {:error, reason} when reason in [:not_found, :unauthorized] ->
+      {:noreply, put_flash(socket, :error, "Post is unavailable")}
+  end
+end
+```
+
+IDs in rendered HTML or event payloads should be treated as public identifiers;
+their exposure is not an authorization flaw by itself. Use opaque references
+when disclosure is sensitive, but authorize them server-side too. Return a
+user-facing error for legitimate stale data or changed permissions. Raising is
+appropriate only after establishing an invariant that the normal UI cannot
+violate: LiveViews and channels are temporary children, so their crashes are not
+restarted and do not count toward supervisor restart intensity.
+
 ---
 
 ## OTP

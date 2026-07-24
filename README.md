@@ -642,7 +642,15 @@ The plugin enforces critical rules and **stops with an explanation** if code wou
 
 **Oban:** Jobs must be idempotent. Args use string keys. Never store structs in args.
 
-**Security:** No `String.to_atom` with user input. Authorize in every LiveView `handle_event`. Never use `raw/1` with untrusted content.
+**Security:** No `String.to_atom` with user input. Authorize in every LiveView
+`handle_event`. Treat forms, hooks, and `phx-value-*` as user-controlled. IDs
+rendered in HTML or event payloads are public identifiers, not proof of access.
+Never use `raw/1` with untrusted content.
+
+**Deployment:** Keep core release secrets required, but gate credentials for
+optional services behind the feature that enables them. `runtime.exs` also runs
+when an `eval`-based migration boots the release, so unconditional S3 or Redis
+requirements can break unrelated migrations.
 
 **OTP:** No process without a runtime reason. Supervise all long-lived processes.
 
@@ -755,8 +763,8 @@ These load automatically based on file context -- no commands needed:
 | `ecto-patterns`        | Schemas, migrations, Repo calls, changesets |
 | `testing`              | `*_test.exs`, factories, test support       |
 | `oban`                 | Oban workers, perform/1, queue config       |
-| `security`             | Auth, sessions, CSRF/CSP, input validation  |
-| `deploy`               | Dockerfile, fly.toml, runtime.exs, releases |
+| `security`             | Auth, event trust, CSRF/CSP, input validation |
+| `deploy`               | Dockerfile, runtime config, releases        |
 | `tidewave-integration` | Runtime debugging, live process inspection  |
 | `intent-detection`     | First message routing to /phx: commands     |
 | `compound-docs`        | Solution documentation lookups              |

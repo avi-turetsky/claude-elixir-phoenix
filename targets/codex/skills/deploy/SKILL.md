@@ -15,6 +15,9 @@ Quick reference for deploying Elixir/Phoenix applications.
 3. **Health checks required** — Without startup/liveness/readiness endpoints, orchestrators can't distinguish a booting node from a dead one, leading to cascading restarts
 4. **SSL verification for database** — Skipping `verify: :verify_peer` allows MITM attacks between your app and database; production data traverses the connection
 5. **No CPU limits** — The BEAM scheduler assumes it owns all cores; cgroups CPU limits cause scheduler collapse where the VM thinks it has more cores than it can use, leading to latency spikes
+6. **Guard optional service credentials** — `runtime.exs` runs whenever a
+   release boots, including `eval`-based migration commands. Only require S3,
+   Redis, and similar credentials when that integration is enabled
 
 ## Quick Configuration
 
@@ -39,6 +42,33 @@ if config_env() == :prod do
     server: true
 end
 ```
+
+### Guard Optional Services
+
+Keep core boot secrets such as `DATABASE_URL` and `SECRET_KEY_BASE` required.
+Gate credentials for optional integrations behind the same feature switch that
+enables the integration:
+
+```elixir
+s3_config =
+  if System.get_env("STORAGE_BACKEND") == "s3" do
+    [
+      access_key_id:
+        System.get_env("S3_ACCESS_KEY") ||
+          raise("S3_ACCESS_KEY is required when STORAGE_BACKEND=s3"),
+      secret_access_key:
+        System.get_env("S3_SECRET_KEY") ||
+          raise("S3_SECRET_KEY is required when STORAGE_BACKEND=s3")
+    ]
+  else
+    []
+  end
+
+config :my_app, :s3_config, s3_config
+```
+
+This lets release tasks that do not use S3 start without S3 credentials while
+still failing fast when S3 is selected.
 
 ### Health Check Plug
 
@@ -72,6 +102,7 @@ end
 ## Deployment Checklist
 
 - [ ] All secrets from environment variables in runtime.exs
+- [ ] Optional service credentials required only when their integration is enabled
 - [ ] `server: true` in endpoint config
 - [ ] SSL verification for database connections
 - [ ] Health endpoints: /health/startup, /health/liveness, /health/readiness

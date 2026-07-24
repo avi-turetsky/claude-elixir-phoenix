@@ -22,6 +22,11 @@ capabilities rather than claiming cross-runtime feature parity.
 
 ### Added
 
+- **LiveView client-boundary guidance** — documents that `phx-value-*`, form,
+  and hook payloads are user-controlled; clarifies that exposed IDs are not an
+  authorization flaw by themselves and must be checked against server-side
+  state in every event.
+
 - **Generated multi-runtime skills distributions** — all 51 canonical skills,
   complete resource subtrees, non-Markdown bytes, and executable modes now ship
   as deterministic targets for Amp, Codex, Pi, and OpenCode. Target generators
@@ -75,6 +80,10 @@ capabilities rather than claiming cross-runtime feature parity.
   command.
 
 ### Changed
+
+- **Optional release-service configuration** — deployment guidance now gates
+  optional S3, Redis, and similar credentials behind their feature switch so
+  unrelated release commands such as `bin/migrate` can start without them.
 
 - **Portable PR-review/full workflow overlays** — generated Codex, Pi, and
   OpenCode `phx-pr-review` now use available GitHub connectors or authenticated
