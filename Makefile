@@ -25,13 +25,13 @@ eval-all: ## Score all 51 skills + 26 agents (structural)
 eval-fix: ## Auto-fix lint + show failures + suggest autoresearch command
 	@bash lab/eval/run_eval.sh --fix
 
-eval-full: ## Everything: structural + behavioral triggers (~60 min)
+eval-full: ## Structural + fresh behavioral gate; every skill must reach 75% (~60 min)
 	@bash lab/eval/run_eval.sh --all && bash lab/eval/run_eval.sh --triggers
 
 eval-ci: ## CI gate: lint + all skills + all agents
 	@bash lab/eval/run_eval.sh --ci
 
-eval-triggers: ## Re-run behavioral trigger tests (~60 min, uses haiku)
+eval-triggers: ## Re-run behavioral gate; every skill must reach 75% (~60 min, Haiku)
 	@bash lab/eval/run_eval.sh --triggers
 
 eval-multimodel: ## Run trigger eval against sonnet (slow, ~$$3, ~3 hr). Override: MODEL=opus make eval-multimodel

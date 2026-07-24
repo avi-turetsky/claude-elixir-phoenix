@@ -824,7 +824,7 @@ make help             # Show all available commands
 make eval             # Quick: lint + score changed skills/agents only
 make eval-all         # Full structural: all 51 skills + all 26 agents
 make eval-fix         # Auto-fix lint + show failures + suggest autoresearch
-make test             # 207 pytest tests for eval framework and port tooling
+make test             # 220 pytest tests for eval framework and port tooling
 make generated-skills-sync # Regenerate and verify all four runtime targets
 make ci               # Full CI: lint + test + validate + eval + security (same as GitHub Actions)
 ```
@@ -852,7 +852,10 @@ npm run eval:fix
 claude -p 'Run autoresearch...' --allowedTools 'Edit,Read,Write,Bash,Glob,Grep'
 ```
 
-The eval framework uses 24 deterministic Python matchers + haiku-based behavioral trigger testing. See `lab/eval/` for details.
+The eval framework uses 24 deterministic Python matchers plus a separate,
+fresh Haiku behavioral gate. `make eval-full` requires every skill to reach 75%
+trigger accuracy; ignored local result caches never affect structural CI. See
+`lab/eval/` for details.
 
 ### Analyze your sessions to improve the plugin
 

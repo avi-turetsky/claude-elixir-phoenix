@@ -17,7 +17,7 @@ Run `make help` to see all available commands:
 make eval          # Quick: lint + score changed skills/agents
 make eval-all      # Full: all 51 skills + 26 agents
 make eval-fix      # Auto-fix + show failures
-make test          # 207 pytest tests for eval framework and port tooling
+make test          # 220 pytest tests for eval framework and port tooling
 make ci            # Full CI pipeline
 ```
 

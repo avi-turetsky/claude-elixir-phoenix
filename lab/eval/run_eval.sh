@@ -7,7 +7,7 @@
 #   ./lab/eval/run_eval.sh --skills     # Score all skills only
 #   ./lab/eval/run_eval.sh --agents     # Score all agents only
 #   ./lab/eval/run_eval.sh --changed    # Only changed since last eval (default)
-#   ./lab/eval/run_eval.sh --triggers   # Re-run behavioral trigger tests (~$1.50, ~60min)
+#   ./lab/eval/run_eval.sh --triggers   # Re-run and gate behavioral triggers (~$1.50, ~60min)
 #
 # Exit codes:
 #   0 = all pass (>= 0.95)
@@ -150,105 +150,6 @@ run_agents() {
     return 0
 }
 
-run_triggers_cached() {
-    local filter="$1"  # "all" or "changed"
-    local results_dir="$SCRIPT_DIR/triggers/results"
-
-    if [ ! -d "$results_dir" ]; then
-        echo "  No cached trigger results (run 'make eval-triggers' first)"
-        return 0
-    fi
-
-    local skills_to_check=()
-
-    if [ "$filter" = "changed" ]; then
-        # Get changed skills (same logic as run_skills)
-        local changed_files=""
-        changed_files=$(git diff --name-only HEAD -- 'plugins/elixir-phoenix/skills/' 2>/dev/null || echo "")
-        local staged
-        staged=$(git diff --cached --name-only -- 'plugins/elixir-phoenix/skills/' 2>/dev/null || echo "")
-        if [ -n "$staged" ]; then
-            changed_files=$(printf "%s\n%s" "$changed_files" "$staged")
-        fi
-        # Untracked (brand-new skills are invisible to git diff)
-        local untracked
-        untracked=$(git ls-files --others --exclude-standard -- 'plugins/elixir-phoenix/skills/' 2>/dev/null || echo "")
-        if [ -n "$untracked" ]; then
-            changed_files=$(printf "%s\n%s" "$changed_files" "$untracked")
-        fi
-        if [ -f "$LAST_EVAL_FILE" ]; then
-            local last_commit
-            last_commit=$(cat "$LAST_EVAL_FILE")
-            local since_last
-            since_last=$(git diff --name-only "$last_commit" HEAD -- 'plugins/elixir-phoenix/skills/' 2>/dev/null || echo "")
-            if [ -n "$since_last" ]; then
-                changed_files=$(printf "%s\n%s" "$changed_files" "$since_last")
-            fi
-        fi
-        if [ -z "$changed_files" ]; then
-            echo "  No skill changes — skipping trigger check"
-            return 0
-        fi
-        while IFS= read -r file; do
-            local skill_name
-            skill_name=$(echo "$file" | sed -n 's|plugins/elixir-phoenix/skills/\([^/]*\)/.*|\1|p')
-            if [ -n "$skill_name" ]; then
-                skills_to_check+=("$skill_name")
-            fi
-        done <<< "$changed_files"
-        mapfile -t skills_to_check < <(printf '%s\n' "${skills_to_check[@]}" | sort -u)
-    else
-        # All skills with cached results
-        for f in "$results_dir"/*.json; do
-            local base
-            base=$(basename "$f" .json)
-            [ "$base" = "_aggregate" ] && continue
-            skills_to_check+=("$base")
-        done
-    fi
-
-    if [ ${#skills_to_check[@]} -eq 0 ]; then
-        return 0
-    fi
-
-    # Check cached trigger accuracy for each skill
-    python3 -c "
-import json, sys, os
-
-results_dir = '$results_dir'
-skills = '${skills_to_check[*]}'.split()
-threshold = 0.75
-below = []
-checked = 0
-no_cache = []
-
-for skill in skills:
-    cache_file = os.path.join(results_dir, f'{skill}.json')
-    if not os.path.isfile(cache_file):
-        no_cache.append(skill)
-        continue
-    with open(cache_file) as f:
-        data = json.load(f)
-    acc = data.get('accuracy', 1.0)
-    checked += 1
-    if acc < threshold:
-        below.append((skill, acc))
-
-if no_cache:
-    print(f'  {len(no_cache)} skills have no cached triggers: {\" \".join(no_cache[:5])}{\"...\" if len(no_cache)>5 else \"\"}')
-
-if below:
-    print(f'  {len(below)} skills BELOW {threshold:.0%} trigger accuracy:')
-    for skill, acc in sorted(below, key=lambda x: x[1]):
-        print(f'    {skill}: {acc:.0%}')
-    print(f'  Run: make eval-tournament')
-    sys.exit(1)
-elif checked > 0:
-    print(f'  {checked} skills checked — all >= {threshold:.0%} trigger accuracy (cached)')
-"
-    return $?
-}
-
 echo "=== Plugin Eval ==="
 echo ""
 
@@ -262,9 +163,6 @@ case "$MODE" in
         echo ""
         echo "--- Agents (all) ---"
         run_agents "all" || FAILURES=$((FAILURES + 1))
-        echo ""
-        echo "--- Trigger Accuracy (cached) ---"
-        run_triggers_cached "all" || FAILURES=$((FAILURES + 1))
         ;;
     --skills)
         echo "--- Skills (all) ---"
@@ -283,9 +181,6 @@ case "$MODE" in
         echo ""
         echo "--- Agents (changed) ---"
         run_agents "changed" || FAILURES=$((FAILURES + 1))
-        echo ""
-        echo "--- Trigger Accuracy (cached, changed skills) ---"
-        run_triggers_cached "changed" || FAILURES=$((FAILURES + 1))
         ;;
     --triggers)
         echo "--- Behavioral Triggers (all, ~\$1.50) ---"
@@ -293,7 +188,7 @@ case "$MODE" in
         python3 -m lab.eval.trigger_scorer --all --summary
         ;;
     --ci)
-        echo "--- CI Gate: Lint + All Skills + All Agents + Triggers ---"
+        echo "--- Structural CI Gate: Lint + All Skills + All Agents ---"
         echo ""
         echo "--- Lint ---"
         npm run lint 2>&1
@@ -308,9 +203,6 @@ case "$MODE" in
         echo ""
         echo "--- Agents ---"
         run_agents "all" || FAILURES=$((FAILURES + 1))
-        echo ""
-        echo "--- Trigger Accuracy (cached) ---"
-        run_triggers_cached "all" || FAILURES=$((FAILURES + 1))
         ;;
     --fix)
         echo "--- Auto-Fix: lint + find failures + suggest fixes ---"
