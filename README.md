@@ -105,14 +105,13 @@ that prevent the mistakes Elixir developers actually make in production.
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-> **v2.14.3** -- the `ecto-patterns` skill now documents the
-> `Repo.transaction/1` changeset error-handling footgun: a bare
-> `{:ok, _} = Repo.update(cs)` inside the callback form raises `MatchError`,
-> which rolls back and **re-raises** — crashing the caller and losing the
-> changeset's validation errors. Covers the `case` + `Repo.rollback/1` and
-> `with ... else` fixes, and points at `Repo.transact/1` / `Ecto.Multi` as the
-> footgun-free forms. Thanks to [@ndrean](https://github.com/ndrean) for the
-> proposal.
+> **v3.0.0** -- all 51 canonical skills now have generated distributions for
+> Amp, Codex, Pi, and OpenCode, with deterministic generation, complete bundled
+> resources, drift enforcement, isolated runtime smoke tests, and native
+> installation guidance. Claude Code remains the full canonical plugin; hooks,
+> agents, MCP, instructions, and workflow portability intentionally vary by
+> runtime. See the [support matrix](docs/runtime-support.md) before assuming
+> feature parity.
 > [Issues](https://github.com/oliver-kriska/claude-elixir-phoenix/issues) welcome.
 
 ## Installation
