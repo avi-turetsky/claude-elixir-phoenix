@@ -9,7 +9,7 @@
     "codex": {
       "entries": 385,
       "files": 254,
-      "sha256": "59a6aa21c856a3d848d2ca8ab56eb07985c2803de2cc839b82d016b9fe2058c3"
+      "sha256": "65a90a11512ca06e8f2fa29494fa9fa9c3574a028cbb2615b4480c8366953422"
     },
     "opencode": {
       "entries": 379,
@@ -19,7 +19,7 @@
     "pi": {
       "entries": 380,
       "files": 252,
-      "sha256": "2b4372f193aa6737246b9d0fbc4ed1baeac49922cbe7398014dd291f77de3eec"
+      "sha256": "f39232433c01597bd34a6d4c6b4c302469189bf33db940f17e810daf61270e5f"
     }
   }
 }

@@ -9,6 +9,28 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [3.0.0] - 2026-07-24
+
+Major release: keep Claude Code as the full canonical plugin while adding
+generated, runtime-native skills distributions for Amp, Codex, Pi, and
+OpenCode. Each target is explicit about supported workflows and deferred
+capabilities rather than claiming cross-runtime feature parity.
+
+### Added
+
+- **Generated multi-runtime skills distributions** — all 51 canonical skills,
+  complete resource subtrees, non-Markdown bytes, and executable modes now ship
+  as deterministic targets for Amp, Codex, Pi, and OpenCode. Target generators
+  normalize names and invocation syntax, validate references and manifests,
+  reject collisions and escaping resources, build through staging directories,
+  preserve prior output on failure, and provide read-only drift checks. Claude
+  Code remains the canonical source and retains its full native hooks, agents,
+  MCP, permissions, and instructions.
+
 - **Canonical multi-runtime support matrix** — documents native invocation,
   distribution, supported and deferred capabilities, generated-target
   acceptance requirements, and isolated Amp, Codex, Pi, and OpenCode smoke-test
@@ -84,6 +106,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   clarify that Amp copies skills and requires an explicit `--overwrite` install.
 
 ### Fixed
+
+- **Reliable behavioral trigger gates and routing boundaries** — deterministic
+  structural evals no longer depend on ignored local result caches, while
+  `make eval-full` runs a fresh Claude Haiku 4.5 gate requiring every skill to
+  reach 75% accuracy. The judge now receives complete descriptions, validates
+  the exact skill/fixture set, retries infrastructure failures, rejects malformed
+  output, and writes results atomically. Generalized routing fixes brought all
+  51 skills above the threshold in the final full run (95.74% aggregate).
 
 - **Generated-runtime install lifecycle guidance** — Amp now documents native,
   target-scoped removal and exact-sync boundaries; Pi distinguishes configured
