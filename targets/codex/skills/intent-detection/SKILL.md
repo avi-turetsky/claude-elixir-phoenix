@@ -1,7 +1,7 @@
 ---
 name: intent-detection
-description: Route ambiguous Phoenix/LiveView/Ecto work requests to the correct; Use
-  when intent is unclear, mixed (bug fix vs.…
+description: Route ambiguous or mixed Phoenix/LiveView/Ecto requests; Use when user
+  is unsure where to start/how to approach work…
 ---
 
 # Intent Detection — Workflow Routing

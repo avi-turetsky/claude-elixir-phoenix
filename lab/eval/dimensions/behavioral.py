@@ -1,8 +1,9 @@
 """Behavioral dimension: Does the skill trigger correctly for real user prompts?
 
-Uses cached trigger test results from lab/eval/triggers/results/.
-If no cached results exist, returns a neutral score (dimension skipped).
-Run trigger_scorer.py first to populate cache.
+Structural scoring is deterministic and therefore ignores the local, Git-ignored
+trigger cache by default. Set ``EVAL_USE_TRIGGER_CACHE=1`` for an explicit local
+diagnostic that incorporates cached results. Fresh paid runs are gated directly
+by ``trigger_scorer.py``.
 """
 
 import json
@@ -15,26 +16,39 @@ TRIGGERS_RESULTS_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     "triggers", "results"
 )
+CACHE_OPT_IN_ENV = "EVAL_USE_TRIGGER_CACHE"
+
+
+def _neutral(skill_name: str, evidence: str) -> DimensionResult:
+    return DimensionResult(
+        dimension="behavioral",
+        score=1.0,
+        passed=0, failed=0, total=0,
+        assertions=[AssertionResult(
+            id="behavioral-0",
+            check_type="trigger_accuracy",
+            description="Trigger cache explicitly enabled",
+            passed=True,
+            evidence=evidence,
+        )],
+    )
 
 
 def score(content: str, dimension: EvalDimension, skill_path: str = "", plugin_root: str = "") -> DimensionResult:
-    """Score behavioral dimension using cached trigger results."""
+    """Score cached trigger results only after an explicit opt-in."""
     skill_name = os.path.basename(os.path.dirname(skill_path)) if skill_path else ""
     cache_path = os.path.join(TRIGGERS_RESULTS_DIR, f"{skill_name}.json")
 
+    if os.environ.get(CACHE_OPT_IN_ENV) != "1":
+        return _neutral(
+            skill_name,
+            f"Local trigger cache disabled for deterministic scoring; set {CACHE_OPT_IN_ENV}=1 to include it",
+        )
+
     if not os.path.isfile(cache_path):
-        # No cached results — return neutral (don't penalize skills without trigger tests)
-        return DimensionResult(
-            dimension="behavioral",
-            score=1.0,
-            passed=0, failed=0, total=0,
-            assertions=[AssertionResult(
-                id="behavioral-0",
-                check_type="trigger_accuracy",
-                description="Trigger test results cached",
-                passed=True,
-                evidence=f"No trigger cache for {skill_name} — skipping (neutral)",
-            )],
+        return _neutral(
+            skill_name,
+            f"No trigger cache for {skill_name} — skipping (neutral)",
         )
 
     with open(cache_path) as f:

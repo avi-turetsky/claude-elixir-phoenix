@@ -1,7 +1,7 @@
 ---
 name: phx-examples
-description: Provide examples and walkthroughs for Phoenix, LiveView, Ecto, OTP; Use
-  when "how do I...", "show me an example"…
+description: Provide Phoenix, LiveView, Ecto, OTP, or Oban examples and walkthroughs.
+  Use for sample code, step-by-step guidance…
 ---
 
 # Examples & Walkthroughs

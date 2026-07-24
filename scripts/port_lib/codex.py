@@ -603,8 +603,8 @@ the initial attempt plus N retries. Review is read-only; findings return WORKING
 """
 
 WHOLESALE_SOURCE_SHA256 = {
-    "pr-review/SKILL.md": "64baf279488cf379d65e276d073dd4c6c4e75d3060b6daac2e1a071b979131a4",
-    "full/SKILL.md": "69af4a8f08319f7ca86432765b0662944b068db2ad8a5bc945cf39f308963545",
+    "pr-review/SKILL.md": "80e91bd0737cf677ca59fe10aa3573afcc739f87685f20f258aa7bc8c650bdf8",
+    "full/SKILL.md": "d72cc731ff8fe0ba6ec4c0123cb86cdb1ca9c86283c77057bd168ebfd9bb7cf6",
     "full/references/execution-steps.md": "b608c047414f9ad464f5c0ecc0eb1562f509cfdc30ef3782ed6b4e566a37382c",
     "full/references/safety-recovery.md": "94595d350b9e3c809e0762676b7d8c3b831782a51173db9213585bebc8869234",
     "full/references/example-run.md": "8b72b77afcf947127978c74c2de560fb7abc826e541f71fcd06835101dad7bc8",

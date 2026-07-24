@@ -1,8 +1,8 @@
 ---
 name: phx-pr-review
-description: Address PR review threads on Elixir/Phoenix code — fetch unresolved threads,
-  fix code, reply, and resolve each thread. Use when the user shares a PR URL or mentions
-  reviewer feedback.
+description: 'Address feedback left on a GitHub pull request: fetch unresolved review
+  threads, make agreed Elixir/Phoenix code fixes, reply, and resolve. Use for a PR
+  URL/number or reviewer comments. NOT for pre-PR review, findings triage, or CI monitoring.'
 ---
 
 # PR Review Response

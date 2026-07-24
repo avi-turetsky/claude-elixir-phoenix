@@ -1,8 +1,9 @@
 ---
 name: phx-full
-description: Use for large features spanning multiple contexts or autonomous end-to-end
-  implementation. Runs the full plan-implement-review-compound cycle with specialist
-  agents. NOT for executing an existing plan file — use phx-work for that.
+description: Deliver a large, cross-domain Phoenix feature or complete end-to-end
+  system through planning, implementation, verification, and review. Use when several
+  coordinated workflows or contexts must ship together. NOT for an existing plan;
+  use phx-work.
 ---
 
 # Full Phoenix Feature Development

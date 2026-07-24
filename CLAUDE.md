@@ -370,9 +370,10 @@ npm install  # Pre-commit hooks + linting
 make help          # Show all commands
 make lint          # Lint markdown
 make lint-fix      # Auto-fix lint
-make test          # 207 pytest tests for eval framework and port tooling
-make eval          # Quick: lint + score changed skills/agents + trigger accuracy (cached)
-make eval-all      # Score all 51 skills + 26 agents + trigger accuracy
+make test          # 220 pytest tests for eval framework and port tooling
+make eval          # Quick: lint + structurally score changed skills/agents
+make eval-all      # Structurally score all 51 skills + 26 agents
+make eval-full     # Structural checks + fresh per-skill behavioral gate
 make eval-fix      # Auto-fix lint + show failures + suggest autoresearch
 make eval-tournament # Run tournament on weak skills (<75% trigger accuracy)
 make ci            # Full CI pipeline: lint + test + validate + eval + security
@@ -380,8 +381,9 @@ make ci            # Full CI pipeline: lint + test + validate + eval + security
 
 ### Eval Framework (lab/eval/)
 
-The plugin has a deterministic 8-dimension scoring system for skills and
-5-dimension scoring for agents. **Run `make eval` after every skill/agent edit.**
+The plugin has seven deterministic structural dimensions plus a neutral
+behavioral slot for skills, and five deterministic dimensions for agents.
+**Run `make eval` after every skill/agent edit.**
 
 **When editing skills/agents, ALWAYS verify your changes pass eval:**
 
@@ -390,7 +392,7 @@ The plugin has a deterministic 8-dimension scoring system for skills and
 3. If FAIL: run `make eval-fix` to see exact failures and get fix suggestions
 4. Fix the issues and re-run until PASS
 
-**What eval checks** (skills — 8 dimensions):
+**What eval checks** (skills — 7 structural dimensions + behavioral slot):
 
 - completeness (sections, Iron Laws, frontmatter)
 - accuracy (cross-references valid)
@@ -399,7 +401,8 @@ The plugin has a deterministic 8-dimension scoring system for skills and
 - safety (Iron Laws, prohibitions, no dangerous patterns)
 - clarity (action density, no duplication, step coverage)
 - specificity (code examples, concrete vs vague)
-- behavioral (trigger accuracy via cached haiku tests)
+- behavioral (neutral during structural scoring; `make eval-full` runs a fresh
+  Haiku gate and requires every skill to reach 75% trigger accuracy)
 
 **What eval checks** (agents — 5 dimensions):
 

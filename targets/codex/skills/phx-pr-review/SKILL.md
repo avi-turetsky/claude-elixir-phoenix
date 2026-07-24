@@ -1,7 +1,7 @@
 ---
 name: phx-pr-review
-description: Address PR review threads on Elixir/Phoenix code — fetch unresolved;
-  Use when the user shares a PR URL or mentions…
+description: 'Address feedback left on a GitHub pull request: fetch unresolved; Use
+  for a PR URL/number or reviewer comments.…'
 ---
 # PR Review Response
 

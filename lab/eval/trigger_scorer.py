@@ -15,7 +15,7 @@ Usage:
     python3 -m lab.eval.trigger_scorer --all --model sonnet        # Evaluate against sonnet
     python3 -m lab.eval.trigger_scorer --skill plan --model claude-sonnet-4-6
 
-Cost: ~$0.001 per test prompt on haiku, ~$0.04 for all 45 skills × ~8 prompts.
+Cost: approximately $1.50 and 60 minutes for all 51 skills on Haiku.
 Sonnet is roughly 12× more expensive per call.
 """
 
@@ -25,6 +25,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 from datetime import datetime, timezone
 
 EVAL_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -39,6 +40,13 @@ PLUGIN_ROOT = os.path.join(PROJECT_ROOT, "plugins", "elixir-phoenix")
 TRIGGERS_DIR = os.path.join(EVAL_DIR, "triggers")
 RESULTS_DIR = os.path.join(TRIGGERS_DIR, "results")
 DEFAULT_MODEL = "claude-haiku-4-5"
+DEFAULT_MIN_ACCURACY = 0.75
+JUDGE_TIMEOUT_SECONDS = 60
+JUDGE_ATTEMPTS = 2
+
+
+class JudgeInvocationError(RuntimeError):
+    """The routing judge failed before producing a valid routing decision."""
 
 # CC CLI accepts both aliases and full IDs. Canonicalize so 'haiku' and
 # 'claude-haiku-4-5' share one cache rather than two.
@@ -90,9 +98,10 @@ def load_all_descriptions() -> dict[str, str]:
         with open(skill_path) as f:
             content = f.read()
         fm = parse_frontmatter(content)
-        desc = str(fm.get("description", ""))
-        if desc:
-            descriptions[name] = desc
+        description = fm.get("description")
+        if not isinstance(description, str) or not description.strip():
+            raise ValueError(f"canonical skill has no valid description: {name}")
+        descriptions[name] = description
     return descriptions
 
 
@@ -105,9 +114,58 @@ def load_trigger_file(skill_name: str) -> dict | None:
         return json.load(f)
 
 
+def load_all_trigger_files(skill_names: set[str]) -> dict[str, dict]:
+    """Load and validate the exact trigger-fixture set for canonical skills."""
+    fixture_names = {
+        os.path.splitext(name)[0]
+        for name in os.listdir(TRIGGERS_DIR)
+        if name.endswith(".json") and not name.startswith("_")
+    }
+    missing = sorted(skill_names - fixture_names)
+    stale = sorted(fixture_names - skill_names)
+    if missing or stale:
+        details = []
+        if missing:
+            details.append(f"missing fixtures: {', '.join(missing)}")
+        if stale:
+            details.append(f"fixtures without canonical skills: {', '.join(stale)}")
+        raise ValueError("trigger fixture set does not match canonical skills (" + "; ".join(details) + ")")
+
+    fixtures = {}
+    for name in sorted(skill_names):
+        fixture = load_trigger_file(name)
+        if not isinstance(fixture, dict):
+            raise ValueError(f"trigger fixture must be a JSON object: {name}")
+        for key in ("should_trigger", "should_not_trigger"):
+            prompts = fixture.get(key)
+            if not isinstance(prompts, list) or not all(isinstance(prompt, str) and prompt for prompt in prompts):
+                raise ValueError(f"trigger fixture {name} has invalid {key}")
+        if not fixture["should_trigger"] or not fixture["should_not_trigger"]:
+            raise ValueError(f"trigger fixture {name} must include positive and negative prompts")
+        fixtures[name] = fixture
+    return fixtures
+
+
+def _parse_judge_output(text: str, skill_names: set[str]) -> list[str] | None:
+    """Parse the judge's deliberately small output protocol."""
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    if lines == ["none"]:
+        return []
+    if not 1 <= len(lines) <= 3:
+        return None
+
+    skills = []
+    for line in lines:
+        candidate = line.lstrip("-*0123456789.) ").strip().strip("`").strip()
+        if candidate not in skill_names or candidate in skills:
+            return None
+        skills.append(candidate)
+    return skills
+
+
 def ask_model(all_descriptions: dict[str, str], prompt: str, model: str = DEFAULT_MODEL) -> list[str]:
     """Ask the chosen routing-judge model which skill(s) it would load for a given prompt."""
-    desc_list = "\n".join(f"- {name}: {desc[:150]}" for name, desc in all_descriptions.items())
+    desc_list = "\n".join(f"- {name}: {desc}" for name, desc in all_descriptions.items())
 
     system_prompt = f"""You are testing skill routing for a Claude Code plugin.
 
@@ -120,40 +178,45 @@ Which skill(s) should be loaded? Reply with ONLY the skill name(s), one per line
 If no skill should be loaded, reply with "none".
 List at most 3 skills, ordered by relevance."""
 
-    try:
-        result = subprocess.run(
-            [
-                "claude", "-p", system_prompt,
-                "--model", model,
-                "--output-format", "text",
-                "--max-budget-usd", "0.50",
-                "--no-session-persistence",
-            ],
-            capture_output=True, text=True, timeout=30,
-        )
-
-        if result.returncode != 0:
-            return []
+    errors = []
+    for attempt in range(1, JUDGE_ATTEMPTS + 1):
+        try:
+            result = subprocess.run(
+                [
+                    "claude", "-p", system_prompt,
+                    "--model", model,
+                    "--output-format", "text",
+                    "--max-budget-usd", "0.50",
+                    "--no-session-persistence",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=JUDGE_TIMEOUT_SECONDS,
+                stdin=subprocess.DEVNULL,
+            )
+        except subprocess.TimeoutExpired:
+            errors.append(f"attempt {attempt}: timed out after {JUDGE_TIMEOUT_SECONDS}s")
+            continue
+        except OSError as error:
+            errors.append(f"attempt {attempt}: could not start Claude CLI: {error}")
+            continue
 
         text = result.stdout.strip()
-        # Parse skill names from response — one per line, strip bullets/numbers
-        skills = []
-        for line in text.split("\n"):
-            line = line.strip().lstrip("-*0123456789.) ").strip()
-            # Remove explanations after dashes or parentheses
-            if " — " in line:
-                line = line.split(" — ")[0].strip()
-            if " (" in line:
-                line = line.split(" (")[0].strip()
-            if " -" in line:
-                line = line.split(" -")[0].strip()
-            line = line.strip("`").strip()
-            if line and line != "none" and not line.startswith("No "):
-                skills.append(line)
+        if result.returncode != 0:
+            detail = result.stderr.strip() or result.stdout.strip() or "no output"
+            errors.append(f"attempt {attempt}: exit {result.returncode}: {detail}")
+            continue
+        if not text:
+            errors.append(f"attempt {attempt}: Claude CLI returned empty output")
+            continue
+
+        skills = _parse_judge_output(text, set(all_descriptions))
+        if skills is None:
+            errors.append(f"attempt {attempt}: invalid routing response: {text}")
+            continue
         return skills
 
-    except (subprocess.TimeoutExpired, Exception):
-        return []
+    raise JudgeInvocationError("routing judge failed: " + "; ".join(errors))
 
 
 def score_triggers(request: ScoreRequest) -> ScoreResult:
@@ -276,16 +339,41 @@ def score_skill_triggers(
     score_data = result.to_dict()
 
     if not result.cache_hit:
-        os.makedirs(cache_dir, exist_ok=True)
         cache_path = os.path.join(cache_dir, f"{skill_name}.json")
-        with open(cache_path, "w") as f:
-            json.dump(score_data, f, indent=2)
-            f.write("\n")
+        _write_json_atomic(cache_path, score_data)
 
     return score_data
 
 
-def main():
+def _write_json_atomic(path: str, payload: dict) -> None:
+    """Replace a JSON result only after its complete contents reach disk."""
+    directory = os.path.dirname(path)
+    os.makedirs(directory, exist_ok=True)
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile("w", dir=directory, delete=False) as temporary:
+            temporary_path = temporary.name
+            json.dump(payload, temporary, indent=2)
+            temporary.write("\n")
+        os.replace(temporary_path, path)
+    finally:
+        if temporary_path and os.path.exists(temporary_path):
+            os.unlink(temporary_path)
+
+
+def skills_below_threshold(results: dict[str, dict], threshold: float) -> list[tuple[str, float]]:
+    """Return skills below the required accuracy, ordered worst first."""
+    return sorted(
+        (
+            (name, float(result.get("accuracy", 0.0)))
+            for name, result in results.items()
+            if float(result.get("accuracy", 0.0)) < threshold
+        ),
+        key=lambda item: (item[1], item[0]),
+    )
+
+
+def main() -> int:
     parser = argparse.ArgumentParser(description="Test skill trigger accuracy against a routing-judge model")
     parser.add_argument("--skill", help="Test one skill")
     parser.add_argument("--all", action="store_true", help="Test all skills with trigger files")
@@ -296,9 +384,22 @@ def main():
         default=DEFAULT_MODEL,
         help=f"Routing-judge model (alias like 'sonnet' or full ID). Default: {DEFAULT_MODEL}",
     )
+    parser.add_argument(
+        "--min-accuracy",
+        type=float,
+        default=DEFAULT_MIN_ACCURACY,
+        help=f"Fail when any tested skill is below this accuracy. Default: {DEFAULT_MIN_ACCURACY}",
+    )
     args = parser.parse_args()
 
-    all_descriptions = load_all_descriptions()
+    if not 0.0 <= args.min_accuracy <= 1.0:
+        parser.error("--min-accuracy must be between 0 and 1")
+
+    try:
+        all_descriptions = load_all_descriptions()
+    except (OSError, ValueError) as error:
+        print(f"ERROR: {error}", file=sys.stderr)
+        return 1
     judge_model = canonicalize_model(args.model)
 
     if args.skill:
@@ -311,17 +412,27 @@ def main():
             print(f"{args.skill} [{judge_model}]: accuracy={result['accuracy']:.0%} precision={result['precision']:.0%} recall={result['recall']:.0%}")
         else:
             print(json.dumps(result, indent=2))
+        if result["accuracy"] < args.min_accuracy:
+            print(
+                f"{args.skill} is below the {args.min_accuracy:.0%} minimum trigger accuracy",
+                file=sys.stderr,
+            )
+            return 1
 
     elif args.all:
+        try:
+            all_triggers = load_all_trigger_files(set(all_descriptions))
+        except (json.JSONDecodeError, OSError, ValueError) as error:
+            print(f"ERROR: {error}", file=sys.stderr)
+            return 1
+
         skills_tested = 0
         total_accuracy = 0
         results = {}
 
         print(f"Judge model: {judge_model}\n")
         for name in sorted(all_descriptions.keys()):
-            triggers = load_trigger_file(name)
-            if not triggers:
-                continue
+            triggers = all_triggers[name]
             print(f"  Testing {name}...", end=" ", flush=True)
             result = score_skill_triggers(name, triggers, all_descriptions, args.cache, model=judge_model)
             results[name] = result
@@ -332,23 +443,29 @@ def main():
         avg = total_accuracy / skills_tested if skills_tested else 0
         print(f"\n{skills_tested} skills tested against {judge_model}, average accuracy: {avg:.0%}")
 
-        if not args.summary:
-            # Save aggregate
-            aggregate_path = aggregate_path_for_model(judge_model)
-            os.makedirs(os.path.dirname(aggregate_path), exist_ok=True)
-            with open(aggregate_path, "w") as f:
-                json.dump({
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "model": judge_model,
-                    "skills_tested": skills_tested,
-                    "average_accuracy": round(avg, 4),
-                    "per_skill": {k: {"accuracy": v["accuracy"], "precision": v["precision"], "recall": v["recall"]}
-                                  for k, v in results.items()},
-                }, f, indent=2)
+        below = skills_below_threshold(results, args.min_accuracy)
+        if below:
+            print(f"\n{len(below)} skills below the {args.min_accuracy:.0%} minimum:")
+            for name, accuracy in below:
+                print(f"  {name}: {accuracy:.0%}")
+
+        _write_json_atomic(aggregate_path_for_model(judge_model), {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "model": judge_model,
+            "skills_tested": skills_tested,
+            "average_accuracy": round(avg, 4),
+            "per_skill": {k: {"accuracy": v["accuracy"], "precision": v["precision"], "recall": v["recall"]}
+                          for k, v in results.items()},
+        })
+
+        if below:
+            return 1
 
     else:
         parser.print_help()
 
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

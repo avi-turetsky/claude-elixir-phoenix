@@ -9,11 +9,14 @@ we evaluated. It dynamically resolves evaluator classes by string ID, lazily
 importing modules on first use.
 
 **Current state**: 8 dimension modules dispatched via an explicit
-`DIMENSION_MODULES` dict at `lab/eval/scorer.py:18-27` (completeness, accuracy,
-conciseness, triggering, safety, clarity, specificity, behavioral). Matcher
-dispatch lives in `lab/eval/agent_matchers.py` and `lab/eval/matchers.py` and
-follows the same explicit-mapping shape — roughly 12 matchers covered by ~24
-deterministic matcher tests.
+`DIMENSION_MODULES` dict at `lab/eval/scorer.py:18-27`. Seven are deterministic
+structural checks (completeness, accuracy, conciseness, triggering, safety,
+clarity, specificity); behavioral is neutral unless cache use is explicitly
+enabled. Fresh paid trigger evaluation is a separate per-skill gate, so ignored
+local results never affect structural CI. Matcher dispatch lives in
+`lab/eval/agent_matchers.py` and `lab/eval/matchers.py` and follows the same
+explicit-mapping shape — roughly 12 matchers covered by ~24 deterministic
+matcher tests.
 
 **Rationale**: at our scale the indirection costs more than it saves. We have
 explicit imports, IDE jump-to-definition works on every dispatch site, and there
