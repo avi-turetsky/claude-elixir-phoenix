@@ -7,10 +7,18 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-Upcoming 3.0.0 major release: keep Claude Code as the full canonical plugin
-while adding generated, runtime-native skills distributions for Amp, Codex,
-Pi, and OpenCode. Each target is explicit about supported workflows and
-deferred capabilities rather than claiming cross-runtime feature parity.
+### Added
+
+### Changed
+
+### Fixed
+
+## [3.0.0] - 2026-07-25
+
+Major release: keep Claude Code as the full canonical plugin while adding
+generated, runtime-native skills distributions for Amp, Codex, Pi, and
+OpenCode. Each target is explicit about supported workflows and deferred
+capabilities rather than claiming cross-runtime feature parity.
 
 ### Added
 

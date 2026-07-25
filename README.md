@@ -106,7 +106,7 @@ that prevent the mistakes Elixir developers actually make in production.
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-> **Upcoming v3.0.0** -- all 51 canonical skill trees have generated distributions
+> **v3.0.0** -- all 51 canonical skill trees have generated distributions
 > for Amp, Codex, Pi, and OpenCode. Nine core workflows are fully adapted: the
 > six flagship lifecycle workflows plus `phx-trace`, `phx-audit`, and
 > `phx-research`. The remaining projections preserve domain knowledge but may
