@@ -42,6 +42,22 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **`displayName` removed from all Claude Code manifests** (reported by
+  @ndrean, #130) — the field was introduced alongside the v3 plugin split and
+  reported as an install blocker one day later. It is undocumented: it appears
+  nowhere in the plugin manifest schema, whose metadata fields are `version`,
+  `description`, `author`, `homepage`, `repository`, `license`, and `keywords`.
+  It is also inert — `claude plugin list` renders the plugin `name`, never
+  `displayName` — and Anthropic's own marketplace uses it in 3 of 285 entries,
+  always in `marketplace.json` and never in a `plugin.json`, which is exactly
+  where this repo had it. `catchup` had already been shipping without it. A
+  clean install from GitHub could not be reproduced as broken on 2.1.227, so
+  the original failure was likely specific to the Claude Code range current in
+  late July; the field is gone regardless, since nothing depended on it. The
+  Codex manifests (`targets/codex/.codex-plugin/plugin.json`,
+  `.agents/plugins/marketplace.json`) keep theirs — different runtime,
+  different schema, where it is nested under `interface`.
+
 ## [3.0.1] - 2026-08-10
 
 Maintenance release: closes a bypass in the destructive-command hook, retires

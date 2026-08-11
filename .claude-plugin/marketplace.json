@@ -11,7 +11,6 @@
   "plugins": [
     {
       "name": "elixir-phoenix",
-      "displayName": "Elixir/Phoenix",
       "description": "Elixir/Phoenix/LiveView development with specialist agents, Iron Laws, and Tidewave MCP integration",
       "author": {
         "name": "Oliver Kriska"
@@ -22,7 +21,6 @@
     },
     {
       "name": "ecto",
-      "displayName": "Elixir/Phoenix — Ecto command compatibility",
       "description": "Compatibility namespace for the Elixir/Phoenix plugin's /ecto:* commands",
       "author": {
         "name": "Oliver Kriska"
@@ -33,7 +31,6 @@
     },
     {
       "name": "lv",
-      "displayName": "Elixir/Phoenix — LiveView command compatibility",
       "description": "Compatibility namespace for the Elixir/Phoenix plugin's /lv:* commands",
       "author": {
         "name": "Oliver Kriska"
