@@ -291,7 +291,7 @@ orchestrator (which may be at 150k+ tokens by this point).
 1. Spawn compound agent in fresh context:
 
    ```
-   Agent(subagent_type: "general-purpose", prompt: """
+   Agent(subagent_type: "general-purpose", model: "sonnet", prompt: """
    Run COMPOUNDING phase for feature '{slug}'.
 
    Read context from plan namespace:
@@ -314,6 +314,11 @@ orchestrator (which may be at 150k+ tokens by this point).
    4. Output: COMPOUNDING_DONE or COMPOUNDING_SKIPPED
    """)
    ```
+
+   **Always pass `model: "sonnet"` here.** Compounding reads artifacts and
+   writes solution docs — mechanical work. Without the explicit pin the
+   subagent inherits this orchestrator's model (opus), inflating the cost
+   of a phase that gains nothing from it.
 
 2. Read the sub-agent's result
 3. Log compound outcome to progress file

@@ -11,6 +11,35 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **`deep-bug-investigator` synthesizes on opus, its four tracks run on sonnet**
+  (thanks @BugsBunny338, #133) — the agent coordinates four parallel
+  investigation tracks and then reconciles their often-conflicting evidence.
+  Cross-track synthesis is where the stronger model earns its cost, and
+  hard-to-reproduce bugs are where a weak synthesis is most expensive. The
+  frontmatter bump alone would have been the wrong fix: the tracks spawn as
+  bare `general-purpose` subagents, which default to `model: inherit` and so
+  resolve to the *spawning parent's* model — opus on the orchestrator would
+  have silently promoted the whole fan-out to five opus contexts. The tracks
+  are now pinned to `model: "sonnet"` explicitly, keeping fan-out cost where it
+  was: sonnet gathers evidence, opus synthesizes. `effort: medium` is
+  unchanged; the eval allowlists opus for orchestrators, so no symmetry fix is
+  owed.
+
+- **`workflow-orchestrator` pins its COMPOUNDING spawn to sonnet** — same
+  inheritance leak as above, found while reviewing #133. The orchestrator runs
+  on opus and spawned an unpinned `general-purpose` subagent to write solution
+  docs, so that mechanical phase was silently billed at opus. Named `phx:*`
+  subagents were never affected — their own frontmatter wins — so
+  `parallel-reviewer` and `planning-orchestrator` needed no change.
+
+- **CLAUDE.md model-tier rules describe the actual split** — the guidance said
+  "opus for primary workflow orchestrators, sonnet for secondary orchestrators
+  (investigation, tracing)", which stopped matching the plugin once
+  `planning-orchestrator` moved to sonnet and `deep-bug-investigator` moved to
+  opus. The rule is now stated in terms of what earns opus (synthesis across
+  parallel workers) and names the four agents on each side, plus the
+  `general-purpose` pinning requirement that follows from it.
+
 ### Fixed
 
 ## [3.0.1] - 2026-08-10

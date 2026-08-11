@@ -174,8 +174,16 @@ skills:
 
 - Use `sonnet` model by default — the `sonnet` alias resolves to Sonnet 5 (Claude Code's
   default model since CC 2.1.197, native 1M context), which achieves near-opus quality at lower cost
-- Use `opus` for primary workflow orchestrators and security-critical agents only
-- Use `sonnet` for secondary orchestrators (investigation, tracing) and judgment-heavy tasks
+- Use `opus` for orchestrators that synthesize across parallel workers, and for
+  security-critical agents. Currently: `workflow-orchestrator`, `parallel-reviewer`,
+  `deep-bug-investigator`, `security-analyzer`
+- Use `sonnet` for orchestrators that fan out without cross-worker synthesis
+  (`planning-orchestrator`, `call-tracer`) and for judgment-heavy specialists
+- **An opus orchestrator must pin its `general-purpose` spawns to `model: "sonnet"`.**
+  A subagent with no `model:` in its definition defaults to `inherit`, which resolves
+  to the *spawning parent's* model — so bumping an orchestrator to opus silently
+  promotes its whole fan-out. Named `phx:*` subagents are unaffected (their own
+  frontmatter wins); only bare `general-purpose` spawns inherit
 - Use `haiku` for mechanical tasks: compression, verification, dependency analysis
 - Set `effort:` to match cognitive load: `low` for haiku/mechanical agents, `medium` for sonnet specialists, `high` for opus orchestrators and security-critical agents
 - Review agents are **read-only** (`disallowedTools: Write, Edit, NotebookEdit`)
