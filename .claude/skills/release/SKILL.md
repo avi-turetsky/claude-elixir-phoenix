@@ -23,6 +23,7 @@ consistent. **Contributor tooling — not shipped in the plugin.**
 5. **USERS ONLY UPDATE ON A `plugin.json` BUMP** — never ship CHANGELOG/code changes without bumping the version, or installed users get nothing (cache).
 6. **ALWAYS leave a fresh empty `## [Unreleased]`** — one `[Unreleased]` becomes one version heading; re-add an empty one on top.
 7. **NEVER force-push** — `git push --force` is hook-blocked here. If history needs rewriting, the user runs it via `!`.
+8. **EVERY release body links the docs site** — append the `https://phxagents.dev` footer. Releases are this project's one measured promotion lever (v3.0.1: 51 → 120 cloners in a day).
 
 ## Step 0: Preconditions
 
@@ -115,7 +116,18 @@ git push origin vX.Y.Z
 gh release create vX.Y.Z --title "vX.Y.Z — <summary>" --notes-file <changelog-section>
 ```
 
-Use the new CHANGELOG section as release notes (extract it to a temp file or `--notes`).
+Use the new CHANGELOG section as release notes (extract it to a temp file or `--notes`),
+then **append the docs footer** before publishing — a release body is read at the
+moment someone decides whether to install:
+
+```
+---
+
+Docs, install guides, and the runtime compatibility matrix: <https://phxagents.dev>
+```
+
+See `${CLAUDE_SKILL_DIR}/references/templates.md` for the one-line `printf` that
+appends it to the extracted notes.
 
 ## Step 8: Verify
 

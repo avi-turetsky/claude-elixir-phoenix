@@ -9,7 +9,25 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **README links phxagents.dev above the fold** — a docs badge, a one-line
+  **Docs** block pointing at `/install/`, `/compatibility/`, `/iron-laws/` and
+  `/catalog/`, and a per-runtime install-guide link in each of the four
+  "Using Amp/Codex/Pi/OpenCode?" callouts. The README had **zero**
+  `phxagents.dev` mentions across 1,056 lines while being the project's
+  higher-traffic discovery surface: over 08/02-08/15, Google sent 56 unique
+  visitors to the repo versus 14 from the docs site, so everyone arriving from
+  search read the whole README and never learned the docs site exists. The
+  repo's About → Website field was already set.
+
 ### Changed
+
+- **Release bodies now carry a docs-site footer** — the `release` contributor
+  skill gained an Iron Law and a `printf` step that appends
+  `<https://phxagents.dev>` to the extracted CHANGELOG release notes. A release
+  body is read at the moment someone decides whether to install, and releases
+  are this project's one promotion lever with a measured effect: v3.0.1 drove
+  unique cloners from 51 to 120 in a single day (2.4x), decaying to baseline
+  over about four days.
 
 - **`deep-bug-investigator` synthesizes on opus, its four tracks run on sonnet**
   (thanks @BugsBunny338, #133) — the agent coordinates four parallel

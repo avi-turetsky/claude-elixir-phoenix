@@ -1,6 +1,12 @@
 # Elixir Phoenix Plugin for Claude Code
 
+[![Docs: phxagents.dev](https://img.shields.io/badge/docs-phxagents.dev-6e40c9)](https://phxagents.dev)
 [![Security: scanned with SkillSpector](https://img.shields.io/badge/security-scanned%20with%20SkillSpector-2ea44f)](SECURITY.md)
+
+**Docs: [phxagents.dev](https://phxagents.dev)** -- [install guides per runtime](https://phxagents.dev/install/),
+the [runtime compatibility matrix](https://phxagents.dev/compatibility/), all
+[26 Iron Laws](https://phxagents.dev/iron-laws/), and a browsable
+[skill and agent catalog](https://phxagents.dev/catalog/).
 
 **Claude Code is great. But it doesn't know that `assign_new` silently skips on reconnect, that `:float` will corrupt your money fields, or that your Oban job isn't idempotent.**
 
@@ -12,26 +18,30 @@ that catch the bugs your tests won't.
 **Using Amp?** Install the generated skills-only edition for the same 51 Elixir,
 Phoenix, LiveView, Ecto, Oban, testing, and security skills. See
 [Use with Amp](#use-with-amp) for the important differences from the full Claude
-Code plugin.
+Code plugin, or the [Amp install guide](https://phxagents.dev/install/amp/) on
+phxagents.dev.
 
 **Using Codex?** Install the native generated skills plugin for all 51 skills,
 including `$elixir-phoenix:phx-investigate` and
 `$elixir-phoenix:phx-review` workflows. See
-[Use with Codex](#use-with-codex); a trust-gated destructive-command safeguard
-is included, while custom agents are intentionally not included and Tidewave
-MCP registration remains external.
+[Use with Codex](#use-with-codex) or the
+[Codex install guide](https://phxagents.dev/install/codex/); a trust-gated
+destructive-command safeguard is included, while custom agents are intentionally
+not included and Tidewave MCP registration remains external.
 
 **Using Pi?** Install the native generated skills package for all 51 skills,
 including Pi-compatible `/skill:phx-investigate` and `/skill:phx-review`
-workflows. See [Use with Pi](#use-with-pi); extensions, prompt templates, MCP,
-and custom agents are intentionally not included yet. Tidewave can be used when
-the Pi host exposes it independently.
+workflows. See [Use with Pi](#use-with-pi) or the
+[Pi install guide](https://phxagents.dev/install/pi/); extensions, prompt
+templates, MCP, and custom agents are intentionally not included yet. Tidewave
+can be used when the Pi host exposes it independently.
 
 **Using OpenCode?** Install the generated skills-only target for all 51 skills,
 including `phx-investigate` and `phx-review`. In the tested OpenCode 1.17.2 setup,
 they are also available as `/phx-investigate` and `/phx-review`; the skill tool
-is the portable explicit interface. See [Use with OpenCode](#use-with-opencode) and the
-[OpenCode guide](docs/opencode.md).
+is the portable explicit interface. See [Use with OpenCode](#use-with-opencode), the
+[OpenCode guide](docs/opencode.md), or the
+[OpenCode install guide](https://phxagents.dev/install/opencode/).
 
 Compare native invocation, installation, and deliberately deferred capabilities
 in the canonical [runtime support matrix](docs/runtime-support.md). Generated
@@ -1044,7 +1054,7 @@ This plugin was built with insights from these articles, repositories, and tools
 - <https://mitchellh.com/writing/my-ai-adoption-journey>
 - <https://www.thepragmaticcto.com/p/no-vibes-allowed-context-engineering>
 - <https://basecamp.com/shapeup>
-- <https://pragprog.com/titles/jwpaieng/common-sense-guide-to-ai-engineering/>
+- <https://pragprog.com/titles/jwpaieng/a-common-sense-guide-to-ai-engineering/>
 - <https://allanmacgregor.com/posts/setting-up-tidewave-beam-introspection>
 - <https://theengineeringmanager.substack.com/p/councils-of-agents>
 - <https://platform.claude.com/docs/en/agents-and-tools/tool-use/programmatic-tool-calling>

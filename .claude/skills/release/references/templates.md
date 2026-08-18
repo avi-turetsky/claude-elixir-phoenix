@@ -49,10 +49,22 @@ Use the new version's CHANGELOG section verbatim. Extract it to a temp file:
 ```bash
 # pull the section between "## [X.Y.Z]" and the next "## ["
 awk '/^## \[X\.Y\.Z\]/{f=1} f&&/^## \[/&&!/X\.Y\.Z/{exit} f' CHANGELOG.md > /tmp/relnotes.md
+
+# always append the docs footer — the release body is read at install-decision time
+printf '\n---\n\nDocs, install guides, and the runtime compatibility matrix: <https://phxagents.dev>\n' \
+  >> /tmp/relnotes.md
+
 gh release create vX.Y.Z --title "vX.Y.Z — <summary>" --notes-file /tmp/relnotes.md
 ```
 
 Title format matches history: `vX.Y.Z — <short summary>` (em dash).
+
+**The docs footer is not optional.** A release body is read at the exact moment
+someone is deciding whether to install, and releases are the one promotion lever
+in this project with a measured effect: v3.0.1 drove unique cloners 51 → 120 in
+one day (2.4x), decaying to baseline over ~4 days. The repo is also the
+higher-traffic discovery surface — Google sends ~4x more repo visitors than
+phxagents.dev does — so every release body should point back to the docs site.
 
 ## Commit message shape (matches `git log`)
 
