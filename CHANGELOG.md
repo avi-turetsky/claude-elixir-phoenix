@@ -35,6 +35,12 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   search read the whole README and never learned the docs site exists. The
   repo's About → Website field was already set.
 
+- **Deterministic Amp workflow plugin** — the generated Amp target now includes
+  40 workflow palette commands, five read-only domain specialists, bounded
+  parallel review and investigation, a persistent classified edit lock, and a
+  bounded `phx-full` verification gate. The standalone distribution promotes a
+  validated `stable` branch for direct GitHub installation.
+
 ### Changed
 
 - **Release bodies now carry a docs-site footer** — the `release` contributor
@@ -44,6 +50,13 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   are this project's one promotion lever with a measured effect: v3.0.1 drove
   unique cloners from 51 to 120 in a single day (2.4x), decaying to baseline
   over about four days.
+
+- **Amp installation profiles and scope names now match current Amp** — docs
+  distinguish hosted-native from paired-full behavior, use native `skill:
+  invoke` for deterministic hosted skill loading, and separate machine-local
+  `--global` installs from personal/workspace hosted repositories. The public
+  standalone repository, generated target, gated `stable` branch, paired local
+  install, and GitHub/curl fallback remain supported.
 
 - **`deep-bug-investigator` synthesizes on opus, its four tracks run on sonnet**
   (thanks @BugsBunny338, #133) — the agent coordinates four parallel
@@ -114,6 +127,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   never saw. This is exactly how `displayName` reached users: it was present in
   all four Claude-facing manifests while the gate looked at one of them. All
   five manifests are validated now.
+
+- **Amp wrapper skill resolution follows supported local precedence** — the
+  generated plugin now checks machine-local skill roots before workspace roots
+  and searches `.agents/skills` and `.claude/skills` through the parent
+  directories exposed from `workspaceRoot`. Docs explicitly call out sources
+  the Plugin API cannot resolve, including hosted repositories, built-ins,
+  plugin caches, custom `amp.skills.path`, and nested invocation roots that are
+  not exposed to plugins.
 
 - **`displayName` removed from all Claude Code manifests** (reported by
   @ndrean, #130) — the field was introduced alongside the v3 plugin split and
