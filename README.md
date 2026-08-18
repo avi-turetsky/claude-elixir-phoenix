@@ -15,8 +15,9 @@ review, and verify your Elixir/Phoenix code in parallel -- each with domain
 expertise, fresh context, and enforced [Iron Laws](#iron-laws-non-negotiable-rules)
 that catch the bugs your tests won't.
 
-**Using Amp?** Install the generated skills-only edition for the same 51 Elixir,
-Phoenix, LiveView, Ecto, Oban, testing, and security skills. See
+**Using Amp?** Install the generated edition for the same 51 Elixir, Phoenix,
+LiveView, Ecto, Oban, testing, and security skills plus the optional native PR
+watch lifecycle plugin. See
 [Use with Amp](#use-with-amp) for the important differences from the full Claude
 Code plugin, or the [Amp install guide](https://phxagents.dev/install/amp/) on
 phxagents.dev.
@@ -278,6 +279,25 @@ amp skill add \
   --global
 ```
 
+`phx-watch-pr` additionally needs the generated Amp plugin. Install it into the
+project where the worker Orb opens and watches PRs:
+
+```bash
+amp plugins add \
+  https://raw.githubusercontent.com/oliver-kriska/claude-elixir-phoenix/main/targets/amp/plugins/phx-watch-pr.ts \
+  --target workspace
+```
+
+The plugin holds a bounded Orb keep-alive lease, filters deployment-like checks
+out of readiness, persists reload-safe state, and wakes the same worker thread
+only for failed/cancelled required CI, unresolved feedback, and terminal
+outcomes. Its defaults are a 60-second poll, 15-minute activity-based quiet
+period, and 2-hour active-watch cap. Head pushes, required-check transitions,
+reviews, and comments restart the quiet period without routine model turns;
+deployment-like transitions do neither. With `--fix`, actionable feedback and
+branch-owned CI failures are repaired in one serialized same-thread workflow.
+It never blindly reruns shared CI, merges, or deploys.
+
 Amp copies skills at installation time; it does not update them automatically.
 Rerun the same command with `--overwrite` to install the latest version from
 `main`. Cloning this repository is only necessary for local development.
@@ -300,8 +320,9 @@ Exact Claude-style entries such as `/phx:review` are not registered as Amp slash
 commands; Amp uses its command palette and native skill invocation instead. Amp
 may also select skills automatically from their descriptions, but automatic
 selection is model-driven and is not guaranteed on every prompt. The Amp
-edition ships skills and their bundled resources, not the Claude-specific
-hooks, custom agents, permission settings, or MCP setup. Read the complete
+edition ships skills, their bundled resources, and the focused `phx-watch-pr`
+lifecycle plugin—not the Claude-specific hooks, custom agents, permission
+settings, or MCP setup. Read the complete
 [Amp installation and usage guide](docs/amp.md) for verification, updates,
 skill precedence, examples, troubleshooting, and the portability matrix.
 

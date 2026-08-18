@@ -26,6 +26,8 @@ EXPECTED_SKILLS = 51
 Run = Callable[..., subprocess.CompletedProcess[str]]
 EXECUTABLE_RESOURCE = Path("phx-watch-pr/scripts/watch-pr.sh")
 PI_SOURCE_EXECUTABLE = Path("watch-pr/scripts/watch-pr.sh")
+AMP_EXECUTABLE_RESOURCE = Path("phx-deps-audit/scripts/diff_cves.py")
+AMP_SOURCE_EXECUTABLE = Path("deps-audit/scripts/diff_cves.py")
 OPENCODE_ENV_OVERRIDES = (
     "OPENCODE_CONFIG",
     "OPENCODE_CONFIG_DIR",
@@ -253,7 +255,9 @@ def smoke_codex(root: Path, runner: Run = subprocess.run) -> None:
 
 def smoke_amp(root: Path, runner: Run = subprocess.run) -> None:
     home, workspace = root / "home", root / "workspace"
-    generated = root / "generated-skills"
+    generated = root / "generated-target"
+    generated_skills = generated / "skills"
+    generated_plugin = generated / amp_port.PLUGIN_TARGET_RELATIVE
     install = workspace / ".agents/skills"
     xdg_roots = {
         name: root / name.lower()
@@ -266,10 +270,10 @@ def smoke_amp(root: Path, runner: Run = subprocess.run) -> None:
     }
     for path in (home, workspace, install, *xdg_roots.values()):
         path.mkdir(parents=True)
-    canonical_resource = SOURCE_PLUGIN_DIR / "skills" / PI_SOURCE_EXECUTABLE
+    canonical_resource = SOURCE_PLUGIN_DIR / "skills" / AMP_SOURCE_EXECUTABLE
     canonical_snapshot = _resource_snapshot(canonical_resource)
-    amp_port.build(SOURCE_PLUGIN_DIR, generated)
-    generated_resource = generated / EXECUTABLE_RESOURCE
+    amp_port.build_target(SOURCE_PLUGIN_DIR, generated)
+    generated_resource = generated_skills / AMP_EXECUTABLE_RESOURCE
     _verify_resource_snapshot(generated_resource, canonical_snapshot)
     settings = root / "settings.json"
     settings.write_text(
@@ -302,16 +306,37 @@ def smoke_amp(root: Path, runner: Run = subprocess.run) -> None:
         raise RuntimeError("amp returned an empty version")
     _run(
         runner,
-        [executable, "skill", "add", str(generated), "--target", str(install)],
+        [
+            executable,
+            "plugins",
+            "exec",
+            str(generated_plugin),
+            "session.start",
+            "--data",
+            '{"thread":{"id":"T-runtime-smoke"}}',
+        ],
+        env,
+        workspace,
+    )
+    _run(
+        runner,
+        [
+            executable,
+            "skill",
+            "add",
+            str(generated_skills),
+            "--target",
+            str(install),
+        ],
         env,
         workspace,
     )
     _verify_tree(install)
     _verify_resource_snapshot(generated_resource, canonical_snapshot)
-    _verify_resource_snapshot(install / EXECUTABLE_RESOURCE, canonical_snapshot)
+    _verify_resource_snapshot(install / AMP_EXECUTABLE_RESOURCE, canonical_snapshot)
     expected = {
         path.parent.name: (install / path.parent.name).resolve()
-        for path in generated.glob("*/SKILL.md")
+        for path in generated_skills.glob("*/SKILL.md")
     }
     discovered = _amp_skill_records(
         json.loads(
@@ -344,10 +369,13 @@ def smoke_amp(root: Path, runner: Run = subprocess.run) -> None:
         )
     if any(install.iterdir()):
         raise RuntimeError(f"Amp left removed skills on disk: {install}")
-    _verify_tree(generated)
+    _verify_tree(generated_skills)
     _verify_resource_snapshot(generated_resource, canonical_snapshot)
     _verify_resource_snapshot(canonical_resource, canonical_snapshot)
-    print(f"[runtime-smoke] Amp {version}: {EXPECTED_SKILLS} skills OK")
+    print(
+        f"[runtime-smoke] Amp {version}: {EXPECTED_SKILLS} skills and "
+        "phx-watch-pr plugin load OK"
+    )
 
 
 def smoke_pi(root: Path, runner: Run = subprocess.run) -> None:

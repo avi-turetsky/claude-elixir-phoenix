@@ -12,7 +12,13 @@ from scripts import runtime_smoke
 
 def _fixture_target(output: Path) -> None:
     for number in range(runtime_smoke.EXPECTED_SKILLS):
-        name = "phx-watch-pr" if number == 0 else f"skill-{number}"
+        name = (
+            "phx-watch-pr"
+            if number == 0
+            else "phx-deps-audit"
+            if number == 1
+            else f"skill-{number}"
+        )
         skill = output / "skills" / name
         skill.mkdir(parents=True)
         (skill / "SKILL.md").write_text("# Skill\n")
@@ -20,26 +26,29 @@ def _fixture_target(output: Path) -> None:
     resource.parent.mkdir()
     resource.write_text("#!/bin/sh\n")
     resource.chmod(0o755)
+    amp_resource = output / "skills" / runtime_smoke.AMP_EXECUTABLE_RESOURCE
+    amp_resource.parent.mkdir()
+    amp_resource.write_text("#!/usr/bin/env python3\n")
+    amp_resource.chmod(0o755)
 
 
 def test_amp_uses_native_install_exact_discovery_and_fresh_removal(tmp_path, monkeypatch) -> None:
     canonical = tmp_path / "canonical"
-    canonical_resource = canonical / "skills" / runtime_smoke.PI_SOURCE_EXECUTABLE
+    canonical_resource = canonical / "skills" / runtime_smoke.AMP_SOURCE_EXECUTABLE
     canonical_resource.parent.mkdir(parents=True)
-    canonical_resource.write_text("#!/bin/sh\n")
+    canonical_resource.write_text("#!/usr/bin/env python3\n")
     canonical_resource.chmod(0o755)
 
     def build_amp_fixture(_source, output):
         _fixture_target(output)
-        nested = output / "skills"
-        for skill in nested.iterdir():
-            skill.rename(output / skill.name)
-        nested.rmdir()
+        plugin = output / runtime_smoke.amp_port.PLUGIN_TARGET_RELATIVE
+        plugin.parent.mkdir(parents=True)
+        plugin.write_text("export default function () {}\n")
 
     monkeypatch.setattr(runtime_smoke, "SOURCE_PLUGIN_DIR", canonical)
     monkeypatch.setattr(
         runtime_smoke.amp_port,
-        "build",
+        "build_target",
         build_amp_fixture,
     )
     monkeypatch.setattr(runtime_smoke, "_executable", lambda name, _env: name)
@@ -58,9 +67,11 @@ def test_amp_uses_native_install_exact_discovery_and_fresh_removal(tmp_path, mon
     def runner(command, **kwargs):
         calls.append((command, kwargs["env"].copy(), kwargs["cwd"]))
         install = tmp_path / "workspace/.agents/skills"
-        generated = tmp_path / "generated-skills"
+        generated = tmp_path / "generated-target" / "skills"
         if command[-1] == "--version":
             output = "amp test\n"
+        elif command[1:3] == ["plugins", "exec"]:
+            output = "Plugin loaded\n"
         elif command[1:3] == ["skill", "add"]:
             for skill in generated.iterdir():
                 shutil.copytree(skill, install / skill.name, copy_function=shutil.copy2)
@@ -95,6 +106,7 @@ def test_amp_uses_native_install_exact_discovery_and_fresh_removal(tmp_path, mon
     assert all(call[2] == tmp_path / "workspace" for call in calls)
     assert sum(call[0][1:4] == ["skill", "list", "--json"] for call in calls) == 2
     assert sum(call[0][1:3] == ["skill", "remove"] for call in calls) == 51
+    assert sum(call[0][1:3] == ["plugins", "exec"] for call in calls) == 1
 
 
 def test_amp_records_require_unique_names_clean_payload_and_path_boundaries(tmp_path) -> None:
@@ -307,6 +319,7 @@ def test_tree_validation_requires_exact_count_resource_and_executable(tmp_path) 
     shutil.rmtree(target)
     _fixture_target(target)
     (target / "skills" / runtime_smoke.EXECUTABLE_RESOURCE).chmod(0o644)
+    (target / "skills" / runtime_smoke.AMP_EXECUTABLE_RESOURCE).chmod(0o644)
     with pytest.raises(RuntimeError, match="executable resource"):
         runtime_smoke._verify_tree(target / "skills")
 

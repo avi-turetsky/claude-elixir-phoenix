@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import hashlib
+import shutil
 import stat
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -32,6 +34,13 @@ def _write_skill(
         encoding="utf-8",
     )
     return skill_dir
+
+
+def _write_amp_plugin(root: Path) -> None:
+    source = SOURCE_PLUGIN_DIR / amp.PLUGIN_SOURCE_RELATIVE
+    target = root / amp.PLUGIN_SOURCE_RELATIVE
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, target)
 
 
 def test_builds_all_repository_skills_without_mutating_claude_source(tmp_path) -> None:
@@ -217,6 +226,58 @@ def test_amp_projection_is_deterministic(tmp_path) -> None:
     assert _tree_hash(first) == _tree_hash(second)
 
 
+def test_complete_target_generates_native_watch_plugin_and_overlay(tmp_path) -> None:
+    output = tmp_path / "amp"
+
+    result = amp.build_target(SOURCE_PLUGIN_DIR, output)
+
+    assert result == {"skills": 51, "plugins": 1}
+    assert amp.validate_plugin(
+        output / amp.PLUGIN_TARGET_RELATIVE,
+        SOURCE_PLUGIN_DIR,
+    ) == 1
+    watch = (output / "skills/phx-watch-pr/SKILL.md").read_text(encoding="utf-8")
+    assert "elixir_phoenix_watch_pr" in watch
+    assert "keep-alive lease" in watch
+    assert "Never merge or deploy" in watch
+    assert "gh pr checks {n} --watch" not in watch
+    assert not (output / "skills/phx-watch-pr/scripts/watch-pr.sh").exists()
+
+
+def test_complete_amp_target_is_deterministic(tmp_path) -> None:
+    first = tmp_path / "first"
+    second = tmp_path / "second"
+
+    amp.build_target(SOURCE_PLUGIN_DIR, first)
+    amp.build_target(SOURCE_PLUGIN_DIR, second)
+
+    assert _tree_hash(first) == _tree_hash(second)
+
+
+def test_native_watch_plugin_lifecycle_harness(tmp_path) -> None:
+    output = tmp_path / "amp"
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    amp.build_target(SOURCE_PLUGIN_DIR, output)
+
+    result = subprocess.run(
+        [
+            "npx",
+            "tsx",
+            "scripts/tests/amp_watch_pr_harness.mts",
+            str(output / amp.PLUGIN_TARGET_RELATIVE),
+            str(workspace),
+        ],
+        cwd=Path(__file__).parents[2],
+        text=True,
+        capture_output=True,
+        timeout=60,
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert "Amp phx-watch-pr lifecycle harness passed" in result.stdout
+
+
 def test_drift_comparison_detects_mode_only_changes(tmp_path) -> None:
     plugin = tmp_path / "plugin"
     skill = _write_skill(plugin, "one", "phx:one")
@@ -273,8 +334,9 @@ def test_build_restores_previous_target_when_installation_fails(
 def test_drift_check_is_read_only(tmp_path, monkeypatch) -> None:
     plugin = tmp_path / "plugin"
     _write_skill(plugin, "one", "phx:one")
-    output = tmp_path / "target" / "skills"
-    amp.build(plugin, output)
+    _write_amp_plugin(plugin)
+    output = tmp_path / "target"
+    amp.build_target(plugin, output)
     before = _tree_hash(output)
     monkeypatch.setattr(build_amp_skills, "SOURCE_PLUGIN_DIR", plugin)
     monkeypatch.setattr(build_amp_skills, "OUTPUT_DIR", output)
@@ -282,7 +344,7 @@ def test_drift_check_is_read_only(tmp_path, monkeypatch) -> None:
     assert build_amp_skills.check() == 0
     assert _tree_hash(output) == before
 
-    skill_file = output / "phx-one" / "SKILL.md"
+    skill_file = output / "skills" / "phx-one" / "SKILL.md"
     skill_file.write_text(skill_file.read_text() + "drift\n", encoding="utf-8")
     drifted = _tree_hash(output)
 

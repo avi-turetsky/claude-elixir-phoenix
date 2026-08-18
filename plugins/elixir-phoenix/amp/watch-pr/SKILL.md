@@ -1,7 +1,8 @@
 ---
-name: phx-watch-pr
-description: Watch an Elixir/Phoenix PR with an Amp Orb keep-alive lease until required
-  non-deployment CI is green and review threads are resolved.
+name: watch-pr
+description: Watch an Elixir/Phoenix PR with an Amp Orb keep-alive lease until required non-deployment CI is green and review threads are resolved. Use after opening or updating a PR.
+effort: medium
+argument-hint: <PR number or URL> [--checks-only] [--fix] [--max-hours N] [--quiet-minutes N]
 ---
 
 # Watch PR — Amp-Native Lifecycle

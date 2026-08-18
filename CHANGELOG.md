@@ -9,6 +9,22 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Amp-native `phx-watch-pr` lifecycle** — the deterministic Amp target now
+  includes a focused Plugin API runtime that acquires an Orb keep-alive lease,
+  persists watch state across reloads, filters deployment-like checks out of
+  readiness, detects unresolved review threads and required CI failures, and
+  serializes `--fix` events back into the same worker thread. Defaults are a
+  60-second poll, 15-minute activity-based quiet period, and 2-hour hard
+  active-watch cap; head pushes, required-check transitions, reviews, and
+  comments restart quiet so delayed reviews cannot be hidden by an early green
+  snapshot without waking inference for routine progress. Deployment-only
+  transitions remain status-visible but silent. Every terminal path releases
+  the lease, and the plugin never blindly reruns shared CI, merges, or deploys.
+  An optional durable Amp webhook can reactivate a completed watch after the
+  Orb pauses only when the event identifies the exact watched PR or head SHA;
+  repository webhook configuration remains an explicit external administrator
+  action.
+
 - **README links phxagents.dev above the fold** — a docs badge, a one-line
   **Docs** block pointing at `/install/`, `/compatibility/`, `/iron-laws/` and
   `/catalog/`, and a per-runtime install-guide link in each of the four

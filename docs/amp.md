@@ -2,8 +2,9 @@
 
 The Amp edition brings the plugin's Elixir, Phoenix, LiveView, Ecto, Oban,
 testing, security, and workflow knowledge to Amp as standard Agent Skills. It is
-a generated, skills-only projection of the full Claude Code plugin—not a second
-hand-maintained implementation.
+a generated projection of the full Claude Code plugin—not a second
+hand-maintained implementation. A focused generated Amp plugin adds the
+keep-alive and durable event lifecycle required by `phx-watch-pr`.
 
 The canonical source remains `plugins/elixir-phoenix/`. Amp-specific naming and
 path constraints never flow back into the Claude Code plugin, so both targets
@@ -17,6 +18,9 @@ with Claude Code, Codex, Pi, and OpenCode.
 - All 51 skills and their complete bundled resources.
 - Amp-compatible names and frontmatter.
 - Rewritten cross-skill links and resource paths.
+- An Amp-native `phx-watch-pr` lifecycle plugin with bounded Orb keep-alive,
+  durable state, required-check filtering, and serialized same-thread fix
+  events for actionable review feedback and required CI failures.
 - Project-local and user-wide installation options.
 - Compatibility with project-specific skills already in `.claude/skills/`.
 
@@ -57,6 +61,22 @@ version, or add it to `.gitignore` and install it per developer. Do not leave
 individual skill directories at the repository root; Amp discovers project
 skills from `.agents/skills/`.
 
+### Install the PR lifecycle plugin
+
+The standard skills work without a plugin. `phx-watch-pr` requires its generated
+Amp plugin because only the Plugin API can hold an Orb keep-alive lease and wake
+the same thread after inactivity:
+
+```bash
+amp plugins add \
+  https://raw.githubusercontent.com/oliver-kriska/claude-elixir-phoenix/main/targets/amp/plugins/phx-watch-pr.ts \
+  --target workspace
+```
+
+Start a fresh Amp process or run `plugins: reload`. Plugins execute code; audit
+the generated TypeScript before installing it. The plugin never merges,
+deploys, publishes, or changes repository webhooks.
+
 ## Install for every project
 
 Use a global installation only if most of your Amp work is Elixir/Phoenix:
@@ -83,6 +103,8 @@ amp
 `amp skill list` should show entries such as `phx-investigate`, `testing`, and
 `tidewave-integration`. For a project-local installation, their displayed base
 directories should resolve under the project's `.agents/skills/` directory.
+`amp plugins list` should also show `phx-watch-pr` with the
+`elixir_phoenix_watch_pr` tool.
 
 For an explicit end-to-end check, start a fresh thread and ask:
 
@@ -250,7 +272,7 @@ when a release deletes or renames a skill.
 | Explicit skill loading | Slash command | Command palette: `skill: invoke` |
 | 26 named custom subagents | Full | Not installed |
 | Parallel workflow orchestration | Full | Optional native workers with sequential fallback |
-| Lifecycle and enforcement hooks | Full | Not installed |
+| Lifecycle and enforcement hooks | Full | Focused `phx-watch-pr` plugin only |
 | Claude permission settings | Full | Not installed |
 | Tidewave MCP connection | User-configured | User-configured |
 
@@ -275,7 +297,47 @@ material in Amp:
 | `phx-learn-from-fix` | Targets Claude-specific personal skill and memory locations. |
 | `phx-permissions` | Manages Claude permission settings. |
 | `phx-init` | Installs Claude-specific project instructions. |
-| `phx-watch-pr` | Uses Claude background-monitor lifecycle tools. |
+
+`phx-watch-pr` is adapted through its focused plugin. It acquires
+`amp.system.executor.keepAlive()`, polls required checks and unresolved review
+threads without model turns, and persists state in workspace Amp configuration.
+Deployment, release, preview, production, and prod checks are reported
+separately and never determine readiness.
+
+Defaults are 60-second polling, a 15-minute activity-based quiet period after
+readiness, and a 2-hour active-watch maximum. The quiet period intentionally
+covers delayed reviews that have no dedicated check and exceeds Amp's normal
+five-minute inactivity pause, at the cost of up to fifteen additional Orb
+minutes after the last relevant activity. The two-hour cap covers normal
+pipelines while bounding HIGH-worker billing; each watch may configure 30–300
+seconds, 5–60 minutes, and 0.5–24 hours respectively. Timeout is incomplete and
+always releases the lease.
+
+The first green snapshot is not immediate success. A new current-head SHA,
+required-check transition, unresolved-thread change, top-level PR comment, or
+submitted review restarts the quiet clock. This covers account-level automated
+reviews that may publish several minutes after CI starts and may be silent when
+they find nothing. Routine pending/pass progress and non-actionable review
+activity do not wake model inference. Deployment-like activity remains
+excluded, does not delay readiness, and stays silent while remaining visible in
+explicit status and terminal summaries.
+
+Failed/cancelled required non-deployment checks and unresolved review threads
+are actionable. Each distinct actionable snapshot wakes the worker once. With
+`--fix`, it appends one serialized event to the same worker thread and directs
+it to the installed `phx-pr-review` workflow with check names, links, and review
+evidence. The worker validates comments and logs, fixes only valid branch-owned
+causes, verifies, pushes the authorized PR branch update, replies, and resolves
+where appropriate. It never blindly reruns shared CI, merges, or deploys.
+
+The plugin also registers an optional durable Amp webhook and writes its bearer
+URL to an owner-only file under `~/.config/amp/phx-watch-pr/`. A repository
+administrator may configure GitHub to send check and review events there; the
+plugin itself never performs that shared change. Without external webhook
+configuration, polling stops after the quiet period and a later human comment
+cannot wake a paused Orb. Forwarded events must identify the exact watched PR
+number or current watched head SHA; empty and unrelated repository events do
+not acquire a lease or schedule a poll.
 
 The generated files mark unsupported Claude hook paths explicitly and contain
 no unresolved `${CLAUDE_SKILL_DIR}` or `${CLAUDE_PLUGIN_ROOT}` variables.
@@ -311,7 +373,7 @@ generated skill; only the invocation surface differs.
 
 ### A workflow mentions Claude-only tools
 
-The nine adapted workflows should not require Claude-only tools. If one does,
+The adapted workflows should not require Claude-only tools. If one does,
 report generated-target drift and reinstall the current release. For other
 workflow or administration skills, treat those steps as reference guidance and
 ask Amp to adapt them using Amp-native tools. Do not assume that hooks, named
@@ -320,12 +382,13 @@ is installed.
 
 ## Maintain the generated target
 
-Never edit `targets/amp/skills` manually. Change the canonical Claude skill,
-then regenerate and verify the complete target with one command:
+Never edit `targets/amp` manually. Change the canonical Claude skill or the Amp
+source under `plugins/elixir-phoenix/amp/`, then regenerate and verify the
+complete target with one command:
 
 ```bash
 make amp-skills-sync
-git add targets/amp/skills
+git add targets/amp
 ```
 
 `make amp-skills` remains available when generation without a follow-up drift
@@ -364,9 +427,9 @@ Maintainers with Amp installed can run a model-free native acceptance check:
 make amp-runtime-smoke
 ```
 
-The acceptance run recorded on 2026-07-23 used Amp
-`0.0.1784809706-g96cc8a`. It builds the target in a temporary directory,
-installs it with `amp skill add`, verifies exact JSON discovery of all 51 skills
+The acceptance run builds the target in a temporary directory, loads the
+generated plugin through the current Amp runtime, installs the skills with
+`amp skill add`, verifies exact JSON discovery of all 51 skills
 plus bundled resource bytes and executable modes, removes every skill with
 `amp skill remove`, and confirms a fresh `amp skill list` no longer
 discovers them from any location. Temporary home, XDG, settings, and log paths

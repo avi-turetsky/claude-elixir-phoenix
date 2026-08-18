@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build or drift-check the Amp Agent Skills projection."""
+"""Build or drift-check the Amp skills and lifecycle plugin projection."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from .port_lib import SOURCE_PLUGIN_DIR, TARGETS_DIR
 from .port_lib import amp
 from .port_lib.generated_tree import tree_differences
 
-OUTPUT_DIR = TARGETS_DIR / "amp" / "skills"
+OUTPUT_DIR = TARGETS_DIR / "amp"
 
 
 def _differences(expected: Path, actual: Path) -> list[str]:
@@ -25,8 +25,8 @@ def check() -> int:
         return 1
 
     with tempfile.TemporaryDirectory(prefix="amp-skills-check-") as tmp:
-        generated = Path(tmp) / "skills"
-        amp.build(SOURCE_PLUGIN_DIR, generated)
+        generated = Path(tmp) / "amp"
+        amp.build_target(SOURCE_PLUGIN_DIR, generated)
         differences = _differences(generated, OUTPUT_DIR)
 
     if differences:
@@ -36,7 +36,9 @@ def check() -> int:
         print("Run `make amp-skills` and commit the result.", file=sys.stderr)
         return 1
 
-    print(f"[amp-skills] OK: {amp.validate(OUTPUT_DIR)} skills")
+    skill_count = amp.validate(OUTPUT_DIR / "skills")
+    amp.validate_plugin(OUTPUT_DIR / amp.PLUGIN_TARGET_RELATIVE, SOURCE_PLUGIN_DIR)
+    print(f"[amp-target] OK: {skill_count} skills and 1 plugin")
     return 0
 
 
@@ -52,8 +54,11 @@ def main() -> int:
     if args.check:
         return check()
 
-    result = amp.build(SOURCE_PLUGIN_DIR, OUTPUT_DIR)
-    print(f"[amp-skills] built {result['skills']} skills in {OUTPUT_DIR}")
+    result = amp.build_target(SOURCE_PLUGIN_DIR, OUTPUT_DIR)
+    print(
+        f"[amp-target] built {result['skills']} skills and "
+        f"{result['plugins']} plugin in {OUTPUT_DIR}"
+    )
     return 0
 
 

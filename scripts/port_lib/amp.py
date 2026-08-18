@@ -40,6 +40,9 @@ IGNORED_FILES = {".DS_Store"}
 CLAUDE_HOOK_UNAVAILABLE = (
     "[Claude Code-only hook unavailable in the Amp skills-only target: {path}]"
 )
+PLUGIN_SOURCE_RELATIVE = Path("amp") / "phx-watch-pr.ts"
+PLUGIN_TARGET_RELATIVE = Path("plugins") / "phx-watch-pr.ts"
+WATCH_OVERLAY_ROOT = Path("amp") / "watch-pr"
 PORTABLE_WORKFLOWS = (
     "phx-investigate",
     "phx-review",
@@ -50,6 +53,7 @@ PORTABLE_WORKFLOWS = (
     "phx-trace",
     "phx-audit",
     "phx-research",
+    "phx-watch-pr",
 )
 AMP_DESCRIPTION_OVERRIDES = {
     "phx-investigate": (
@@ -67,6 +71,10 @@ AMP_DESCRIPTION_OVERRIDES = {
     "phx-freeze": (
         "Apply an advisory edit scope in this session. Use for read-only or "
         "directory-scoped work; no enforcement hook is installed."
+    ),
+    "phx-watch-pr": (
+        "Watch an Elixir/Phoenix PR with an Amp Orb keep-alive lease until "
+        "required non-deployment CI is green and review threads are resolved."
     ),
 }
 
@@ -240,6 +248,13 @@ def _rewrite_commands(text: str) -> str:
 
 def _amp_overlay(source_file: Path, current: SkillSource) -> str | None:
     """Reuse the anchored portable workflows with Amp-native terminology."""
+    if current.target_name == "phx-watch-pr":
+        relative = source_file.relative_to(current.source_dir)
+        overlay_file = current.source_dir.parent.parent / WATCH_OVERLAY_ROOT / relative
+        if overlay_file.is_file():
+            if relative == Path("SKILL.md"):
+                return parse_file(overlay_file).body
+            return overlay_file.read_text(encoding="utf-8")
     overlay = codex._codex_overlay(source_file, current)
     if overlay is None:
         return None
@@ -278,6 +293,21 @@ def _populate(skills: list[SkillSource], output_dir: Path) -> None:
         IGNORED_FILES,
         _transform_markdown,
     )
+    watch = next((skill for skill in skills if skill.target_name == "phx-watch-pr"), None)
+    if watch:
+        overlay_root = watch.source_dir.parent.parent / WATCH_OVERLAY_ROOT
+        overlay_files = {
+            path.relative_to(overlay_root)
+            for path in overlay_root.rglob("*")
+            if path.is_file()
+        }
+        generated_watch = output_dir / watch.target_name
+        for generated in sorted(generated_watch.rglob("*"), reverse=True):
+            relative = generated.relative_to(generated_watch)
+            if generated.is_file() and relative not in overlay_files:
+                generated.unlink()
+            elif generated.is_dir() and not any(generated.iterdir()):
+                generated.rmdir()
 
 
 def validate(output_dir: str | Path) -> int:
@@ -409,6 +439,40 @@ def validate(output_dir: str | Path) -> int:
     return len(skill_files)
 
 
+def plugin_source(source_plugin_dir: str | Path) -> Path:
+    """Return the canonical Amp plugin source after validating its node type."""
+    source = Path(source_plugin_dir) / PLUGIN_SOURCE_RELATIVE
+    if source.is_symlink() or not source.is_file():
+        raise ValueError(f"{source}: canonical Amp plugin must be a regular file")
+    return source
+
+
+def validate_plugin(
+    plugin_file: str | Path,
+    source_plugin_dir: str | Path,
+) -> int:
+    """Validate generated plugin bytes and required current Plugin API usage."""
+    generated = Path(plugin_file)
+    if generated.is_symlink() or not generated.is_file():
+        raise ValueError(f"{generated}: generated Amp plugin must be a regular file")
+    expected = plugin_source(source_plugin_dir).read_bytes()
+    if generated.read_bytes() != expected:
+        raise ValueError(f"{generated}: generated Amp plugin content does not match source")
+    text = expected.decode("utf-8")
+    required_api = (
+        "amp.system.executor.keepAlive()",
+        "amp.threads.get(",
+        "thread.appendUserMessage(",
+        "thread.waitForResponse(",
+        "amp.createWebhook(",
+        "amp.onDispose(",
+    )
+    missing = next((token for token in required_api if token not in text), None)
+    if missing:
+        raise ValueError(f"{generated}: missing Amp Plugin API usage `{missing}`")
+    return 1
+
+
 def build(source_plugin_dir: str | Path, output_dir: str | Path) -> dict[str, int]:
     """Replace output_dir with a validated projection, rolling back on failure."""
     source = Path(source_plugin_dir)
@@ -437,3 +501,39 @@ def build(source_plugin_dir: str | Path, output_dir: str | Path) -> dict[str, in
             shutil.rmtree(backup)
 
     return {"skills": count}
+
+
+def build_target(source_plugin_dir: str | Path, output_dir: str | Path) -> dict[str, int]:
+    """Replace the complete Amp target with generated skills and lifecycle plugin."""
+    source = Path(source_plugin_dir)
+    output = Path(output_dir)
+    skills = discover_skills(source)
+    output.parent.mkdir(parents=True, exist_ok=True)
+
+    with tempfile.TemporaryDirectory(prefix=".amp-target-", dir=output.parent) as tmp:
+        staged = Path(tmp) / "target"
+        staged_skills = staged / "skills"
+        staged_skills.mkdir(parents=True)
+        _populate(skills, staged_skills)
+        skill_count = validate(staged_skills)
+
+        staged_plugin = staged / PLUGIN_TARGET_RELATIVE
+        staged_plugin.parent.mkdir(parents=True)
+        shutil.copy2(plugin_source(source), staged_plugin)
+        plugin_count = validate_plugin(staged_plugin, source)
+
+        replacement = Path(tmp) / "replacement"
+        staged.rename(replacement)
+        backup = output.with_name(f".{output.name}.backup-{uuid.uuid4().hex}")
+        if output.exists():
+            output.rename(backup)
+        try:
+            replacement.rename(output)
+        except Exception:
+            if backup.exists() and not output.exists():
+                backup.rename(output)
+            raise
+        if backup.exists():
+            shutil.rmtree(backup)
+
+    return {"skills": skill_count, "plugins": plugin_count}

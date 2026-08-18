@@ -35,6 +35,7 @@ installation and troubleshooting remain in the linked guides.
 | `phx-pr-review` / `phx-full` | Full | Adapted | Adapted | Adapted | Adapted |
 | `phx-trace` | Full | Adapted | Adapted | Adapted | Adapted |
 | `phx-audit` / `phx-research` | Full | Adapted | Adapted | Adapted | Adapted |
+| `phx-watch-pr` | Background monitor | Native keep-alive plugin | Guidance/baseline | Guidance/baseline | Guidance/baseline |
 | `phx-freeze` | Hook-enforced advisory lock | Advisory only | Advisory only | Advisory only | Advisory only |
 | Remaining workflow/admin skills | Full | Guidance/baseline | Guidance/baseline | Guidance/baseline | Guidance/baseline |
 | Claude namespaced slash commands | Full | Not applicable | Not applicable | Not applicable | Not applicable |
@@ -88,9 +89,11 @@ project and port. Portability fixes must not weaken this behavior.
 
 ### Amp
 
-Amp installs `targets/amp/skills` as standard Agent Skills. The generated target
-is intentionally stable and does not install Claude hooks, agents, permissions,
-or MCP configuration. Exact Claude slash-command syntax is replaced by Amp's
+Amp installs `targets/amp/skills` as standard Agent Skills. The focused
+`targets/amp/plugins/phx-watch-pr.ts` plugin adds a bounded keep-alive lease,
+durable polling state, and same-thread event delivery for PR watching. The rest
+of the generated target does not install Claude hooks, agents, permissions, or
+MCP configuration. Exact Claude slash-command syntax is replaced by Amp's
 native skill picker and explicit skill-loading prompts.
 
 ### Codex
