@@ -57,6 +57,15 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **`route-intent.sh` timeout raised 10s → 30s** — the `UserPromptSubmit`
+  intent-routing hook had the tightest budget of any hook in the plugin despite
+  sitting on the latency path of every prompt. It normally finishes in well
+  under 100ms (it truncates the prompt to 4000 chars before scanning), but a
+  timeout drops the routing hint silently, so the extra headroom costs nothing
+  on the common path and avoids losing suggestions on a slow first run. The
+  hook already exits 0 on every path — a `UserPromptSubmit` hook must never
+  exit 2, which would erase the user's prompt.
+
 - **Release bodies now carry a docs-site footer** — the `release` contributor
   skill gained an Iron Law and a `printf` step that appends
   `<https://phxagents.dev>` to the extracted CHANGELOG release notes. A release
