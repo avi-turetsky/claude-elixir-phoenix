@@ -145,7 +145,8 @@ def test_builds_complete_target_with_public_workflow_commands(tmp_path) -> None:
     assert "tools: ['Read', 'finder']" in plugin
     assert "Promise.allSettled" in plugin
     assert "parentThreadID" in plugin
-    assert "executor: 'local'" in plugin
+    assert "amp.system.executor.kind === 'remote' ? 'orb' : 'local'" in plugin
+    assert "executor: childExecutor(amp)" in plugin
     assert "name: 'elixir_phoenix_parallel_review'" in plugin
     assert "name: 'elixir_phoenix_parallel_investigate'" in plugin
     assert "amp.on('tool.call'" in plugin

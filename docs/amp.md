@@ -315,7 +315,7 @@ only `Read` and `finder`. They cannot edit or create files, run shell commands,
 or invoke more agents.
 
 Choose `phx: specialist` to select one specialist, enter its task, and run it in
-a local child thread. The result is returned to the current thread for evidence
+a child thread. The result is returned to the current thread for evidence
 checking and synthesis. If no thread exists yet, the command creates and shows a
 medium-mode parent thread first.
 
@@ -335,10 +335,14 @@ single failed track from discarding successful results. The parent verifies and
 deduplicates findings; failed concerns fall back to sequential analysis rather
 than being respawned.
 
-Child threads use Amp's `local` executor and are linked to the parent thread.
-Starting the plugin does not run a model. A model is billed only when a
-specialist command or tool actually runs, once per selected child plus the
-normal parent synthesis turn.
+Child threads are linked to the parent thread. From a local Amp client they use
+that client's executor and checkout. From an Orb they run in fresh child Orbs,
+because Amp does not expose a same-Orb child executor. Those children receive
+the collected project context but do not share the parent's processes,
+services, or uncommitted working tree. Starting the plugin does not run a model.
+A specialist command or tool runs one model call per selected child plus the
+normal parent synthesis turn; remote runs also consume child Orb time and run
+the project's Orb setup.
 
 ### Choose the specialist model
 

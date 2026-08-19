@@ -99,7 +99,7 @@ complete.
 
 For a non-trivial failure with independent reproduction, root-cause, impact,
 and fix-strategy questions, call `elixir_phoenix_parallel_investigate` once.
-Its four local child threads are enforced read-only (`Read` and `finder` only).
+Its four child threads are enforced read-only (`Read` and `finder` only).
 Reconcile their output in this parent thread and verify every claimed evidence
 path before editing. If the tool is unavailable or a child fails, run only the
 missing track sequentially. Simple failures should stay sequential.
@@ -807,6 +807,10 @@ function errorText(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
 }
 
+function childExecutor(amp: PluginAPI): 'local' | 'orb' {
+  return amp.system.executor.kind === 'remote' ? 'orb' : 'local'
+}
+
 function specialistTask(
   definition: SpecialistDefinition,
   scope: string,
@@ -845,6 +849,7 @@ async function runChildren(
   agents: Map<string, Agent>,
   prompt: (definition: { key: string; label: string }) => string,
   parentThreadID: PluginThread['id'],
+  executor: 'local' | 'orb',
 ): Promise<ChildResult[]> {
   const settled = await Promise.allSettled(
     definitions.map(async (definition) => {
@@ -852,7 +857,7 @@ async function runChildren(
       if (!agent) throw new Error(`Agent is unavailable: ${definition.key}`)
       const result = await agent.run(prompt(definition), {
         parentThreadID,
-        executor: 'local',
+        executor,
         timeoutMs: childTimeoutMs,
       })
       return {
@@ -918,7 +923,7 @@ async function ensureThread(
 ): Promise<PluginThread> {
   if (ctx.thread) return ctx.thread
   return amp.getBuiltinAgent('medium').createThread({
-    executor: 'local',
+    executor: childExecutor(amp),
     show: true,
   })
 }
@@ -1251,6 +1256,7 @@ export default function (amp: PluginAPI) {
               projectContext,
             ),
           ctx.thread.id,
+          childExecutor(amp),
         )
         return aggregateResults(
           'Parallel Elixir/Phoenix Review Results',
@@ -1303,6 +1309,7 @@ export default function (amp: PluginAPI) {
               projectContext,
             ),
           ctx.thread.id,
+          childExecutor(amp),
         )
         return aggregateResults(
           'Parallel Elixir/Phoenix Investigation Results',
@@ -1349,6 +1356,7 @@ export default function (amp: PluginAPI) {
               projectContext,
             ),
           thread.id,
+          childExecutor(amp),
         )
         await thread.appendUserMessage({
           type: 'user-message',
@@ -1393,6 +1401,7 @@ export default function (amp: PluginAPI) {
               projectContext,
             ),
           thread.id,
+          childExecutor(amp),
         )
         await thread.appendUserMessage({
           type: 'user-message',
@@ -1436,6 +1445,7 @@ export default function (amp: PluginAPI) {
               projectContext,
             ),
           thread.id,
+          childExecutor(amp),
         )
         await thread.appendUserMessage({
           type: 'user-message',

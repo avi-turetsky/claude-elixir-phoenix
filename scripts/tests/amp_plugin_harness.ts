@@ -31,6 +31,7 @@ const commands = new Map<string, Function>()
 const tools = new Map<string, any>()
 const handlers = new Map<string, Function>()
 const agents: any[] = []
+const childRunOptions: Array<{ name: string; options: any }> = []
 const notices: string[] = []
 let config: Record<string, unknown> = {}
 let configError = false
@@ -51,7 +52,8 @@ const amp: any = {
   createAgent(definition: any) {
     const agent = {
       definition,
-      async run() {
+      async run(_prompt: string, options: any) {
+        childRunOptions.push({ name: definition.name, options })
         if (definition.name.includes(childFailure)) {
           throw new Error(`simulated ${definition.name} failure`)
         }
@@ -107,7 +109,7 @@ const amp: any = {
       return typeof value === 'string' ? value : value.path
     },
   },
-  system: { workspaceRoot: workspace },
+  system: { workspaceRoot: workspace, executor: { kind: 'local' } },
   activeThread: { current: undefined },
   logger: { log() {} },
   ui: {
@@ -266,6 +268,39 @@ assert.match(
   parallelResult,
   /simulated elixir-phoenix-security-analyzer failure/,
 )
+assert.ok(childRunOptions.length > 0)
+assert.ok(
+  childRunOptions.every(
+    ({ options }) =>
+      options.executor === 'local' &&
+      options.parentThreadID === 'T-parent' &&
+      options.timeoutMs === 300_000,
+  ),
+)
+
+childRunOptions.length = 0
+childFailure = 'never-fail'
+amp.system.executor.kind = 'remote'
+await parallel.execute(
+  { scope: 'review changes', specialists: ['elixir'] },
+  { thread: { id: 'T-remote-parent' } },
+)
+assert.equal(childRunOptions.length, 1)
+assert.deepEqual(childRunOptions[0].options, {
+  parentThreadID: 'T-remote-parent',
+  executor: 'orb',
+  timeoutMs: 300_000,
+})
+
+childRunOptions.length = 0
+amp.system.executor.kind = 'unknown'
+await parallel.execute(
+  { scope: 'review changes', specialists: ['ecto'] },
+  { thread: { id: 'T-unknown-parent' } },
+)
+assert.equal(childRunOptions.length, 1)
+assert.equal(childRunOptions[0].options.executor, 'local')
+amp.system.executor.kind = 'local'
 
 const notify = async (message: string) => {
   notices.push(message)

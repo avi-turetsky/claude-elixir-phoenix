@@ -107,7 +107,7 @@ appropriate. Do not invoke another skill unless the user asks you to continue.
 
 For a non-trivial failure with independent reproduction, root-cause, impact,
 and fix-strategy questions, call `elixir_phoenix_parallel_investigate` once.
-Its four local child threads are enforced read-only (`Read` and `finder` only).
+Its four child threads are enforced read-only (`Read` and `finder` only).
 Reconcile their output in this parent thread and verify every claimed evidence
 path before editing. If the tool is unavailable or a child fails, run only the
 missing track sequentially. Simple failures should stay sequential.
