@@ -611,6 +611,31 @@ When you run `/phx:review`:
 5. Output: plans/{slug}/summaries/review-consolidated.md
 ```
 
+### Hooks — the deterministic layer
+
+Skills and agents are instructions a model may or may not follow. **Hooks are
+shell scripts that always run.** The plugin ships 23 of them across 10 lifecycle
+events:
+
+- **Block destructive commands** — `mix ecto.reset/drop`, `MIX_ENV=prod`, force
+  pushes are denied before they execute, with a safer alternative attached
+- **Verify Iron Laws on every edit** — the lines you just wrote are scanned for
+  `:float` money fields, `String.to_atom` on user input, `raw/1` with a
+  variable, implicit cross joins, unsupervised `start_link`
+- **Inject context where models can't reach it** — all 26 Iron Laws into every
+  spawned subagent; `/phx:` routing suggestions on PR URLs and stack traces
+- **Keep the plan workflow coherent** — hard-stop after planning, re-inject
+  phase rules and scratchpad dead ends across compaction
+- **Break debugging loops** — repeated `mix` failures escalate from hints to a
+  structured critic that consolidates the error history
+
+Everything Elixir-specific self-gates on `mix.exs`, so the plugin is inert in
+your non-Elixir repos. Hooks fail open — a broken hook means the guard is off,
+never that the session is unusable.
+
+**→ [HOOKS.md](HOOKS.md)** for the full list, the lifecycle diagram, and
+per-hook deep dives.
+
 ## Usage Guide
 
 ### Quick tasks (bug fixes, small changes)
@@ -951,7 +976,8 @@ permissions, so it ships a verifiable security posture:
 - **No telemetry or covert egress**; workflows can make visible, user-authorized
   GitHub, Hex, web-search, or configured MCP calls through the host runtime.
   Review agents are read-only by default (source edits disallowed), and the
-  Bash hooks are auditable in `plugins/elixir-phoenix/hooks/`.
+  Bash hooks are auditable in `plugins/elixir-phoenix/hooks/` — every one of
+  them is documented in **[HOOKS.md](HOOKS.md)**.
 
 Full report, line-by-line triage, and a reproduce-it-yourself command live in
 **[SECURITY.md](SECURITY.md)**. Re-run the scan anytime with `make security`.

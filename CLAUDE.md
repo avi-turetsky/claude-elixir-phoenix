@@ -269,6 +269,20 @@ Defined in `hooks/hooks.json`:
 }
 ```
 
+**Hook documentation is REQUIRED, not optional.** When you add, remove, or
+change the behavior of any hook, update all four of these in the same commit:
+
+1. `HOOKS.md` (repo root) — user-facing table + lifecycle diagram
+2. `plugins/elixir-phoenix/hooks/docs/{group}.md` — the per-group deep dive
+3. `plugins/elixir-phoenix/hooks/README.md` — only if a convention or the
+   per-event output-channel table changed
+4. The **Current hooks** list below
+
+The docs are the only place the *reasoning* behind a hook is recorded — the
+incident it came from, the pattern it rejects, the fail-open contract. A hook
+change that ships without them loses that permanently. See
+`plugins/elixir-phoenix/hooks/README.md` → "Adding or changing a hook".
+
 **Current hooks:**
 
 - `PreToolUse` (Bash): Block destructive operations (`mix ecto.reset/drop`, `git push --force`, `MIX_ENV=prod`) before execution
@@ -884,6 +898,16 @@ After ANY correction I make:
 - Ask: "Should I update CLAUDE.md so this doesn't happen again?"
 - If yes, add a concise rule preventing the specific mistake
 - Keep rules actionable: "Do NOT X — instead Y"
+
+### Hook Documentation Maintenance
+
+When touching `plugins/elixir-phoenix/hooks/`, docs are part of the change, not
+a follow-up. Update `HOOKS.md`, the matching `hooks/docs/{group}.md`, and the
+**Current hooks** list in the Hooks section above. Quick check: does the full
+hook list in `HOOKS.md` still match `ls plugins/elixir-phoenix/hooks/scripts/`?
+
+The website (phxagents.dev) renders from these files, so a stale `HOOKS.md`
+ships stale public docs.
 
 ### Intro Tutorial Maintenance
 

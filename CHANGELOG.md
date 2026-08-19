@@ -9,6 +9,20 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Hook documentation** — the 23 hooks across 10 lifecycle events had no
+  user-facing docs; the reasoning lived only in script header comments and a
+  terse contributor checklist. Adds `HOOKS.md` at the repo root (what fires
+  when, a lifecycle diagram, the full hook table, escape hatches),
+  `plugins/elixir-phoenix/hooks/README.md` (per-event output-channel table and
+  the shared conventions: `mix.exs` gating, the fail-open contract, `if`
+  conditions, blame-aware scanning), and six per-group deep dives under
+  `plugins/elixir-phoenix/hooks/docs/` — safety gates, code quality, failure
+  recovery, context injection, session lifecycle, workflow state. Each records
+  the incident or measurement the hook came from (issue #55 cross-project
+  bleed, issue #61 `--force-with-lease`, issue #38 progress.md cross-writes,
+  the ~0% CLAUDE.md routing finding). `CLAUDE.md` now requires these docs to be
+  updated in the same commit as any hook change.
+
 - **Amp-native `phx-watch-pr` lifecycle** — the deterministic Amp target now
   includes a focused Plugin API runtime that acquires an Orb keep-alive lease,
   persists watch state across reloads, filters deployment-like checks out of
